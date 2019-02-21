@@ -26,8 +26,15 @@ for path in args.image_subdir:
 
         # retrieve id images
         res = re.match(r'.*_0*(\d+\.\w+)$', name)
+        #print(res)
+
         if not res:
             continue
 
         # create symlink with id_image
-        os.symlink(name, os.path.join(args.data_out, res.group(1)))
+	path_file = os.path.join(args.data_out, res.group(1))
+
+        if os.path.exists(path_file) == False:
+           os.symlink(name, path_file)
+        
+	
