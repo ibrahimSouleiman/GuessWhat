@@ -5,7 +5,7 @@ import numpy as np
 import argparse
 from distutils.util import strtobool
 
-from neural_toolbox import resnet
+#from neural_toolbox import resnet
 
 import tensorflow.contrib.slim as slim
 import tensorflow.contrib.slim.python.slim.nets.vgg as vgg
@@ -37,7 +37,7 @@ parser.add_argument("-img_size", type=int, default=224, help="image size (pixels
 parser.add_argument("-crop_scale", type=float, default=1.1, help="crop scale around the bbox")
 parser.add_argument("-batch_size", type=int, default=64, help="Batch size to extract features")
 
-parser.add_argument("-gpu_ratio", type=float, default=0.95, help="How many GPU ram is required? (ratio)")
+parser.add_argument("-gpu_ratio", type=float, default=0.90, help="How many GPU ram is required? (ratio)")
 parser.add_argument("-no_thread", type=int, default=2, help="No thread to load batch")
 
 args = parser.parse_args()
@@ -84,6 +84,9 @@ out_file = "gw_{mode}_{network}_{feature_name}_{size}".format(
 
 print("Create networks...")
 if args.network == "resnet":
+    pass 
+    
+    """
     ft_output = resnet.create_resnet(images,
                                      resnet_out=args.feature_name,
                                      resnet_version=args.resnet_version,
@@ -92,6 +95,7 @@ if args.network == "resnet":
     with slim.arg_scope(slim_utils.resnet_arg_scope(is_training=False)):
         _, end_points = resnet_v1.resnet_v1_152(images, 1000)  # 1000 is the number of softmax class
 
+    """
 
 elif args.network == "vgg":
     _, end_points = vgg.vgg_16(images, is_training=False, dropout_keep_prob=1.0)
