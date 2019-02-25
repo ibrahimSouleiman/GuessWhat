@@ -105,13 +105,14 @@ if __name__ == '__main__':
 
         sources = network.get_sources(sess)
         logger.info("Sources: " + ', '.join(sources))
-
+        # is_training, question, seq_length, category, spatial, answe
         sess.run(tf.global_variables_initializer())
         if use_resnet:
             resnet_saver.restore(sess, os.path.join(args.data_dir, 'resnet_v1_{}.ckpt'.format(resnet_version)))
 
         start_epoch = load_checkpoint(sess, saver, args, save_path)
-
+        print("Oracle | start_epoch={}".format(start_epoch))
+        exit()
         best_val_err = 0
         best_train_err = None
 
