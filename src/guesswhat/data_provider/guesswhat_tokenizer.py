@@ -6,9 +6,7 @@ class GWTokenizer:
     def __init__(self, dictionary_file):
         with open(dictionary_file, 'r') as f:
             self.word2i = json.load(f)['word2i']
-            print("GWTokenizer | word2i ={} ".format(self.word2i) )
-
-            exit()
+          
         self.wpt = TweetTokenizer(preserve_case=False)
 
         if "<stop_dialogue>" not in self.word2i:

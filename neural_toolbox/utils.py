@@ -12,6 +12,7 @@ def get_embedding(lookup_indices, n_words, n_dim,
                 'W', [n_words, n_dim],
                 initializer=tf.random_uniform_initializer(-0.08, 0.08))
             embedded = tf.nn.embedding_lookup(embedding_matrix, lookup_indices)
+            print("Utils | embedding={}".format(embedded))
             return embedded
 
 
