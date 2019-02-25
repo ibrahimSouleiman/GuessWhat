@@ -111,15 +111,15 @@ if __name__ == '__main__':
             resnet_saver.restore(sess, os.path.join(args.data_dir, 'resnet_v1_{}.ckpt'.format(resnet_version)))
 
         start_epoch = load_checkpoint(sess, saver, args, save_path)
-        print("Oracle | start_epoch={}".format(start_epoch))
-        exit()
+       
         best_val_err = 0
         best_train_err = None
 
         # create training tools
         evaluator = Evaluator(sources, network.scope_name)
         batchifier = OracleBatchifier(tokenizer, sources, status=config['status'])
-
+        print("Bachifier | {}".format(batchifier))
+        exit()
         for t in range(start_epoch, no_epoch):
             logger.info('Epoch {}..'.format(t + 1))
 
