@@ -78,7 +78,7 @@ if __name__ == '__main__':
     tokenizer = GWTokenizer(os.path.join(args.data_dir, args.dict_file))
 
     # Build Network
-    logger.info('Building network..')
+    logger.info('Building network..'+tokenizer.no_words)
     network = OracleNetwork(config, num_words=tokenizer.no_words)
 
     # Build Optimizer
