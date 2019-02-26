@@ -39,7 +39,7 @@ class OracleBatchifier(AbstractBatchifier):
 
             if 'question' in sources:
                 assert  len(game.questions) == 1
-                print("OracleBatchifier | game.question ={}".format(game.questions[0]))
+                print(" OracleBatchifier | game.question ={},{}".format(game.questions,game.questions[0]))
                 exit()
                 batch['question'].append(tokenizer.apply(game.questions[0]))
 
