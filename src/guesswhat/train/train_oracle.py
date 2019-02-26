@@ -24,6 +24,16 @@ if __name__ == '__main__':
 
     ###############################
     #  LOAD CONFIG
+    # python src/guesswhat/preprocess_data/create_dictionary.py 
+    # -data_dir data -dict_file dict.json -min_occ 3
+    #
+    #python src/guesswhat/train/train_oracle.py \
+    #    -data_dir data \
+    #    -img_dir data/img/ft_vgg_img \
+    #    -crop_dir data/img/ft_vgg_crop \
+    #    -config config/oracle/config.json \
+    #    -exp_dir out/oracle \
+    #    -no_thread 2 
     #############################
 
     parser = argparse.ArgumentParser('Oracle network baseline!')
@@ -119,8 +129,7 @@ if __name__ == '__main__':
         # create training tools
         evaluator = Evaluator(sources, network.scope_name)
         batchifier = OracleBatchifier(tokenizer, sources, status=config['status'])
-        print("Bachifier | {}".format(batchifier))
-        exit()
+        
         for t in range(start_epoch, no_epoch):
             logger.info('Epoch {}..'.format(t + 1))
 
