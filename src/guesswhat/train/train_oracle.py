@@ -83,6 +83,7 @@ if __name__ == '__main__':
     validset = OracleDataset.load(args.data_dir, "valid", image_builder, crop_builder)
     testset = OracleDataset.load(args.data_dir, "test", image_builder, crop_builder)
 
+    exit()
     # Load dictionary
     logger.info('Loading dictionary..')
     tokenizer = GWTokenizer(os.path.join(args.data_dir, args.dict_file))
