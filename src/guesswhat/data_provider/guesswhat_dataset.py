@@ -21,7 +21,7 @@ except ImportError:
 
 class Game:
 
-    def __init__(self, id, object_id, image, objects, qas,des , status, which_set, image_builder, crop_builder):
+    def __init__(self, id, object_id, image, objects, qas , status, which_set, image_builder, crop_builder):
         self.dialogue_id = id
         self.object_id = object_id
         self.image = Image(id=image["id"],
