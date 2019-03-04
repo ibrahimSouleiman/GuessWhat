@@ -165,11 +165,11 @@ class Dataset(AbstractDataset):
                 game = json.loads(line.strip('\n'))
                 
 
-                with open("newfile.json","w") as new_file:
-                    game["image"]["description"]  = "il etait une fois id=" + str(game["image"]["id"])
-
-                    json.dump(game, new_file)
-
+                with open("newfile.json","a") as new_file:
+                   game["image"]["description"]  = "il etait une fois id=" + str(game["image"]["id"])
+                   print("creation new file ...")
+                   json.dump(game, new_file)
+                exit()
 
                 g = Game(id=game['id'],
                          object_id=game['object_id'],
@@ -181,6 +181,7 @@ class Dataset(AbstractDataset):
                          image_builder=image_builder,
                          crop_builder=crop_builder)
 
+		
                 games.append(g)
 
                 #if len(games) > 200: break
