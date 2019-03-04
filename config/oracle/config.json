@@ -1,6 +1,8 @@
 {
   "inputs": {
     "question": true,
+    "description": false,
+    "allcategory": false,
     "category": true,
     "spatial": true,
     "crop": false,
@@ -9,6 +11,11 @@
 
   "model": {
     "question": {
+      "no_LSTM_hiddens": 512,
+      "embedding_dim": 300
+    },
+
+    "description": {
       "no_LSTM_hiddens": 512,
       "embedding_dim": 300
     },

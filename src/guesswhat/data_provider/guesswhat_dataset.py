@@ -21,7 +21,7 @@ except ImportError:
 
 class Game:
 
-    def __init__(self, id, object_id, image, objects, qas, status, which_set, image_builder, crop_builder):
+    def __init__(self, id, object_id, image, objects, qas,des , status, which_set, image_builder, crop_builder):
         self.dialogue_id = id
         self.object_id = object_id
         self.image = Image(id=image["id"],
@@ -50,6 +50,11 @@ class Game:
         self.question_ids = [qa['id'] for qa in qas]
         self.questions = [qa['question'] for qa in qas]
         self.answers = [qa['answer'] for qa in qas]
+
+        self.question_ids = [qa['id'] for qa in qas]
+        self.questions = [qa['question'] for qa in qas]
+        self.answers = [qa['answer'] for qa in qas]
+
         self.status = status
 
     def show(self, img_raw_dir, display_index=False, display_mask=False):
@@ -146,6 +151,10 @@ class Dataset(AbstractDataset):
     """Loads the dataset."""
     def __init__(self, folder, which_set, image_builder=None, crop_builder=None):
         file = '{}/guesswhat.{}.jsonl.gz'.format(folder, which_set)
+
+        file_description = '{}/captions_{}2014.json'.format(folder, which_set)
+
+
         games = []
 
         self.set = which_set
@@ -154,6 +163,13 @@ class Dataset(AbstractDataset):
             for line in f:
                 line = line.decode("utf-8")
                 game = json.loads(line.strip('\n'))
+                
+
+                with open("newfile.json","w") as new_file:
+                    game["image"]["description"]  = "il etait une fois id=" + str(game["image"]["id"])
+
+                    json.dump(game, new_file)
+
 
                 g = Game(id=game['id'],
                          object_id=game['object_id'],
