@@ -5,9 +5,9 @@ import os
 
 file = '{}/guesswhat.{}.jsonl.gz'.format("data", "train")
 
-file_descriptionT = '{}/captions_{}2014.json'.format("data/annotations_Caption", "train")
+file_descriptionT = '{}/captions_{}2014.json'.format("data/annotations", "train")
 
-file_descriptionV = '{}/captions_{}2014.json'.format("data/annotations_Caption", "val")
+file_descriptionV = '{}/captions_{}2014.json'.format("data/annotations", "val")
 
 games = []
 list_games = []
