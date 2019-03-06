@@ -41,7 +41,6 @@ class OracleNetwork(ResnetModel):
                                            scope="word_embedding_description")
 
 
-            print(" SeqDescription = ",self.seq_length_description)
 
             lstm_states, _ = rnn.variable_length_LSTM(word_emb,
                                                    num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),

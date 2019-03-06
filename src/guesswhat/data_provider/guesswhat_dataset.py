@@ -193,7 +193,7 @@ class Dataset(AbstractDataset):
 
                     
 
-                #if len(games) > 200: break
+                # if len(games) > 200: break
 
         super(Dataset, self).__init__(games)
 
