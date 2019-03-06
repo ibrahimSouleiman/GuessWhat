@@ -46,7 +46,7 @@ if __name__ == '__main__':
     parser.add_argument("-crop_dir", type=str, help='Directory with images')
     parser.add_argument("-load_checkpoint", type=str, help="Load model parameters from specified checkpoint")
     parser.add_argument("-continue_exp", type=lambda x: bool(strtobool(x)), default="False", help="Continue previously started experiment?")
-    parser.add_argument("-gpu_ratio", type=float, default=1., help="How many GPU ram is required? (ratio)")
+    parser.add_argument("-gpu_ratio", type=float, default=0.9, help="How many GPU ram is required? (ratio)")
     parser.add_argument("-no_thread", type=int, default=1, help="No thread to load batch")
 
     args = parser.parse_args()
@@ -96,10 +96,11 @@ if __name__ == '__main__':
     # Build Network
     logger.info('Building network..')
     print("Oracle | taille_tok Question= {}".format(tokenizer.no_words))
-    print("Oracle | taille_tok Description= {}".format(tokenizer_description.no_words)
+    print("Oracle | taille_tok Description= {}".format(tokenizer_description.no_words))
 
     network = OracleNetwork(config, tokenizer.no_words, tokenizer_description.no_words )
 
+    
     # Build Optimizer
     logger.info('Building optimizer..')
     optimizer, outputs = create_optimizer(network, config, finetune=finetune)
@@ -130,7 +131,7 @@ if __name__ == '__main__':
             resnet_saver.restore(sess, os.path.join(args.data_dir, 'resnet_v1_{}.ckpt'.format(resnet_version)))
 
         start_epoch = load_checkpoint(sess, saver, args, save_path)
-
+       
         best_val_err = 0
         best_train_err = None
 
@@ -140,12 +141,17 @@ if __name__ == '__main__':
 
         for t in range(start_epoch, no_epoch):
             logger.info('Epoch {}..'.format(t + 1))
-
+            print(" train_oracle | Iterator ...")
             train_iterator = Iterator(trainset,
                                       batch_size=batch_size, pool=cpu_pool,
                                       batchifier=batchifier,
                                       shuffle=True)
+
+            print(" train_oracle | evaluator ...")
+
             train_loss, train_accuracy = evaluator.process(sess, train_iterator, outputs=outputs + [optimizer])
+
+            print(" train_oracle | Iterator ...")
 
             valid_iterator = Iterator(validset, pool=cpu_pool,
                                       batch_size=batch_size*2,
