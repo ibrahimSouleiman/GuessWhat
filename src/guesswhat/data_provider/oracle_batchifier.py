@@ -15,7 +15,7 @@ answer_dict = \
 
 class OracleBatchifier(AbstractBatchifier):
 
-    def __init__(self, tokenizer_question, tokenizer_description, sources, status=list()):
+    def __init__(self, tokenizer_question, sources,tokenizer_description = None , status=list()):
         self.tokenizer_question = tokenizer_question
         self.tokenizer_description = tokenizer_description
         self.sources = sources
