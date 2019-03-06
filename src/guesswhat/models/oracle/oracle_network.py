@@ -22,7 +22,7 @@ class OracleNetwork(ResnetModel):
             word_emb = utils.get_embedding(self._question,
                                            n_words=num_words_question,
                                            n_dim=int(config['model']['question']["embedding_dim"]),
-                                           scope="word_embedding")
+                                           scope="word_embedding_question")
 
             lstm_states, _ = rnn.variable_length_LSTM(word_emb,
                                                    num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
@@ -38,7 +38,7 @@ class OracleNetwork(ResnetModel):
             word_emb = utils.get_embedding(self._description,
                                            n_words=num_words_description,
                                            n_dim=int(config['model']['description']["embedding_dim"]),
-                                           scope="word_embedding")
+                                           scope="word_embedding_description")
 
             lstm_states, _ = rnn.variable_length_LSTM(word_emb,
                                                    num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
