@@ -30,7 +30,11 @@ class OracleBatchifier(AbstractBatchifier):
 
     def apply(self, games):
         sources = self.sources
-        tokenizer = self.tokenizer
+        tokenizer_questioner = self.tokenizer_question
+        
+        tokenizer_description = self.tokenizer_description
+
+
         batch = collections.defaultdict(list)
 
         for i, game in enumerate(games):
@@ -42,14 +46,14 @@ class OracleBatchifier(AbstractBatchifier):
                 assert  len(game.questions) == 1
 
                 # games.question = ['am I a person?'],
-                batch['question'].append(tokenizer.apply(game.questions[0]))
+                batch['question'].append(tokenizer_questioner.apply(game.questions[0]))
 
             if 'description' in sources:
                 assert  len(game.questions) == 1
 
                 # games.question = ['am I a person?'],
                 print(game.image.description)
-                batch['description'].append(tokenizer.apply(game.image.description[0]))
+                batch['description'].append(tokenizer_description.apply(game.image.description[0]))
 
             if 'answer' in sources:
                 assert len(game.answers) == 1
@@ -78,7 +82,12 @@ class OracleBatchifier(AbstractBatchifier):
 
         # pad the questions
         if 'question' in sources:
-            batch['question'], batch['seq_length'] = padder(batch['question'], padding_symbol=tokenizer.word2i['<padding>'])
+            # complete par padding en prenons la taille maximal
+            batch['question'], batch['seq_length_question'] = padder(batch['question'], padding_symbol=tokenizer_questioner.word2i['<padding>'])
+       
+        if 'description' in sources:
+            # complete par padding en prenons la taille maximal
+            batch['description'], batch['seq_length_description'] = padder(batch['question'], padding_symbol=tokenizer_description.word2i['<padding>'])
 
         return batch
 

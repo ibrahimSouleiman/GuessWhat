@@ -7,7 +7,7 @@ from generic.tf_factory.image_factory import get_image_features
 
 class OracleNetwork(ResnetModel):
 
-    def __init__(self, config, num_words, device='', reuse=False):
+    def __init__(self, config, num_words_question, num_words_description , device='', reuse=False):
         ResnetModel.__init__(self, "oracle", device=device)
 
         with tf.variable_scope(self.scope_name, reuse=reuse) as scope:
@@ -17,10 +17,10 @@ class OracleNetwork(ResnetModel):
             # QUESTION
             self._is_training = tf.placeholder(tf.bool, name="is_training")
             self._question = tf.placeholder(tf.int32, [self.batch_size, None], name='question')
-            self._seq_length = tf.placeholder(tf.int32, [self.batch_size], name='seq_length')
+            self._seq_length = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question')
 
             word_emb = utils.get_embedding(self._question,
-                                           n_words=num_words,
+                                           n_words=num_words_question,
                                            n_dim=int(config['model']['question']["embedding_dim"]),
                                            scope="word_embedding")
 
@@ -28,6 +28,23 @@ class OracleNetwork(ResnetModel):
                                                    num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
                                                    seq_length=self._seq_length)
             embeddings.append(lstm_states)
+
+            # DESCRIPTION
+
+            self._is_training = tf.placeholder(tf.bool, name="is_training")
+            self._description = tf.placeholder(tf.int32, [self.batch_size, None], name='description')
+            self._seq_length = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_description')
+
+            word_emb = utils.get_embedding(self._description,
+                                           n_words=num_words_description,
+                                           n_dim=int(config['model']['description']["embedding_dim"]),
+                                           scope="word_embedding")
+
+            lstm_states, _ = rnn.variable_length_LSTM(word_emb,
+                                                   num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
+                                                   seq_length=self._seq_length)
+            embeddings.append(lstm_states)
+
 
             # CATEGORY
             if config['inputs']['category']:
