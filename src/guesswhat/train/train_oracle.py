@@ -96,8 +96,7 @@ if __name__ == '__main__':
     # Build Network
     logger.info('Building network..')
     print("Oracle | taille_tok Question= {}".format(tokenizer.no_words))
-    print("Oracle | taille_tok Description= {}".format(tokenizer_description.no_words)
-
+    print("Oracle | taille_tok Description= {}".format(tokenizer_description.no_words))
     network = OracleNetwork(config, tokenizer.no_words, tokenizer_description.no_words )
 
     # Build Optimizer
