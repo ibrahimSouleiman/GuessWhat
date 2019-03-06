@@ -46,8 +46,8 @@ if __name__ == '__main__':
     parser.add_argument("-crop_dir", type=str, help='Directory with images')
     parser.add_argument("-load_checkpoint", type=str, help="Load model parameters from specified checkpoint")
     parser.add_argument("-continue_exp", type=lambda x: bool(strtobool(x)), default="False", help="Continue previously started experiment?")
-    parser.add_argument("-gpu_ratio", type=float, default=0.9, help="How many GPU ram is required? (ratio)")
-    parser.add_argument("-no_thread", type=int, default=1, help="No thread to load batch")
+    parser.add_argument("-gpu_ratio", type=float, default=0.7, help="How many GPU ram is required? (ratio)")
+    parser.add_argument("-no_thread", type=int, default=5, help="No thread to load batch")
 
     args = parser.parse_args()
 
@@ -100,7 +100,6 @@ if __name__ == '__main__':
 
     network = OracleNetwork(config, tokenizer.no_words)
 
-    
     # Build Optimizer
     logger.info('Building optimizer..')
     optimizer, outputs = create_optimizer(network, config, finetune=finetune)
@@ -131,7 +130,6 @@ if __name__ == '__main__':
             resnet_saver.restore(sess, os.path.join(args.data_dir, 'resnet_v1_{}.ckpt'.format(resnet_version)))
 
         start_epoch = load_checkpoint(sess, saver, args, save_path)
-       
         best_val_err = 0
         best_train_err = None
 
