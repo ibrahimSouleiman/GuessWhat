@@ -46,7 +46,7 @@ if __name__ == '__main__':
     parser.add_argument("-crop_dir", type=str, help='Directory with images')
     parser.add_argument("-load_checkpoint", type=str, help="Load model parameters from specified checkpoint")
     parser.add_argument("-continue_exp", type=lambda x: bool(strtobool(x)), default="False", help="Continue previously started experiment?")
-    parser.add_argument("-gpu_ratio", type=float, default=1.0, help="How many GPU ram is required? (ratio)")
+    parser.add_argument("-gpu_ratio", type=float, default=0.06, help="How many GPU ram is required? (ratio)")
     parser.add_argument("-no_thread", type=int, default=5, help="No thread to load batch")
 
     args = parser.parse_args()
