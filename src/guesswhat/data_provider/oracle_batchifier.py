@@ -52,7 +52,6 @@ class OracleBatchifier(AbstractBatchifier):
                 assert  len(game.questions) == 1
 
                 # games.question = ['am I a person?'],
-                print(game.image.description)
                 batch['description'].append(tokenizer_description.apply(game.image.description[0]))
 
             if 'answer' in sources:
