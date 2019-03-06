@@ -1,7 +1,7 @@
 {
   "inputs": {
-    "question": true,
-    "description": false,
+    "question": false,
+    "description": true,
     "allcategory": false,
     "category": false,
     "spatial": false,

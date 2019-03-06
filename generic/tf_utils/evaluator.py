@@ -56,7 +56,11 @@ class Evaluator(object):
         n_iter = 1.
         aggregated_outputs = [0.0 for v in outputs if is_scalar(v) and v in original_outputs]
 
+        #print(" Evaluator | iterator =",iterator)
+
         for batch in tqdm(iterator):
+
+            
             # Appending is_training flag to the feed_dict
             batch["is_training"] = is_training
 

@@ -27,7 +27,7 @@ def load_checkpoint(sess, saver, args, save_path):
         saver.restore(sess, ckpt_path)
         status_path = save_path.format('status.pkl')
         status = pickle.load(open(status_path, 'rb'))
-
+        
         return status['epoch'] + 1
 
     if args.load_checkpoint is not None:

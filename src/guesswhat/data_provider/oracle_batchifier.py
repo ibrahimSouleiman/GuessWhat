@@ -8,7 +8,7 @@ from generic.data_provider.image_preprocessors import get_spatial_feat, resize_i
 from generic.data_provider.nlp_utils import padder
 
 answer_dict = \
-    {'Yes': np.array([1, 0, 0], dtype=np.int32),
+    {  'Yes': np.array([1, 0, 0], dtype=np.int32),
        'No': np.array([0, 1, 0], dtype=np.int32),
        'N/A': np.array([0, 0, 1], dtype=np.int32)
     }
@@ -86,7 +86,7 @@ class OracleBatchifier(AbstractBatchifier):
        
         if 'description' in sources:
             # complete par padding en prenons la taille maximal
-            batch['description'], batch['seq_length_description'] = padder(batch['question'], padding_symbol=tokenizer_description.word2i['<padding>'])
+            batch['description'], batch['seq_length_description'] = padder(batch['description'], padding_symbol=tokenizer_description.word2i['<padding>'])
 
         return batch
 

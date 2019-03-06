@@ -65,6 +65,8 @@ class Iterator(object):
 
         self.n_batches = int(math.ceil(1. * self.n_examples / self.batch_size))
         batch = split_batch(games, batch_size, use_padding)
+  
+        #print("Iterator | n_examples = {},batch_size={},n_batches={}".format(self.n_examples,self.batch_size,self.n_batches))
 
         # no proc
         # self.it = (batchifier.apply(b )for b in batch)
