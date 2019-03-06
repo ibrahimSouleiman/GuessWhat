@@ -7,7 +7,7 @@ from generic.tf_factory.image_factory import get_image_features
 
 class OracleNetwork(ResnetModel):
 
-    def __init__(self, config, num_words_question, num_words_description , device='', reuse=False):
+    def __init__(self, config, num_words_question , device='', reuse=False):
         ResnetModel.__init__(self, "oracle", device=device)
 
         with tf.variable_scope(self.scope_name, reuse=reuse) as scope:
@@ -25,7 +25,7 @@ class OracleNetwork(ResnetModel):
                 word_emb = utils.get_embedding(self._question,
                                             n_words=num_words_question,
                                             n_dim=int(config['model']['question']["embedding_dim"]),
-                                            scope="word_embedding_question")
+                                            scope="word_embedding")
 
                 lstm_states, _ = rnn.variable_length_LSTM(word_emb,
                                                     num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
