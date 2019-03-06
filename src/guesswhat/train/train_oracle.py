@@ -96,11 +96,10 @@ if __name__ == '__main__':
     # Build Network
     logger.info('Building network..')
     print("Oracle | taille_tok Question= {}".format(tokenizer.no_words))
-    print("Oracle | taille_tok Description= {}".format(tokenizer_description.no_words))
+    print("Oracle | taille_tok Description= {}".format(tokenizer_description.no_words)
 
     network = OracleNetwork(config, tokenizer.no_words, tokenizer_description.no_words )
 
-    
     # Build Optimizer
     logger.info('Building optimizer..')
     optimizer, outputs = create_optimizer(network, config, finetune=finetune)
@@ -131,20 +130,14 @@ if __name__ == '__main__':
             resnet_saver.restore(sess, os.path.join(args.data_dir, 'resnet_v1_{}.ckpt'.format(resnet_version)))
 
         start_epoch = load_checkpoint(sess, saver, args, save_path)
-       
+
         best_val_err = 0
         best_train_err = None
 
         # create training tools
         evaluator = Evaluator(sources, network.scope_name)
-<<<<<<< HEAD
         batchifier = OracleBatchifier( tokenizer, tokenizer_description, sources, status=config['status'])
-=======
 
-
-        batchifier = OracleBatchifier(tokenizer,  tokenizer_description, sources, status=config['status'])
->>>>>>> 1d4c5bcebe48198ecfca7a9229da4733e26a5d56
-        
         for t in range(start_epoch, no_epoch):
             logger.info('Epoch {}..'.format(t + 1))
 
