@@ -2,7 +2,6 @@ import gzip
 import json
 import copy
 import os
-import json_lines
 
 file = '{}/guesswhat.{}.jsonl.gz'.format("data", "train")
 
