@@ -32,21 +32,21 @@ class OracleNetwork(ResnetModel):
             # DESCRIPTION
 
             # self._is_training = tf.placeholder(tf.bool, name="is_training")
-            # self._description = tf.placeholder(tf.int32, [self.batch_size, None], name='description')
-            # self.seq_length_description = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_description')
+            self._description = tf.placeholder(tf.int32, [self.batch_size, None], name='description')
+            self.seq_length_description = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_description')
 
-            # word_emb = utils.get_embedding(self._description,
-            #                                n_words=num_words_description,
-            #                                n_dim=int(config['model']['description']["embedding_dim"]),
-            #                                scope="word_embedding_description")
+            word_emb = utils.get_embedding(self._description,
+                                           n_words=num_words_description,
+                                           n_dim=int(config['model']['description']["embedding_dim"]),
+                                           scope="word_embedding_description")
 
 
-            # print(" SeqDescription = ",self.seq_length_description)
+            print(" SeqDescription = ",self.seq_length_description)
 
-            # lstm_states, _ = rnn.variable_length_LSTM(word_emb,
-            #                                        num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
-            #                                        seq_length=self.seq_length_description,reuse=True)
-            # embeddings.append(lstm_states)
+            lstm_states, _ = rnn.variable_length_LSTM(word_emb,
+                                                   num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
+                                                   seq_length=self.seq_length_description,reuse=True)
+            embeddings.append(lstm_states)
 
 
             # CATEGORY
