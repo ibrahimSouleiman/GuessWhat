@@ -96,10 +96,9 @@ if __name__ == '__main__':
     # Build Network
     logger.info('Building network..')
     print("Oracle | taille_tok Question= {}".format(tokenizer.no_words))
-    print("Oracle | taille_tok Description= {}".format(tokenizer.no_words))
-
-    network = OracleNetwork(config, num_words=tokenizer.no_words)
-
+    print("Oracle | taille_tok Description= {}".format(tokenizer_description.no_words))
+    network = OracleNetwork(config, num_words_question=tokenizer.no_words, num_words_description = tokenizer_description.no_words ))
+    
     # Build Optimizer
     logger.info('Building optimizer..')
     optimizer, outputs = create_optimizer(network, config, finetune=finetune)
@@ -136,7 +135,7 @@ if __name__ == '__main__':
 
         # create training tools
         evaluator = Evaluator(sources, network.scope_name)
-        batchifier = OracleBatchifier(tokenizer, sources, status=config['status'])
+        batchifier = OracleBatchifier(tokenizer_question = tokenizer, tokenizer_description =  tokenizer_description, sources, status=config['status'])
         
         for t in range(start_epoch, no_epoch):
             logger.info('Epoch {}..'.format(t + 1))
