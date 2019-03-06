@@ -17,7 +17,7 @@ class OracleNetwork(ResnetModel):
             # QUESTION
             self._is_training = tf.placeholder(tf.bool, name="is_training")
             self._question = tf.placeholder(tf.int32, [self.batch_size, None], name='question')
-            self._seq_length = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question')
+            self.seq_length_question = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question')
 
             word_emb = utils.get_embedding(self._question,
                                            n_words=num_words_question,
@@ -26,14 +26,14 @@ class OracleNetwork(ResnetModel):
 
             lstm_states, _ = rnn.variable_length_LSTM(word_emb,
                                                    num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
-                                                   seq_length=self._seq_length)
+                                                   seq_length=self.seq_length_question)
             embeddings.append(lstm_states)
 
             # DESCRIPTION
 
             self._is_training = tf.placeholder(tf.bool, name="is_training")
             self._description = tf.placeholder(tf.int32, [self.batch_size, None], name='description')
-            self._seq_length = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_description')
+            self.seq_length_description = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_description')
 
             word_emb = utils.get_embedding(self._description,
                                            n_words=num_words_description,
@@ -42,7 +42,7 @@ class OracleNetwork(ResnetModel):
 
             lstm_states, _ = rnn.variable_length_LSTM(word_emb,
                                                    num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
-                                                   seq_length=self._seq_length)
+                                                   seq_length=self.seq_length_description)
             embeddings.append(lstm_states)
 
 
