@@ -17,22 +17,15 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser('Creating dictionary..')
 
     parser.add_argument("-data_dir", type=str, help="Path where are the Guesswhat dataset")
+    parser.add_argument("-texteType", default="Question" ,type=str, help="Path where are the Guesswhat dataset")
+
     parser.add_argument("-dict_file", type=str, default="dict.json", help="Name of the dictionary file")
     parser.add_argument("-min_occ", type=int, default=3,
                         help='Minimum number of occurences to add word to dictionary')
 
     args = parser.parse_args()
 
-    # Set default values
-    word2i = {'<padding>': 0,
-              '<start>': 1,
-              '<stop>': 2,
-              '<stop_dialogue>': 3,
-              '<unk>': 4,
-              '<yes>' : 5,
-              '<no>': 6,
-              '<n/a>': 7,
-              }
+    
 
     word2occ = collections.defaultdict(int)
 
@@ -41,11 +34,39 @@ if __name__ == '__main__':
 
     print("Processing train dataset...")
     trainset = OracleDataset.load(args.data_dir, "train")
-    for game in trainset.games:
-        question = game.questions[0]
-        tokens = tknzr.tokenize(question)
-        for tok in tokens:
-            word2occ[tok] += 1
+
+    if args.texteType == "Question":
+        # Set default values
+        word2i = {'<padding>': 0,
+                '<start>': 1,
+                '<stop>': 2,
+                '<stop_dialogue>': 3,
+                '<unk>': 4,
+                '<yes>' : 5,
+                '<no>': 6,
+                '<n/a>': 7,
+                }
+
+
+        for game in trainset.games:
+            question = game.questions[0]
+            tokens = tknzr.tokenize(question)
+            for tok in tokens:
+                word2occ[tok] += 1
+
+    elif args.texteType == "Description":
+        # Set default values
+        word2i = {'<padding>': 0,
+                '<start>': 1,
+                '<stop>': 2,
+                '<stop_dialogue>': 3,
+                }
+
+        for game in trainset.games:
+            description = game.image.description
+            tokens = tknzr.tokenize(description)
+            for tok in tokens:
+                word2occ[tok] += 1
 
     print("filter words...")
     for word, occ in word2occ.items():
@@ -55,7 +76,7 @@ if __name__ == '__main__':
     print("Number of words (occ >= 1): {}".format(len(word2occ)))
     print("Number of words (occ >= {}): {}".format(args.min_occ, len(word2i)))
 
-    dict_path = os.path.join(args.data_dir, 'dict.json')
+    dict_path = os.path.join(args.data_dir, args.dict_file)
     print("Dump file: {} ...".format(dict_path))
     with io.open(dict_path, 'wb') as f_out:
         data = json.dumps({'word2i': word2i}, ensure_ascii=False)

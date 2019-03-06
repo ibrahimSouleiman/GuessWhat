@@ -2,78 +2,81 @@ import gzip
 import json
 import copy
 import os
+import argparse
 
-file = '{}/guesswhat.{}.jsonl.gz'.format("data", "train")
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser('Creating data description..')
 
-file_descriptionT = '{}/captions_{}2014.json'.format("data/annotations", "train")
+    parser.add_argument("-data_type", type=str, help="data train /val/test")
 
-file_descriptionV = '{}/captions_{}2014.json'.format("data/annotations", "val")
-
-games = []
-list_games = []
-description = {}
-description_notFound = []
+    args = parser.parse_args()
 
 
-with  open(file_descriptionT)  as fd:
-    game = json.load(fd)
-    
-    for line in game["annotations"]:
+    file = '{}/guesswhat.{}.jsonl.gz'.format("data", args.data_type)
 
-        description[line["image_id"]] = line["caption"]
-    # print(description[460809])
-    # exit()
-with  open(file_descriptionV)  as fd:
-    game = json.load(fd)
-    
-    for line in game["annotations"]:
+    file_descriptionT = '{}/captions_{}2014.json'.format("data/annotations", "train")
 
-        description[line["image_id"]] = line["caption"]
-    # print(description[460809])
-    # exit()
-
-# self.set = which_set
-
-n = 0
-with gzip.open(file) as f:
-    for line in f:
-        line = line.decode("utf-8")
-        game = json.loads(line.strip('\n'))
-    
-        # print(game["image"]["coco_url"])
-        link = game["image"]["id"]
-        id_img = int(link)
-        # print(id_img)
-
-        try:
-            game["image"]["description"]  = description[id_img]
-        except KeyError:
-            game["image"]["description"]  = " Not Found "
-            description_notFound.append(id_img)
-        list_games.append(game)
-        # print("creation new file ...")
-
-        # if n == 3:
-        #     break
-        # else:
-        #     n += 1
+    file_descriptionV = '{}/captions_{}2014.json'.format("data/annotations", "val")
+   
+    file_output= '{}/guesswhat_{}2014.jsonl'.format("data", args.data_type)
 
 
-with open("data/guesswhatDescription.jsonl","a") as new_file:
-    json.dump(list_games, new_file)
-
-             
-
-print(len(description_notFound),len(description))
+    games = []
+    list_games = []
+    description = {}
+    description_notFound = []
 
 
-        # g = Game(id=game['id'],
-        #           object_id=game['object_id'],
-        #           objects=game['objects'],
-        #           qas=game['qas'],
-        #           image=game['image'],
-        #           status=game['status'],
-        #           which_set=which_set,
-        #           image_builder=image_builder,
-        #           crop_builder=crop_builder)
-        # description[id_img]
+    with  open(file_descriptionT)  as fd:
+        game = json.load(fd)
+        
+        for line in game["annotations"]:
+
+            description[line["image_id"]] = line["caption"]
+       
+    with  open(file_descriptionV)  as fd:
+        game = json.load(fd)
+        
+        for line in game["annotations"]:
+
+            description[line["image_id"]] = line["caption"]
+     
+    n = 0
+    with gzip.open(file) as f:
+        for line in f:
+            line = line.decode("utf-8")
+            game = json.loads(line.strip('\n'))
+        
+            link = game["image"]["id"]
+            id_img = int(link)
+
+            try:
+                game["image"]["description"]  = description[id_img]
+                n += 1
+            except KeyError:
+                game["image"]["description"]  = " Not Found "
+                description_notFound.append(id_img)
+
+            # with open(file_output,"a") as new_file:
+            #     new_file.write("{%s}" % ",\n ".join(json.dumps(game)))
+            
+            list_games.append(game)
+
+            # if n == 3:
+            #     break
+            # else:
+            #     n += 1
+        print("Nb description added = {} ".format(n))
+        # Nb description train = 113221 
+        # Nb description valid = 23739  
+        # Nb description test = 23785  
+        open(file_output,'w').write("%s" % "\n ".join(json.dumps(e) for e in list_games))
+
+    # with open(file_output,"a") as new_file:
+    #     #json.dump(list_games, new_file)
+
+                
+
+    print("Type = {} , not_found_description = {} , description_length = {}".format(args.data_type,len(description_notFound),len(description)))
+
+

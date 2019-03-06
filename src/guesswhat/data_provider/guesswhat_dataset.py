@@ -28,6 +28,7 @@ class Game:
                            width=image["width"],
                            height=image["height"],
                            url=image["coco_url"],
+                           description=image["description"],
                            which_set=which_set,
                            image_builder=image_builder)
         self.objects = []
@@ -77,11 +78,12 @@ class Game:
 
 
 class Image:
-    def __init__(self, id, width, height, url, which_set, image_builder=None):
+    def __init__(self, id, width, height, url,description, which_set, image_builder=None):
         self.id = id
         self.width = width
         self.height = height
         self.url = url
+        self.description = description
 
         self.image_loader = None
         if image_builder is not None:
@@ -150,12 +152,12 @@ class Object:
 class Dataset(AbstractDataset):
     """Loads the dataset."""
     def __init__(self, folder, which_set, image_builder=None, crop_builder=None):
-        file = '{}/guesswhat.{}.jsonl.gz'.format(folder, which_set)
-
+        file = '{}/guesswhat_{}2014.jsonl.gz'.format(folder,which_set)
         file_description = '{}/captions_{}2014.json'.format(folder, which_set)
 
-
         games = []
+        nb_pass = 0
+        nb_erreur = 0
 
         self.set = which_set
 
@@ -163,26 +165,33 @@ class Dataset(AbstractDataset):
             for line in f:
                 line = line.decode("utf-8")
                 game = json.loads(line.strip('\n'))
-                
+                try : 
+                    # print(game["image"])
+                    # print("Dans try")
+                    # print(game["id"],type(game["id"]))
+                    nb_pass += 1
+                    g = Game(id=game['id'],
+                        object_id=game['object_id'],
+                        objects=game['objects'],
+                        qas=game['qas'],
+                        image=game['image'],
+                        status=game['status'],
+                        which_set=which_set,
+                        image_builder=image_builder,
+                        crop_builder=crop_builder)
 
-                with open("newfile.json","a") as new_file:
-                   game["image"]["description"]  = "il etait une fois id=" + str(game["image"]["id"])
-                   print("creation new file ...")
-                   json.dump(game, new_file)
-                exit()
 
-                g = Game(id=game['id'],
-                         object_id=game['object_id'],
-                         objects=game['objects'],
-                         qas=game['qas'],
-                         image=game['image'],
-                         status=game['status'],
-                         which_set=which_set,
-                         image_builder=image_builder,
-                         crop_builder=crop_builder)
+                    games.append(g)
 
-		
-                games.append(g)
+
+                    # exit()
+                except TypeError:
+                    print("error to create dataset")
+                    nb_erreur += 1
+
+                # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass))
+
+                    
 
                 #if len(games) > 200: break
 

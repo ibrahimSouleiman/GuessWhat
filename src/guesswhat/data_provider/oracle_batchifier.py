@@ -15,8 +15,9 @@ answer_dict = \
 
 class OracleBatchifier(AbstractBatchifier):
 
-    def __init__(self, tokenizer, sources, status=list()):
-        self.tokenizer = tokenizer
+    def __init__(self, tokenizer_question, tokenizer_description, sources, status=list()):
+        self.tokenizer_question = tokenizer_question
+        self.tokenizer_description = tokenizer_description
         self.sources = sources
         self.status = status
 
@@ -42,6 +43,13 @@ class OracleBatchifier(AbstractBatchifier):
 
                 # games.question = ['am I a person?'],
                 batch['question'].append(tokenizer.apply(game.questions[0]))
+
+            if 'description' in sources:
+                assert  len(game.questions) == 1
+
+                # games.question = ['am I a person?'],
+                print(game.image.description)
+                batch['description'].append(tokenizer.apply(game.image.description[0]))
 
             if 'answer' in sources:
                 assert len(game.answers) == 1

@@ -83,14 +83,21 @@ if __name__ == '__main__':
     validset = OracleDataset.load(args.data_dir, "valid", image_builder, crop_builder)
     testset = OracleDataset.load(args.data_dir, "test", image_builder, crop_builder)
 
-    exit()
     # Load dictionary
-    logger.info('Loading dictionary..')
+    logger.info('Loading dictionary Question..')
     tokenizer = GWTokenizer(os.path.join(args.data_dir, args.dict_file))
+
+    # Load dictionary
+    logger.info('Loading dictionary Description..')
+    tokenizer_description = GWTokenizer(os.path.join(args.data_dir, args.dict_file))
+
+
 
     # Build Network
     logger.info('Building network..')
-    print("Oracle | taille_tok = {}".format(tokenizer.no_words))
+    print("Oracle | taille_tok Question= {}".format(tokenizer.no_words))
+    print("Oracle | taille_tok Description= {}".format(tokenizer.no_words))
+
     network = OracleNetwork(config, num_words=tokenizer.no_words)
 
     # Build Optimizer
