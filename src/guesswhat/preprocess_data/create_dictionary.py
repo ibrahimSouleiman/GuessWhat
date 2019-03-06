@@ -35,9 +35,7 @@ if __name__ == '__main__':
     print("Processing train dataset...")
     trainset = OracleDataset.load(args.data_dir, "train")
 
-    if args.texteType == "Question":
-        # Set default values
-        word2i = {'<padding>': 0,
+    word2i = {'<padding>': 0,
                 '<start>': 1,
                 '<stop>': 2,
                 '<stop_dialogue>': 3,
@@ -47,7 +45,8 @@ if __name__ == '__main__':
                 '<n/a>': 7,
                 }
 
-
+    if args.texteType == "Question":
+        # Set default values
         for game in trainset.games:
             question = game.questions[0]
             tokens = tknzr.tokenize(question)
@@ -56,12 +55,6 @@ if __name__ == '__main__':
 
     elif args.texteType == "Description":
         # Set default values
-        word2i = {'<padding>': 0,
-                '<start>': 1,
-                '<stop>': 2,
-                '<stop_dialogue>': 3,
-                }
-
         for game in trainset.games:
             description = game.image.description
             tokens = tknzr.tokenize(description)
