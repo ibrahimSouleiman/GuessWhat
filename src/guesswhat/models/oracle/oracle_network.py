@@ -42,10 +42,15 @@ class OracleNetwork(ResnetModel):
 
             #print(" SeqDescription = ",self.seq_length_description)
 
+
+
             lstm_states, _ = rnn.variable_length_LSTM(word_emb,
                                                    num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
                                                    seq_length=self.seq_length_description,reuse=True)
             embeddings.append(lstm_states)
+
+
+
 
             # CATEGORY
             if config['inputs']['category']:
