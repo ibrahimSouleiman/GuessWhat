@@ -32,78 +32,78 @@ class OracleNetwork(ResnetModel):
                                                     seq_length=self.seq_length_question)
                 embeddings.append(lstm_states)
 
-            # DESCRIPTION
-            if config['inputs']['description']:
-                print("Oracle_network |  inpurt = Description ")
+            # # DESCRIPTION
+            # if config['inputs']['description']:
+            #     print("Oracle_network |  inpurt = Description ")
 
-                self._is_training = tf.placeholder(tf.bool, name="is_training")
-                self._description = tf.placeholder(tf.int32, [self.batch_size, None], name='description')
-                self.seq_length_description = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_description')
+            #     self._is_training = tf.placeholder(tf.bool, name="is_training")
+            #     self._description = tf.placeholder(tf.int32, [self.batch_size, None], name='description')
+            #     self.seq_length_description = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_description')
 
-                word_emb = utils.get_embedding(self._description,
-                                            n_words=num_words_description,
-                                            n_dim=int(config['model']['description']["embedding_dim"]),
-                                            scope="word_embedding_description")
+            #     word_emb = utils.get_embedding(self._description,
+            #                                 n_words=num_words_description,
+            #                                 n_dim=int(config['model']['description']["embedding_dim"]),
+            #                                 scope="word_embedding_description")
 
-                #print(" SeqDescription = ",self.seq_length_description)
-                lstm_states, _ = rnn.variable_length_LSTM(word_emb,
-                                                    num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
-                                                    seq_length=self.seq_length_description,scope="lstm2")
-                embeddings.append(lstm_states)
+            #     #print(" SeqDescription = ",self.seq_length_description)
+            #     lstm_states, _ = rnn.variable_length_LSTM(word_emb,
+            #                                         num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
+            #                                         seq_length=self.seq_length_description,scope="lstm2")
+            #     embeddings.append(lstm_states)
 
 
                 
 
-            # CATEGORY
-            if config['inputs']['category']:
-                print("Oracle_network |  input = category ")
+            # # CATEGORY
+            # if config['inputs']['category']:
+            #     print("Oracle_network |  input = category ")
 
-                self._category = tf.placeholder(tf.int32, [self.batch_size], name='category')
+            #     self._category = tf.placeholder(tf.int32, [self.batch_size], name='category')
 
-                cat_emb = utils.get_embedding(self._category,
-                                              int(config['model']['category']["n_categories"]) + 1,  # we add the unkwon category
-                                              int(config['model']['category']["embedding_dim"]),
-                                              scope="cat_embedding")
-                embeddings.append(cat_emb)
-                print("Input: Category")
+            #     cat_emb = utils.get_embedding(self._category,
+            #                                   int(config['model']['category']["n_categories"]) + 1,  # we add the unkwon category
+            #                                   int(config['model']['category']["embedding_dim"]),
+            #                                   scope="cat_embedding")
+            #     embeddings.append(cat_emb)
+            #     print("Input: Category")
 
-            # SPATIAL
-            if config['inputs']['spatial']:
-                print("Oracle_network |  input = spatial ")
-
-
-                self._spatial = tf.placeholder(tf.float32, [self.batch_size, 8], name='spatial')
-                embeddings.append(self._spatial)
-                print("Input: Spatial")
+            # # SPATIAL
+            # if config['inputs']['spatial']:
+            #     print("Oracle_network |  input = spatial ")
 
 
-            # IMAGE
-            if config['inputs']['image']:
-                print("Oracle_network |  input = image ")
+            #     self._spatial = tf.placeholder(tf.float32, [self.batch_size, 8], name='spatial')
+            #     embeddings.append(self._spatial)
+            #     print("Input: Spatial")
 
-                self._image = tf.placeholder(tf.float32, [self.batch_size] + config['model']['image']["dim"], name='image')
-                self.image_out = get_image_features(
-                    image=self._image, question=lstm_states,
-                    is_training=self._is_training,
-                    scope_name=scope.name,
-                    config=config['model']['image']
-                )
-                embeddings.append(self.image_out)
-                print("Input: Image")
 
-            # CROP
-            if config['inputs']['crop']:
-                print("Oracle_network |  input = crop ")
+            # # IMAGE
+            # if config['inputs']['image']:
+            #     print("Oracle_network |  input = image ")
 
-                self._crop = tf.placeholder(tf.float32, [self.batch_size] + config['model']['crop']["dim"], name='crop')
-                self.crop_out = get_image_features(
-                    image=self._crop, question=lstm_states,
-                    is_training=self._is_training,
-                    scope_name=scope.name,
-                    config=config["model"]['crop'])
+            #     self._image = tf.placeholder(tf.float32, [self.batch_size] + config['model']['image']["dim"], name='image')
+            #     self.image_out = get_image_features(
+            #         image=self._image, question=lstm_states,
+            #         is_training=self._is_training,
+            #         scope_name=scope.name,
+            #         config=config['model']['image']
+            #     )
+            #     embeddings.append(self.image_out)
+            #     print("Input: Image")
 
-                embeddings.append(self.crop_out)
-                print("Input: Crop")
+            # # CROP
+            # if config['inputs']['crop']:
+            #     print("Oracle_network |  input = crop ")
+
+            #     self._crop = tf.placeholder(tf.float32, [self.batch_size] + config['model']['crop']["dim"], name='crop')
+            #     self.crop_out = get_image_features(
+            #         image=self._crop, question=lstm_states,
+            #         is_training=self._is_training,
+            #         scope_name=scope.name,
+            #         config=config["model"]['crop'])
+
+            #     embeddings.append(self.crop_out)
+            #     print("Input: Crop")
 
 
             # Compute the final embedding
