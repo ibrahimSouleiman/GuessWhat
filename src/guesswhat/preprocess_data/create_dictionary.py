@@ -57,6 +57,8 @@ if __name__ == '__main__':
         # Set default values
         for game in trainset.games:
             description = game.image.description
+            print("Description = {} ".format(description))
+
             tokens = tknzr.tokenize(description)
             for tok in tokens:
                 word2occ[tok] += 1
