@@ -1,6 +1,6 @@
 {
   "inputs": {
-    "question": false,
+    "question": true,
     "description": true,
     "category": false,
     "spatial": false,
