@@ -22,10 +22,10 @@ class GWTokenizer:
         self.stop_token = self.word2i["?"]
         self.stop_dialogue = self.word2i["<stop_dialogue>"]
         self.padding_token = self.word2i["<padding>"]
+
         self.yes_token = self.word2i["<yes>"]
         self.no_token = self.word2i["<no>"]
         self.non_applicable_token = self.word2i["<n/a>"]
-
         self.answers = [self.yes_token, self.no_token, self.non_applicable_token]
 
     """
