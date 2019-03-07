@@ -61,6 +61,13 @@ class OracleBatchifier(AbstractBatchifier):
             if 'category' in sources:
                 batch['category'].append(game.object.category_id)
 
+            if 'allcategory' in sources:
+                allcategory = []
+                # print("Oracle_batchifier |  Allcategory -------------------------------")
+                for obj in game.objects:
+                    allcategory.append(obj.category_id)
+                batch['allcategory'].append(allcategory)
+
             if 'spatial' in sources:
                 spat_feat = get_spatial_feat(game.object.bbox, image.width, image.height)
                 batch['spatial'].append(spat_feat)

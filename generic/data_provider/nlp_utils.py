@@ -22,6 +22,7 @@ def padder(list_of_tokens, seq_length=None, padding_symbol=0, max_seq_length=0):
 
     if seq_length is None:
         seq_length = np.array([len(q) for q in list_of_tokens], dtype=np.int32)
+        #print("nlp | sequence_length = {} ",seq_length)
 
 
     if max_seq_length == 0:

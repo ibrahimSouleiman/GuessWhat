@@ -1,7 +1,8 @@
 {
   "inputs": {
     "question": true,
-    "description": true,
+    "description": false,
+    "allcategory":true,
     "category": true,
     "spatial": false,
     "crop": false,
@@ -13,17 +14,19 @@
       "no_LSTM_hiddens": 512,
       "embedding_dim": 300
     },
-
     "description": {
       "no_LSTM_hiddens": 512,
       "embedding_dim": 300
     },
-
+    "allcategory": {
+      "no_LSTM_hiddens": 512,
+      "embedding_dim": 300
+    },
     "category": {
       "n_categories": 90,
       "embedding_dim": 512
     },
-
+    
     "MLP": {
       "num_hiddens": 512
     },
