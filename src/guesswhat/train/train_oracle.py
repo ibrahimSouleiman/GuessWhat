@@ -46,7 +46,7 @@ if __name__ == '__main__':
     parser.add_argument("-crop_dir", type=str, help='Directory with images')
     parser.add_argument("-load_checkpoint", type=str, help="Load model parameters from specified checkpoint")
     parser.add_argument("-continue_exp", type=lambda x: bool(strtobool(x)), default="False", help="Continue previously started experiment?")
-    parser.add_argument("-gpu_ratio", type=float, default=0.6, help="How many GPU ram is required? (ratio)")
+    parser.add_argument("-gpu_ratio", type=float, default=0.8, help="How many GPU ram is required? (ratio)")
     parser.add_argument("-no_thread", type=int, default=5, help="No thread to load batch")
 
     args = parser.parse_args()
@@ -138,18 +138,20 @@ if __name__ == '__main__':
         batchifier = OracleBatchifier(tokenizer, sources,tokenizer_description, status=config['status'])
 
         for t in range(start_epoch, no_epoch):
-            logger.info('Epoch {}..'.format(t + 1))
-            print(" train_oracle | Iterator ...")
+            # logger.info('Epoch {}..'.format(t + 1))
+            print('Epoch {}..'.format(t + 1))
+
+            # print(" train_oracle | Iterator ...")
             train_iterator = Iterator(trainset,
                                       batch_size=batch_size, pool=cpu_pool,
                                       batchifier=batchifier,
                                       shuffle=True)
 
-            print(" train_oracle | evaluator ...")
+            # print(" train_oracle | evaluator ...")
 
             train_loss, train_accuracy = evaluator.process(sess, train_iterator, outputs=outputs + [optimizer])
 
-            print(" train_oracle | Iterator ...")
+            # print(" train_oracle | Iterator ...")
 
             valid_iterator = Iterator(validset, pool=cpu_pool,
                                       batch_size=batch_size*2,
@@ -157,10 +159,16 @@ if __name__ == '__main__':
                                       shuffle=False)
             valid_loss, valid_accuracy = evaluator.process(sess, valid_iterator, outputs=outputs)
 
-            logger.info("Training loss: {}".format(train_loss))
-            logger.info("Training error: {}".format(1-train_accuracy))
-            logger.info("Validation loss: {}".format(valid_loss))
-            logger.info("Validation error: {}".format(1-valid_accuracy))
+            print("Training loss: {}".format(train_loss))
+            print("Training error: {}".format(1-train_accuracy))
+            print("Validation loss: {}".format(valid_loss))
+            print("Validation error: {}".format(1-valid_accuracy))
+
+
+            # logger.info("Training loss: {}".format(train_loss))
+            # logger.info("Training error: {}".format(1-train_accuracy))
+            # logger.info("Validation loss: {}".format(valid_loss))
+            # logger.info("Validation error: {}".format(1-valid_accuracy))
 
             if valid_accuracy > best_val_err:
                 best_train_err = train_accuracy
@@ -178,5 +186,8 @@ if __name__ == '__main__':
                                  shuffle=True)
         [test_loss, test_accuracy] = evaluator.process(sess, test_iterator, outputs)
 
-        logger.info("Testing loss: {}".format(test_loss))
-        logger.info("Testing error: {}".format(1-test_accuracy))
+        print("Testing loss: {}".format(test_loss))
+        print("Testing error: {}".format(1-test_accuracy))
+
+        # logger.info("Testing loss: {}".format(test_loss))
+        # logger.info("Testing error: {}".format(1-test_accuracy))
