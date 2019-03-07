@@ -2,7 +2,7 @@
   "inputs": {
     "question": true,
     "description": true,
-    "category": false,
+    "category": true,
     "spatial": false,
     "crop": false,
     "image": false
