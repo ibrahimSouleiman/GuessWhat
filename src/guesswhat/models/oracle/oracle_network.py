@@ -47,10 +47,10 @@ class OracleNetwork(ResnetModel):
                                             scope="word_embedding_description")
 
                 #print(" SeqDescription = ",self.seq_length_description)
-                lstm_states, _ = rnn.variable_length_LSTM(word_emb,
+                lstm_states_description, _ = rnn.variable_length_LSTM(word_emb,
                                                     num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
                                                     seq_length=self.seq_length_description,scope="lstm2")
-                embeddings.append(lstm_states)
+                embeddings.append(lstm_states_description)
 
 
                 
@@ -73,7 +73,7 @@ class OracleNetwork(ResnetModel):
                 print("Input: Category")
 
 
-             # ALLCATEGORY
+            # ALLCATEGORY
             if config['inputs']['allcategory']:
                 print("**** Oracle_network |  input = allcategory ")
 
@@ -99,8 +99,6 @@ class OracleNetwork(ResnetModel):
             # SPATIAL
             if config['inputs']['spatial']:
                 print("****  Oracle_network |  input = spatial ")
-
-
                 self._spatial = tf.placeholder(tf.float32, [self.batch_size, 8], name='spatial')
                 embeddings.append(self._spatial)
                 print("Input: Spatial")

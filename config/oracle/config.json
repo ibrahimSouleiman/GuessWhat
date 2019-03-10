@@ -4,7 +4,7 @@
     "description": false,
     "allcategory":true,
     "category": true,
-    "spatial": false,
+    "spatial": true,
     "crop": false,
     "image": false
   },

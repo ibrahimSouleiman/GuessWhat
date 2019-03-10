@@ -16,6 +16,7 @@ class GWTokenizer:
         for (k, v) in self.word2i.items():
             self.i2word[v] = k
 
+
         # Retrieve key values
         self.no_words = len(self.word2i)
         self.start_token = self.word2i["<start>"]
