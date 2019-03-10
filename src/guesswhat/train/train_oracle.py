@@ -46,7 +46,7 @@ if __name__ == '__main__':
     parser.add_argument("-crop_dir", type=str, help='Directory with images')
     parser.add_argument("-load_checkpoint", type=str, help="Load model parameters from specified checkpoint")
     parser.add_argument("-continue_exp", type=lambda x: bool(strtobool(x)), default="False", help="Continue previously started experiment?")
-    parser.add_argument("-gpu_ratio", type=float, default=0.5, help="How many GPU ram is required? (ratio)")
+    parser.add_argument("-gpu_ratio", type=float, default=0.90, help="How many GPU ram is required? (ratio)")
     parser.add_argument("-no_thread", type=int, default=5, help="No thread to load batch")
 
     args = parser.parse_args()
@@ -120,7 +120,7 @@ if __name__ == '__main__':
     cpu_pool = Pool(args.no_thread, maxtasksperchild=1000)
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=args.gpu_ratio)
 
-    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True)) as sess:
+    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True,device_count = {'GPU': 0})) as sess:
 
         sources = network.get_sources(sess)
         logger.info("Sources: " + ', '.join(sources))
