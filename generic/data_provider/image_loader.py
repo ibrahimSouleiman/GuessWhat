@@ -134,7 +134,7 @@ class h5FeatureBufloader(AbstractImgLoader):
 
 class RawImageBuilder(AbstractImgBuilder):
     """
-    normalized image with build method 
+    normalized (convert rgb,resize)image with build method 
     """
     def __init__(self, img_dir, width, height, channel=None):
         AbstractImgBuilder.__init__(self, img_dir, is_raw=True, require_process=True)

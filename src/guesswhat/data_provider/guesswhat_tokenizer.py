@@ -33,6 +33,7 @@ class GWTokenizer:
     Input: String
     Output: List of tokens
     """
+
     def apply(self, question, is_answer=False):
 
         tokens = []
@@ -46,6 +47,7 @@ class GWTokenizer:
                 tokens.append(self.word2i[token])
 
         return tokens
+
 
     def decode(self, tokens):
         return ' '.join([self.i2word[tok] for tok in tokens])

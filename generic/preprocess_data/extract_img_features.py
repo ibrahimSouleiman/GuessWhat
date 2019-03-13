@@ -65,23 +65,14 @@ def extract_features(
             #
             #         try:
             #             print(str(img++".jpg"))
-            #             f = open(os.path.join("data/img/raw/", img))
+            #             f = open(os.path.ft_outputta/img/raw/", img))
             #
-            #             nb_total_trouve += 1
+            #             nb_total_trouve +ft_output
             #         except:
-            #             # print("Not Found !!")
-            #             nb_nonTrouve += 1
+            #             # print("Not Founft_output
+            #             nb_nonTrouve += 1ft_output
             # print("[Trouve = {} et Non_Trouve = {} ]".format(nb_total_trouve,nb_nonTrouve))
             # # print(img ++".jpg")
-
-
-
-
-
-
-
-
-
             dataset.games = games
             no_images = len(games)
     
@@ -110,7 +101,11 @@ def extract_features(
 
                 for batch in tqdm(iterator):
                     feat = sess.run(ft_output, feed_dict={img_input: numpy.array(batch[source_name])})
-    
+
+
+                    print("----- extract_img_Features | Feat ={} shape = {}".format(feat,feat.shape))
+
+
                     # Store dataset
                     batch_size = len(batch["raw"])
                     ft_dataset[pt_hd5: pt_hd5 + batch_size] = feat

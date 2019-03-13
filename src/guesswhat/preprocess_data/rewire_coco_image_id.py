@@ -32,7 +32,8 @@ for path in args.image_subdir:
             continue
 
         # create symlink with id_image
-	path_file = os.path.join(args.data_out, res.group(1))
+        
+        path_file = os.path.join(args.data_out, res.group(1))
 
         if os.path.exists(path_file) == False:
            os.symlink(name, path_file)

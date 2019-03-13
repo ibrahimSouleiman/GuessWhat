@@ -37,8 +37,8 @@ parser.add_argument("-img_size", type=int, default=224, help="image size (pixels
 parser.add_argument("-crop_scale", type=float, default=1.1, help="crop scale around the bbox")
 parser.add_argument("-batch_size", type=int, default=64, help="Batch size to extract features")
 
-parser.add_argument("-gpu_ratio", type=float, default=0, help="How many GPU ram is required? (ratio)")
-parser.add_argument("-no_thread", type=int, default=4, help="No thread to load batch")
+parser.add_argument("-gpu_ratio", type=float, default=0.95, help="How many GPU ram is required? (ratio)")
+parser.add_argument("-no_thread", type=int, default=2, help="No thread to load batch")
 
 args = parser.parse_args()
 
@@ -104,9 +104,9 @@ elif args.network == "vgg":
 
     ft_output = end_points[ft_name]
 
-    print("Extrat_image | ft_name = {} ",ft_name)
+    print("Extrat_image | ft_name = {} ".format(ft_name))
+    print("Extrat_image | ft_output = {} ".format(ft_output))
 
-    print("Extrat_image | ft_output = {} ",ft_output)
 
 else:
     assert False, "Incorrect Network"

@@ -96,7 +96,7 @@ class Image:
         """
 
         """
-        print(" guesswhat_dataset | get_image = {}".format(self.image_loader))
+        # print(" guesswhat_dataset | get_image = {}".format(self.image_loader))
         if self.image_loader is not None:
             return self.image_loader.get_image(**kwargs)
         else:
@@ -201,7 +201,7 @@ class Dataset(AbstractDataset):
 
                     
 
-                if len(games) > 50: break
+                if len(games) > 1: break
 
         super(Dataset, self).__init__(games)
 
