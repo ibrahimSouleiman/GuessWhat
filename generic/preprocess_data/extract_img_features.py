@@ -38,7 +38,7 @@ def extract_features(
         # tf.initialize_all_variables().run()
         for one_set in set_type:
     
-            print("Load dataset -> set: {}".format(one_set))
+            print("Load dataset -> set: {} , set_type".format(one_set,set_type))
             dataset_args["which_set"] = one_set
             dataset = dataset_cstor(**dataset_args)
     
@@ -87,7 +87,8 @@ def extract_features(
     
             source_name = os.path.basename(img_input.name[:-2])
             dummy_tokenizer = DummyTokenizer()
-            batchifier = batchifier_cstor(tokenizer=dummy_tokenizer, sources=[source_name])
+            batchifier = batchifier_cstor(tokenizer_question=dummy_tokenizer, sources=[source_name])
+            
             iterator = Iterator(dataset,
                                 batch_size=batch_size,
                                 pool=cpu_pool,
