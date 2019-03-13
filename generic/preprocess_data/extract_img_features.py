@@ -38,7 +38,7 @@ def extract_features(
         # tf.initialize_all_variables().run()
         for one_set in set_type:
     
-            print("Load dataset -> set: {} , set_type".format(one_set,set_type))
+            print("Load dataset -> set: {}".format(one_set))
             dataset_args["which_set"] = one_set
             dataset = dataset_cstor(**dataset_args)
     
