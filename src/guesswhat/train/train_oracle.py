@@ -120,7 +120,7 @@ if __name__ == '__main__':
     cpu_pool = Pool(args.no_thread, maxtasksperchild=1000)
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=args.gpu_ratio)
 
-    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True,device_count = {'GPU': 0})) as sess:
+    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True)) as sess:
 
         sources = network.get_sources(sess)
         logger.info("Sources: " + ', '.join(sources))

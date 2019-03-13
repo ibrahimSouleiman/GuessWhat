@@ -13,13 +13,13 @@ def get_image_features(image, question, is_training, scope_name, config, dropout
     if image_input_type == "fc8" \
             or image_input_type == "fc7" \
             or image_input_type == "dummy":
-
+        print("** image_factory IF")
         image_out = image
         if config.get('normalize', False):
             image_out = tf.nn.l2_normalize(image, dim=1, name="fc_normalization")
 
     elif image_input_type.startswith("conv") or image_input_type.startswith("raw"):
-
+        print("** image_factory ELSE")
         # Extract feature from raw images
         if image_input_type.startswith("raw"):
 
