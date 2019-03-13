@@ -78,6 +78,7 @@ class Game:
 
 
 class Image:
+
     def __init__(self, id, width, height, url,description, which_set, image_builder=None):
         self.id = id
         self.width = width
@@ -90,11 +91,18 @@ class Image:
             self.filename = "{}.jpg".format(id)
             self.image_loader = image_builder.build(id, which_set=which_set, filename=self.filename, optional=False)
 
+
     def get_image(self, **kwargs):
+        """
+
+        """
+        print(" guesswhat_dataset | get_image = {}".format(self.image_loader))
         if self.image_loader is not None:
             return self.image_loader.get_image(**kwargs)
         else:
             return None
+
+
 
 class Bbox:
     def __init__(self, bbox, im_width, im_height):
@@ -193,7 +201,7 @@ class Dataset(AbstractDataset):
 
                     
 
-                # if len(games) > 50: break
+                if len(games) > 50: break
 
         super(Dataset, self).__init__(games)
 

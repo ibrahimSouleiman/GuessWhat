@@ -76,7 +76,10 @@ class OracleBatchifier(AbstractBatchifier):
                 batch['crop'].append(game.object.get_crop())
 
             if 'image' in sources:
+                print(" ---  Debut ")
                 batch['image'].append(image.get_image())
+
+                print(" ---  Fin ")    
 
             if 'mask' in sources:
                 assert "image" in batch['image'], "mask input require the image source"
