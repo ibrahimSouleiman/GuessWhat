@@ -132,10 +132,11 @@ class h5FeatureBufloader(AbstractImgLoader):
     def get_image(self, **kwargs):
         return self.data
 
+
+
+
+
 class RawImageBuilder(AbstractImgBuilder):
-    """
-    normalized image with build method 
-    """
     def __init__(self, img_dir, width, height, channel=None):
         AbstractImgBuilder.__init__(self, img_dir, is_raw=True, require_process=True)
         self.width = width
@@ -156,6 +157,7 @@ class RawImageLoader(AbstractImgLoader):
 
     def get_image(self, **kwargs):
         img = Image.open(self.img_path).convert('RGB')
+
         img = resize_image(img, self.width , self.height)
         img = np.array(img, dtype=np.float32)
 

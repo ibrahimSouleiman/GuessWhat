@@ -39,7 +39,6 @@ parser.add_argument("-batch_size", type=int, default=64, help="Batch size to ext
 
 parser.add_argument("-gpu_ratio", type=float, default=0.3, help="How many GPU ram is required? (ratio)")
 parser.add_argument("-no_thread", type=int, default=20, help="No thread to load batch")
-
 args = parser.parse_args()
 
 
@@ -62,7 +61,6 @@ if args.mode == "img":
                                     height=args.img_size,
                                     width=args.img_size,
                                     channel=channel_mean)
-                    
 
 elif args.mode == "crop":
     images = tf.placeholder(tf.float32, [None, args.img_size, args.img_size, 3], name='crop')
@@ -101,15 +99,10 @@ if args.network == "resnet":
 elif args.network == "vgg":
     _, end_points = vgg.vgg_16(images, is_training=False, dropout_keep_prob=1.0)
     ft_name = os.path.join("vgg_16", args.feature_name)
-
     ft_output = end_points[ft_name]
-
-    print("Extrat_image | ft_name = {} ",ft_name)
-
-    print("Extrat_image | ft_output = {} ",ft_output)
-
 else:
     assert False, "Incorrect Network"
+
 
 extract_features(
     img_input = images,

@@ -88,7 +88,6 @@ def extract_features(
             source_name = os.path.basename(img_input.name[:-2])
             dummy_tokenizer = DummyTokenizer()
             batchifier = batchifier_cstor(tokenizer_question=dummy_tokenizer, sources=[source_name])
-            
             iterator = Iterator(dataset,
                                 batch_size=batch_size,
                                 pool=cpu_pool,
@@ -103,22 +102,34 @@ def extract_features(
             filepath = os.path.join(out_dir, "{}_features.h5".format(one_set))
 
             with h5py.File(filepath, 'w') as f:
+                print("--- 1")
                 ft_shape = [int(dim) for dim in ft_output.get_shape()[1:]]
+                print("--- 2")
                 ft_dataset = f.create_dataset('features', shape=[no_images] + ft_shape, dtype=np.float32)
+                print("--- 3")
                 idx2img = f.create_dataset('idx2img', shape=[no_images], dtype=np.int32)
+                print("--- 4")
                 pt_hd5 = 0
 
+                print("--- 5")
+
                 for batch in tqdm(iterator):
+                    print("--- 6")
+                    print(" ... ",numpy.array(batch[source_name]),numpy.array(batch[source_name]).shape)
                     feat = sess.run(ft_output, feed_dict={img_input: numpy.array(batch[source_name])})
     
                     # Store dataset
+                    print("--- 7")
                     batch_size = len(batch["raw"])
                     ft_dataset[pt_hd5: pt_hd5 + batch_size] = feat
     
+                    print("--- 8")
+
                     # Store idx to image.id
                     for i, game in enumerate(batch["raw"]):
                         idx2img[pt_hd5 + i] = game.image.id
     
+                    print("--- 9")
                     # update hd5 pointer
                     pt_hd5 += batch_size
                 print("Start dumping file: {}".format(filepath))

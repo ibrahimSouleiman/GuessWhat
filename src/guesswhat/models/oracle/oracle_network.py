@@ -53,6 +53,8 @@ class OracleNetwork(ResnetModel):
                 embeddings.append(lstm_states_description)
 
 
+                
+
             # CATEGORY
             if config['inputs']['category']:
                 print("****  Oracle_network |  input = category ")
@@ -108,7 +110,7 @@ class OracleNetwork(ResnetModel):
 
                 self._image = tf.placeholder(tf.float32, [self.batch_size] + config['model']['image']["dim"], name='image')
                 self.image_out = get_image_features(
-                    image=self._image, question=None,
+                    image=self._image, question=lstm_states,
                     is_training=self._is_training,
                     scope_name=scope.name,
                     config=config['model']['image']
