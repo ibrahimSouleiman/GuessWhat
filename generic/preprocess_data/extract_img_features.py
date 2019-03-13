@@ -87,7 +87,7 @@ def extract_features(
     
             source_name = os.path.basename(img_input.name[:-2])
             dummy_tokenizer = DummyTokenizer()
-            batchifier = batchifier_cstor(tokenizer=dummy_tokenizer, sources=[source_name])
+            batchifier = batchifier_cstor(tokenizer_question=dummy_tokenizer, sources=[source_name])
             iterator = Iterator(dataset,
                                 batch_size=batch_size,
                                 pool=cpu_pool,
