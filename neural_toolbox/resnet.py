@@ -22,7 +22,7 @@ def get_resnet_arg_scope(bn_fn):
         return arg_sc
 
 
-def create_resnet(image_input, is_training, scope="", resnet_out="block4", resnet_version=50, cbn=None):
+def create_resnet(image_input, is_training, scope="", resnet_out="logits", resnet_version=50, cbn=None):
     """
     Create a resnet by overidding the classic batchnorm with conditional batchnorm
     :param image_input: placeholder with image
@@ -58,6 +58,7 @@ def create_resnet(image_input, is_training, scope="", resnet_out="block4", resne
     with slim.arg_scope(arg_sc):
         net, end_points = current_resnet(image_input, 1000)  # 1000 is the number of softmax class
 
+    print(" resnet | endpoint=",end_points)
     if len(scope) > 0 and not scope.endswith("/"):
         scope += "/"
 
@@ -65,6 +66,12 @@ def create_resnet(image_input, is_training, scope="", resnet_out="block4", resne
     print(" Batch ",resnet_scope)
 
     out = end_points[scope + resnet_scope]
-    print("-- out Use: {},output = {}".format(resnet_scope,out))
+    # print("------------------------- out Use: {},output = {}".format(resnet_scope,out))
+    out = tf.reshape(
+    out,
+    [-1,out.shape[3]],
+)
+    # print("-- out Use: {},output = {}".format(resnet_scope,out))
+
 
     return out,end_points

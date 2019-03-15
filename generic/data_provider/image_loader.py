@@ -91,8 +91,13 @@ class h5FeatureBuilder(AbstractImgBuilder):
 
             # hd5 requires continuous id while image_id can be very diverse.
             # We then need a mapping between both of them
+            print(h5file)
             if h5_idx_key in h5file:
                 # Retrieve id mapping from file
+                # for id_h5, id_img in enumerate(h5file[h5_idx_key]):
+                #     # print("image_loadar | id_img = {} , id_h5={}".format(id_img,id_h5))
+
+
                 img2idx = {id_img : id_h5 for id_h5, id_img in enumerate(h5file[h5_idx_key])}
             else:
                 # Assume their is a perfect identity between image_id and h5_id
