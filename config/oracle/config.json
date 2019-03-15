@@ -3,8 +3,8 @@
     "question": true,
     "description": false,
     "allcategory":true,
-    "category": false,
-    "spatial": false,
+    "category": true,
+    "spatial": true,
     "crop": false,
     "image": false
   },
