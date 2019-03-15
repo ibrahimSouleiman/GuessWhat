@@ -40,7 +40,7 @@ parser.add_argument("-crop_scale", type=float, default=1.1, help="crop scale aro
 parser.add_argument("-batch_size", type=int, default=64, help="Batch size to extract features")
 
 parser.add_argument("-gpu_ratio", type=float, default=0.50, help="How many GPU ram is required? (ratio)")
-parser.add_argument("-no_thread", type=int, default=2, help="No thread to load batch")
+parser.add_argument("-no_thread", type=int, default=20, help="No thread to load batch")
 
 args = parser.parse_args()
 
