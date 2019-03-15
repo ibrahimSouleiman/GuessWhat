@@ -2,11 +2,11 @@
   "inputs": {
     "question": true,
     "description": false,
-    "allcategory":false,
+    "allcategory":true,
     "category": false,
     "spatial": false,
     "crop": false,
-    "image": true
+    "image": false
   },
 
   "model": {

@@ -104,6 +104,7 @@ if __name__ == '__main__':
     logger.info('Building optimizer..')
     optimizer, outputs = create_optimizer(network, config, finetune=finetune)
 
+    # tf.reset_default_graph()
     ###############################
     #  START  TRAINING
     #############################
@@ -119,6 +120,8 @@ if __name__ == '__main__':
     # CPU/GPU option
     cpu_pool = Pool(args.no_thread, maxtasksperchild=1000)
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=args.gpu_ratio)
+
+
 
     with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True,device_count = {'GPU': 0})) as sess:
 
@@ -138,7 +141,7 @@ if __name__ == '__main__':
         batchifier = OracleBatchifier(tokenizer, sources,tokenizer_description, status=config['status'])
 
         for t in range(start_epoch, no_epoch):
-            # logger.info('Epoch {}..'.format(t + 1))
+            logger.info('Epoch {}..'.format(t + 1))
             print('Epoch {}..'.format(t + 1))
 
             # print(" train_oracle | Iterator ...")
@@ -165,10 +168,10 @@ if __name__ == '__main__':
             print("Validation error: {}".format(1-valid_accuracy))
 
 
-            # logger.info("Training loss: {}".format(train_loss))
-            # logger.info("Training error: {}".format(1-train_accuracy))
-            # logger.info("Validation loss: {}".format(valid_loss))
-            # logger.info("Validation error: {}".format(1-valid_accuracy))
+            logger.info("Training loss: {}".format(train_loss))
+            logger.info("Training error: {}".format(1-train_accuracy))
+            logger.info("Validation loss: {}".format(valid_loss))
+            logger.info("Validation error: {}".format(1-valid_accuracy))
 
             if valid_accuracy > best_val_err:
                 best_train_err = train_accuracy
@@ -189,5 +192,5 @@ if __name__ == '__main__':
         print("Testing loss: {}".format(test_loss))
         print("Testing error: {}".format(1-test_accuracy))
 
-        # logger.info("Testing loss: {}".format(test_loss))
-        # logger.info("Testing error: {}".format(1-test_accuracy))
+        logger.info("Testing loss: {}".format(test_loss))
+        logger.info("Testing error: {}".format(1-test_accuracy))

@@ -79,20 +79,25 @@ class OracleNetwork(ResnetModel):
 
         
                 
-                self._allcategory = tf.placeholder(tf.int32, [self.batch_size, None], name='description')
-                self.seq_length_allcategory = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_description')
+                self._allcategory = tf.placeholder(tf.float32, [self.batch_size,90], name='allcategory')
+                # self.seq_length_allcategory = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_allcategory')
 
-                word_emb = utils.get_embedding(self._allcategory,
-                                            n_words=int(config['model']['category']["n_categories"]) + 1,
-                                            n_dim=int(config['model']['description']["embedding_dim"]),
-                                            scope="word_embedding_description")
+                # word_emb = utils.get_embedding(self._allcategory,
+                #                             n_words=int(config['model']['category']["n_categories"]) + 1,
+                #                             n_dim=int(config['model']['description']["embedding_dim"]),
+                #                             scope="word_embedding_allcategory")
 
+                
                 #print(" SeqDescription = ",self.seq_length_description)
-                lstm_states, _ = rnn.variable_length_LSTM(word_emb,
-                                                    num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
-                                                    seq_length=self.seq_length_allcategory,scope="lstm3")
-                embeddings.append(lstm_states)
+                # lstm_states, _ = rnn.variable_length_LSTM(word_emb,
+                #                                     num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
+                #                                     seq_length=self.seq_length_allcategory,scope="lstm3")
+                
+                print(" Oracle_network | embdedding all_cate=",word_emb)
+                embeddings.append(self._allcategory)
                 print("Input: allcategory")
+
+                
 
 
 

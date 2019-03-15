@@ -5,11 +5,13 @@ import numpy as np
 import argparse
 from distutils.util import strtobool
 
-#from neural_toolbox import resnet
+from neural_toolbox import resnet,inception
 
 import tensorflow.contrib.slim as slim
 import tensorflow.contrib.slim.python.slim.nets.vgg as vgg
 import tensorflow.contrib.slim.python.slim.nets.resnet_v1 as resnet_v1
+import tensorflow.contrib.slim.python.slim.nets.inception_v1 as inception_v1
+
 import tensorflow.contrib.slim.python.slim.nets.resnet_utils as slim_utils
 
 from generic.data_provider.image_loader import RawImageBuilder, RawCropBuilder
@@ -26,7 +28,7 @@ parser.add_argument("-set_type", type=list, default=["valid", "train", "test"], 
 
 parser.add_argument("-out_dir", type=str, required=True, help="Output folder")
 
-parser.add_argument("-network", type=str, choices=["resnet", "vgg"], help="Use resnet/vgg network")
+parser.add_argument("-network", type=str, choices=["resnet", "vgg","inception","alexnet"], help="Use resnet/vgg/inception/alexnet network")
 parser.add_argument("-resnet_version", type=int, default=152, choices=[50, 101, 152], help="Pick the resnet version [50/101/152]")
 parser.add_argument("-ckpt", type=str, required=True, help="Path for network checkpoint: ")
 parser.add_argument("-feature_name", type=str, default="", help="Pick the name of the network features default=(fc8 - block4)")
@@ -37,20 +39,16 @@ parser.add_argument("-img_size", type=int, default=224, help="image size (pixels
 parser.add_argument("-crop_scale", type=float, default=1.1, help="crop scale around the bbox")
 parser.add_argument("-batch_size", type=int, default=64, help="Batch size to extract features")
 
-parser.add_argument("-gpu_ratio", type=float, default=0.90, help="How many GPU ram is required? (ratio)")
+parser.add_argument("-gpu_ratio", type=float, default=0.50, help="How many GPU ram is required? (ratio)")
 parser.add_argument("-no_thread", type=int, default=2, help="No thread to load batch")
 
 args = parser.parse_args()
-
-
-
 
 # define image
 if args.subtract_mean:
     channel_mean = np.array([123.68, 116.779, 103.939])
 else:
     channel_mean = None
-
 
 # define the image loader (raw vs crop)
 if args.mode == "img":
@@ -62,7 +60,7 @@ if args.mode == "img":
                                     height=args.img_size,
                                     width=args.img_size,
                                     channel=channel_mean)
-
+                    
 elif args.mode == "crop":
     images = tf.placeholder(tf.float32, [None, args.img_size, args.img_size, 3], name='crop')
     source = 'crop'
@@ -73,6 +71,8 @@ elif args.mode == "crop":
                                   width=args.img_size,
                                   scale=args.crop_scale,
                                   channel=channel_mean)
+
+
 else:
     assert False, "Invalid mode: {}".format(args.mode)
 
@@ -83,27 +83,58 @@ out_file = "gw_{mode}_{network}_{feature_name}_{size}".format(
 
 
 print("Create networks...")
-if args.network == "resnet":
-    pass 
-    
-    """
-    ft_output = resnet.create_resnet(images,
+if args.network == "resnet":    
+
+    ft_output,end_points = resnet.create_resnet(images,
                                      resnet_out=args.feature_name,
                                      resnet_version=args.resnet_version,
                                      is_training=False)
     # create network
-    with slim.arg_scope(slim_utils.resnet_arg_scope(is_training=False)):
-        _, end_points = resnet_v1.resnet_v1_152(images, 1000)  # 1000 is the number of softmax class
+    # with slim.arg_scope(slim_utils.resnet_arg_scope()):
+    #     _, end_points = resnet_v1.resnet_v1_152(images, 1000,reuse=tf.AUTO_REUSE)  # 1000 is the number of softmax class
+    
+    # print(end_points)
+    print(" -- Finish to build resnet ...")
 
-    """
+elif args.network == "inception":    
+
+    ft_output, end_points= inception.create_inception(images, is_training=False)
+
+    # print("** Networkd = ",logits)
+    print("** Networkd = ",end_points)
+    # create network
+    # with slim.arg_scope(slim_utils.resnet_arg_scope()):
+    #     _, end_points = resnet_v1.resnet_v1_152(images, 1000,reuse=tf.AUTO_REUSE)  # 1000 is the number of softmax class
+    
+    # print("*** Ft_output ",ft_output)
+    # print(end_points)
+    print(" -- Finish to build inception ...")
+
+elif args.network == "alexnet":    
+
+    ft_output,end_points = resnet.create_resnet(images,
+                                     resnet_out=args.feature_name,
+                                     resnet_version=args.resnet_version,
+                                     is_training=False)
+    # create network
+    # with slim.arg_scope(slim_utils.resnet_arg_scope()):
+    #     _, end_points = resnet_v1.resnet_v1_152(images, 1000,reuse=tf.AUTO_REUSE)  # 1000 is the number of softmax class
+    
+    print("*** Ft_output ",ft_output)
+    # print(end_points)
+    print(" -- Finish to build alexnet ...")
 
 elif args.network == "vgg":
     _, end_points = vgg.vgg_16(images, is_training=False, dropout_keep_prob=1.0)
     ft_name = os.path.join("vgg_16", args.feature_name)
     ft_output = end_points[ft_name]
+
+    print("Extrat_image | ft_name = {} ".format(ft_name))
+    print("Extrat_image | ft_output = {} ".format(ft_output))
+
+
 else:
     assert False, "Incorrect Network"
-
 
 extract_features(
     img_input = images,

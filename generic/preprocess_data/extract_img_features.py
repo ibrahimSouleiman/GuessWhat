@@ -28,26 +28,32 @@ def extract_features(
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=gpu_ratio)
 
     # gpu_options.allow_growth = True
+    
+    saver = tf.train.Saver()
 
+    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
+        print("+++ 0")
 
-    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True)) as sess:
-
-        saver = tf.train.Saver()
         saver.restore(sess, network_ckpt)
-
+        print("+++ 1")
         # tf.initialize_all_variables().run()
         for one_set in set_type:
-    
+            print("+++ 2")
             print("Load dataset -> set: {}".format(one_set))
             dataset_args["which_set"] = one_set
             dataset = dataset_cstor(**dataset_args)
-    
+
+            print("+++ 3")
             # hack dataset to only keep one game by image
             image_id_set = {}
             games = []
 
+            print("+++ 4")
+
             nb_total_trouve = 0
             nb_nonTrouve = 0
+
+            print("+++ 5")
 
             print("[Data Length ] = {}".format(len(dataset.games)))
             for game in dataset.games:
@@ -55,6 +61,7 @@ def extract_features(
                     games.append(game)
                     image_id_set[game.image.id] = 1
 
+            print("+++ 6")
             #
             #         img = game.image.url.split("/")[-1]
             #         img = img + ".jpg"
@@ -73,12 +80,6 @@ def extract_features(
             #             nb_nonTrouve += 1
             # print("[Trouve = {} et Non_Trouve = {} ]".format(nb_total_trouve,nb_nonTrouve))
             # # print(img ++".jpg")
-
-
-
-
-
-
 
 
 
@@ -110,12 +111,11 @@ def extract_features(
                 idx2img = f.create_dataset('idx2img', shape=[no_images], dtype=np.int32)
                 print("--- 4")
                 pt_hd5 = 0
-
                 print("--- 5")
 
                 for batch in tqdm(iterator):
                     print("--- 6")
-                    print(" ... ",numpy.array(batch[source_name]),numpy.array(batch[source_name]).shape)
+                    # print(" ... ",numpy.array(batch[source_name]),numpy.array(batch[source_name]).shape)
                     feat = sess.run(ft_output, feed_dict={img_input: numpy.array(batch[source_name])})
     
                     # Store dataset
@@ -124,11 +124,10 @@ def extract_features(
                     ft_dataset[pt_hd5: pt_hd5 + batch_size] = feat
     
                     print("--- 8")
-
                     # Store idx to image.id
                     for i, game in enumerate(batch["raw"]):
                         idx2img[pt_hd5 + i] = game.image.id
-    
+
                     print("--- 9")
                     # update hd5 pointer
                     pt_hd5 += batch_size

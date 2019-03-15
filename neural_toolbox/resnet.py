@@ -37,7 +37,9 @@ def create_resnet(image_input, is_training, scope="", resnet_out="block4", resne
         # assert False, "\n" \
         #               "There is a bug with classic batchnorm with slim networks (https://github.com/tensorflow/tensorflow/issues/4887). \n" \
         #               "Please use the following config -> 'cbn': {'use_cbn':true, 'excluded_scope_names': ['*']}"
-        arg_sc = slim_utils.resnet_arg_scope(is_training=is_training)
+        # arg_sc = slim_utils.resnet_arg_scope(is_training=is_training)
+        arg_sc = slim_utils.resnet_arg_scope()
+
     else:
         arg_sc = get_resnet_arg_scope(cbn.apply)
 
@@ -52,14 +54,17 @@ def create_resnet(image_input, is_training, scope="", resnet_out="block4", resne
         raise ValueError("Unsupported resnet version")
 
     resnet_scope = os.path.join('resnet_v1_{}/'.format(resnet_version), resnet_out)
-
+    # print(" resnet_out = {} , resnet_scope = {}".format(resnet_out,resnet_scope))
     with slim.arg_scope(arg_sc):
         net, end_points = current_resnet(image_input, 1000)  # 1000 is the number of softmax class
 
     if len(scope) > 0 and not scope.endswith("/"):
         scope += "/"
 
-    print("Use: {}".format(resnet_scope))
-    out = end_points[scope + resnet_scope]
+    # print(end_points)
+    print(" Batch ",resnet_scope)
 
-    return out
+    out = end_points[scope + resnet_scope]
+    print("-- out Use: {},output = {}".format(resnet_scope,out))
+
+    return out,end_points

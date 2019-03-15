@@ -207,6 +207,8 @@ class OracleDataset(AbstractDataset):
         new_games = []
         for g in old_games:
             new_games += self.split(g)
+          
+
         super(OracleDataset, self).__init__(new_games)
 
     @classmethod
@@ -216,6 +218,10 @@ class OracleDataset(AbstractDataset):
     def split(self, game):
         games = []
         for i, q, a in zip(game.question_ids, game.questions, game.answers):
+            # print(" GuessWhat | oracleDataSet q={}".format(q))
+            # if( i == 10):
+            #     exit()
+            
             new_game = copy.copy(game)
             new_game.questions = [q]
             new_game.question_ids = [i]

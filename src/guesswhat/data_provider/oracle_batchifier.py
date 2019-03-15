@@ -43,15 +43,14 @@ class OracleBatchifier(AbstractBatchifier):
             image = game.image
 
             if 'question' in sources:
+                
                 assert  len(game.questions) == 1
-
-                # games.question = ['am I a person?'],
+                # games.question = ['am I a person?'],            
                 batch['question'].append(tokenizer_questioner.apply(game.questions[0]))
 
             if 'description' in sources:
+                
                 assert  len(game.questions) == 1
-
-                # games.question = ['am I a person?'],
                 batch['description'].append(tokenizer_description.apply(game.image.description[0]))
 
             if 'answer' in sources:
@@ -63,10 +62,15 @@ class OracleBatchifier(AbstractBatchifier):
 
             if 'allcategory' in sources:
                 allcategory = []
+                allcategory_hot = np.zeros(shape=(90),dtype=int)
                 # print("Oracle_batchifier |  Allcategory -------------------------------")
                 for obj in game.objects:
-                    allcategory.append(obj.category_id)
-                batch['allcategory'].append(allcategory)
+                    allcategory.append(obj.category_id - 1)
+
+                # print("...   ",allcategory,allcategory_hot)
+
+                allcategory_hot[allcategory] = 1
+                batch['allcategory'].append(allcategory_hot)
 
             if 'spatial' in sources:
                 spat_feat = get_spatial_feat(game.object.bbox, image.width, image.height)
