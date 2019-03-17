@@ -89,6 +89,8 @@ if args.network == "resnet":
                                      resnet_out=args.feature_name,
                                      resnet_version=args.resnet_version,
                                      is_training=False)
+
+    
     # create network
     # with slim.arg_scope(slim_utils.resnet_arg_scope()):
     #     _, end_points = resnet_v1.resnet_v1_152(images, 1000,reuse=tf.AUTO_REUSE)  # 1000 is the number of softmax class
