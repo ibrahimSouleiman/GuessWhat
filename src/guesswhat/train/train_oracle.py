@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+import sys
 from multiprocessing import Pool
 from distutils.util import strtobool
 
@@ -194,3 +195,6 @@ if __name__ == '__main__':
 
         logger.info("Testing loss: {}".format(test_loss))
         logger.info("Testing error: {}".format(1-test_accuracy))
+
+        sys.stdout.flush() 
+
