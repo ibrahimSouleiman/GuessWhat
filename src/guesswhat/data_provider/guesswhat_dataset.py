@@ -193,7 +193,7 @@ class Dataset(AbstractDataset):
 
                     
 
-                #if len(games) > 5: break
+                if len(games) > 5: break
 
         super(Dataset, self).__init__(games)
 
@@ -208,6 +208,8 @@ class OracleDataset(AbstractDataset):
         for g in old_games:
             new_games += self.split(g)
           
+        #for i in range(150):
+        # print(" guesswhat_dataset | Question = ",new_games[0].game.questions)
 
         super(OracleDataset, self).__init__(new_games)
 
@@ -227,6 +229,8 @@ class OracleDataset(AbstractDataset):
             new_game.question_ids = [i]
             new_game.answers = [a]
             games.append(new_game)
+
+        
         return games
 
 
