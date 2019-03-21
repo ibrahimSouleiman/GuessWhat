@@ -5,7 +5,7 @@ from PIL import Image
 from generic.data_provider.batchifier import AbstractBatchifier
 
 from generic.data_provider.image_preprocessors import get_spatial_feat, resize_image
-from generic.data_provider.nlp_utils import padder
+from generic.data_provider.nlp_utils import padder,padder_3d
 
 answer_dict = \
     {  'Yes': np.array([1, 0, 0], dtype=np.int32),
@@ -15,11 +15,12 @@ answer_dict = \
 
 class OracleBatchifier(AbstractBatchifier):
 
-    def __init__(self, tokenizer_question, sources,tokenizer_description = None , status=list()):
+    def __init__(self, tokenizer_question, sources,tokenizer_description = None ,embedding=None, status=list()):
         self.tokenizer_question = tokenizer_question
         self.tokenizer_description = tokenizer_description
         self.sources = sources
         self.status = status
+        self.embedding=embedding
 
     def filter(self, games):
         if len(self.status) > 0:
@@ -30,9 +31,7 @@ class OracleBatchifier(AbstractBatchifier):
 
     def apply(self, games):
         sources = self.sources
-        tokenizer_questioner = self.tokenizer_question
         
-        tokenizer_description = self.tokenizer_description
 
 
         batch = collections.defaultdict(list)
@@ -42,16 +41,34 @@ class OracleBatchifier(AbstractBatchifier):
 
             image = game.image
 
-            if 'question' in sources:
+            question = self.tokenizer_question.apply(game.questions[0])
+            batch['question'].append(question)
+
+            if 'embedding_vector' in sources:
                 
                 assert  len(game.questions) == 1
+                # Add glove vectors (NB even <unk> may have a specific glove)
+                # print("oracle_batchifier | question = {}".format(game.questions))
+                words = self.tokenizer_question.apply(game.questions[0],tokent_int=False)
+                # print(" End ................... ,",words)
+                if type(words) == int:
+                    exit()
+                
+                
+                embedding_vectors = self.embedding.get_embeddings(words) # slow (copy gloves in process)
+                # print(" Oracle_batchifier | embedding_vector= {}".format(embedding_vectors))
+
+
+                batch['embedding_vector'].append(embedding_vectors)
+
+
                 # games.question = ['am I a person?'],            
-                batch['question'].append(tokenizer_questioner.apply(game.questions[0]))
+                # batch['question'].append(self.tokenizer_question.apply(game.questions[0]))
 
             if 'description' in sources:
                 
                 assert  len(game.questions) == 1
-                batch['description'].append(tokenizer_description.apply(game.image.description[0]))
+                batch['description'].append(self.tokenizer_question.apply(game.image.description[0]))
 
             if 'answer' in sources:
                 assert len(game.answers) == 1
@@ -67,9 +84,11 @@ class OracleBatchifier(AbstractBatchifier):
                 for obj in game.objects:
                     allcategory.append(obj.category_id - 1)
 
-                # print("...   ",allcategory,allcategory_hot)
+
 
                 allcategory_hot[allcategory] = 1
+                # print("...   ",allcategory,allcategory_hot)
+
                 batch['allcategory'].append(allcategory_hot)
 
             if 'spatial' in sources:
@@ -90,15 +109,28 @@ class OracleBatchifier(AbstractBatchifier):
                 mask = resize_image(Image.fromarray(mask), height=ft_height, width=ft_width)
                 batch['mask'].append(mask)
 
+        # padding = self.embedding.get_embeddings(["<padding>"])[0]
+        # print("padding | = {}".format(padding))
+
         # pad the questions
-        if 'question' in sources:
-            # complete par padding en prenons la taille maximal
-            batch['question'], batch['seq_length_question'] = padder(batch['question'], padding_symbol=tokenizer_questioner.word2i['<padding>'])
-       
+        
+    
+        
+
+        batch['question'], batch['seq_length_question'] = padder(batch['question'],
+                                                        padding_symbol=self.tokenizer_question.padding_token)
+
+
+        if 'embedding_vector' in sources:
+                        batch['embedding_vector'], _ = padder_3d(batch['embedding_vector'])
+
+
+
         if 'description' in sources:
             # complete par padding en prenons la taille maximal
-            batch['description'], batch['seq_length_description'] = padder(batch['description'], padding_symbol=tokenizer_description.word2i['<padding>'])
+            batch['description'], batch['seq_length_description'] = padder_3d(batch['description'])
 
+        print("finish oracle_bachifier ....")
         return batch
 
 

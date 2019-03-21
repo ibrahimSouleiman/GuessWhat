@@ -58,19 +58,19 @@ def create_resnet(image_input, is_training, scope="", resnet_out="logits", resne
     with slim.arg_scope(arg_sc):
         net, end_points = current_resnet(image_input, 1000)  # 1000 is the number of softmax class
 
-    print(" resnet | endpoint=",end_points)
+    # print(" resnet | endpoint=",end_points)
     if len(scope) > 0 and not scope.endswith("/"):
         scope += "/"
 
     # print(end_points)
-    print(" Batch ",resnet_scope)
+    # print(" Batch ",resnet_scope)
 
     out = end_points[scope + resnet_scope]
     # print("------------------------- out Use: {},output = {}".format(resnet_scope,out))
-    out = tf.reshape(
-    out,
-    [-1,out.shape[3]],
-)
+    # out = tf.reshape(
+    # out,
+    # [-1,out.shape[3]],
+    # )
     # print("-- out Use: {},output = {}".format(resnet_scope,out))
 
 

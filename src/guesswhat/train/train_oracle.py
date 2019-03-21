@@ -14,6 +14,7 @@ from generic.tf_utils.ckpt_loader import load_checkpoint, create_resnet_saver
 from generic.utils.config import load_config
 from generic.utils.file_handlers import pickle_dump
 from generic.data_provider.image_loader import get_img_builder
+from generic.data_provider.nlp_utils import Embeddings
 
 from guesswhat.data_provider.guesswhat_dataset import OracleDataset
 from guesswhat.data_provider.oracle_batchifier import OracleBatchifier
@@ -43,11 +44,13 @@ if __name__ == '__main__':
     parser.add_argument("-exp_dir", type=str, help="Directory in which experiments are stored")
     parser.add_argument("-config", type=str, help='Config file')
     parser.add_argument("-dict_file", type=str, default="dict.json", help="Dictionary file name")
+    parser.add_argument("-all_dictfile", type=str, default="data/list_allquestion1.npy", help="Dictionary file name")
+
     parser.add_argument("-img_dir", type=str, help='Directory with images')
     parser.add_argument("-crop_dir", type=str, help='Directory with images')
     parser.add_argument("-load_checkpoint", type=str, help="Load model parameters from specified checkpoint")
     parser.add_argument("-continue_exp", type=lambda x: bool(strtobool(x)), default="False", help="Continue previously started experiment?")
-    parser.add_argument("-gpu_ratio", type=float, default=0.10, help="How many GPU ram is required? (ratio)")
+    parser.add_argument("-gpu_ratio", type=float, default=0.60, help="How many GPU ram is required? (ratio)")
     parser.add_argument("-no_thread", type=int, default=6, help="No thread to load batch")
 
     args = parser.parse_args()
@@ -122,6 +125,15 @@ if __name__ == '__main__':
     cpu_pool = Pool(args.no_thread, maxtasksperchild=1000)
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=args.gpu_ratio)
 
+    # gov load
+    # Load glove
+    if config["embedding"] != None:
+         use_embedding = True
+    embedding = None
+    if use_embedding:
+        logger.info('Loading embedding..')
+        embedding = Embeddings(args.all_dictfile,total_words=tokenizer.no_words)
+    
 
 
     with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True,device_count = {'GPU': 0})) as sess:
@@ -139,7 +151,7 @@ if __name__ == '__main__':
 
         # create training tools
         evaluator = Evaluator(sources, network.scope_name)
-        batchifier = OracleBatchifier(tokenizer, sources,tokenizer_description, status=config['status'])
+        batchifier = OracleBatchifier(tokenizer, sources,tokenizer_description,embedding=embedding, status=config['status'])
 
         for t in range(start_epoch, no_epoch):
             logger.info('Epoch {}..'.format(t + 1))

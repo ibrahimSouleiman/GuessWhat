@@ -20,6 +20,8 @@ def get_image_features(image, question, is_training, scope_name, config, dropout
 
     elif image_input_type.startswith("conv") or image_input_type.startswith("raw"):
 
+
+        print("---------------------------------- Before IF")
         # Extract feature from raw images
         if image_input_type.startswith("raw"):
 
@@ -31,16 +33,17 @@ def get_image_features(image, question, is_training, scope_name, config, dropout
                 excluded_scopes = config["cbn"].get('excluded_scope_names', [])
                 cbn = ConditionalBatchNorm(cbn_factory, excluded_scope_names=excluded_scopes,
                                            is_training=is_training)
-
+            print("---------------------------------- Before resnet_version")
             # Create ResNet
             resnet_version = config['resnet_version']
-            image_feature_maps = create_resnet(image,
+            image_feature_maps,_ = create_resnet(image,
                                                  is_training=is_training,
                                                  scope=scope_name,
                                                  cbn=cbn,
                                                  resnet_version=resnet_version,
                                                  resnet_out=config.get('resnet_out', "block4"))
 
+            print("---------------------------------- After resnet_version")
             image_feature_maps = image_feature_maps
             if config.get('normalize', False):
                 image_feature_maps = tf.nn.l2_normalize(image_feature_maps, dim=[1, 2, 3])
@@ -48,6 +51,9 @@ def get_image_features(image, question, is_training, scope_name, config, dropout
         # Extract feature from 3D-image features
         else:
             image_feature_maps = image
+        
+
+        print("-------- image_feature_maps = ",image_feature_maps)
 
         # apply attention
         image_out = get_attention(image_feature_maps, question,
@@ -57,5 +63,9 @@ def get_image_features(image, question, is_training, scope_name, config, dropout
 
     else:
         assert False, "Wrong input type for image"
+
+
+    print("---------------------------------- Finish image_out")
+
 
     return image_out

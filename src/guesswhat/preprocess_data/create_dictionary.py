@@ -16,12 +16,14 @@ from nltk.tokenize import TweetTokenizer
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('Creating dictionary..')
 
+
     parser.add_argument("-data_dir", type=str, help="Path where are the Guesswhat dataset")
     parser.add_argument("-texteType", default="Question" ,type=str, help="Path where are the Guesswhat dataset")
-
     parser.add_argument("-dict_file", type=str, default="dict.json", help="Name of the dictionary file")
     parser.add_argument("-min_occ", type=int, default=3,
                         help='Minimum number of occurences to add word to dictionary')
+
+
 
     args = parser.parse_args()
 
@@ -45,6 +47,8 @@ if __name__ == '__main__':
                 '<n/a>': 7,
                 }
 
+    
+
     if args.texteType == "Question":
         # Set default values
         for game in trainset.games:
@@ -58,6 +62,7 @@ if __name__ == '__main__':
         for game in trainset.games:
             description = game.image.description
             print("Description = {} ".format(description))
+            exit()
 
             tokens = tknzr.tokenize(description)
             for tok in tokens:

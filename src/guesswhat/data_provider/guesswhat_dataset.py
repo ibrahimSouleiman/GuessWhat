@@ -51,11 +51,6 @@ class Game:
         self.question_ids = [qa['id'] for qa in qas]
         self.questions = [qa['question'] for qa in qas]
         self.answers = [qa['answer'] for qa in qas]
-
-        self.question_ids = [qa['id'] for qa in qas]
-        self.questions = [qa['question'] for qa in qas]
-        self.answers = [qa['answer'] for qa in qas]
-
         self.status = status
 
     def show(self, img_raw_dir, display_index=False, display_mask=False):
@@ -171,14 +166,14 @@ class Dataset(AbstractDataset):
                     # print(game["id"],type(game["id"]))
                     nb_pass += 1
                     g = Game(id=game['id'],
-                        object_id=game['object_id'],
-                        objects=game['objects'],
-                        qas=game['qas'],
-                        image=game['image'],
-                        status=game['status'],
-                        which_set=which_set,
-                        image_builder=image_builder,
-                        crop_builder=crop_builder)
+                         object_id=game['object_id'],
+                         objects=game['objects'],
+                         qas=game['qas'],
+                         image=game['image'],
+                         status=game['status'],
+                         which_set=which_set,
+                         image_builder=image_builder,
+                         crop_builder=crop_builder)
 
 
                     games.append(g)
@@ -193,7 +188,7 @@ class Dataset(AbstractDataset):
 
                     
 
-                # if len(games) > 5: break
+                if len(games) > 1: break
 
         super(Dataset, self).__init__(games)
 
