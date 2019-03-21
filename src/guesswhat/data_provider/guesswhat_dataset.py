@@ -48,10 +48,8 @@ class Game:
             if o['id'] == object_id:
                 self.object = new_obj  # Keep ref on the object to find
 
-        self.question_ids = [qa['id'] for qa in qas]
-        self.questions = [qa['question'] for qa in qas]
-        self.answers = [qa['answer'] for qa in qas]
-
+        
+        
         self.question_ids = [qa['id'] for qa in qas]
         self.questions = [qa['question'] for qa in qas]
         self.answers = [qa['answer'] for qa in qas]
@@ -208,6 +206,7 @@ class OracleDataset(AbstractDataset):
         for g in old_games:
             new_games += self.split(g)
           
+        print("_______ guessDataSet | taille_question = {}".format(len(new_games)))
         #for i in range(150):
         # print(" guesswhat_dataset | Question = ",new_games[0].game.questions)
 
