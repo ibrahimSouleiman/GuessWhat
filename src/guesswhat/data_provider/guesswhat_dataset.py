@@ -190,7 +190,7 @@ class Dataset(AbstractDataset):
 
                     
 
-            #    if len(games) > 300: break
+                if len(games) > 300: break
 
         super(Dataset, self).__init__(games)
 
@@ -231,12 +231,9 @@ class OracleDataset(AbstractDataset):
             if tokens != lemme:
                 self.compteur += 1
 
-            
-
-            
-
+            ql = " ".join(lemme)
             new_game = copy.copy(game)
-            new_game.questions = [q]
+            new_game.questions = [ql]
             new_game.question_ids = [i]
             new_game.answers = [a]
             games.append(new_game)
