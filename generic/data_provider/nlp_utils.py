@@ -8,7 +8,7 @@ import glove
 from guesswhat.data_provider.guesswhat_dataset import OracleDataset
 from nltk.tokenize import TweetTokenizer
 
-
+from guesswhat.data_provider.lemmatize import lemmatize
 from pathlib import Path
 
 
@@ -51,10 +51,8 @@ class Embeddings(object):
             
             np.save("data/all_question.npy",all_questions)
 
-        
-
             
-        
+        self.lemmatize = lemmatize()
         self.tknzr = tknzr
         self.emb_dim = emb_dim
         self.model = None
@@ -88,10 +86,13 @@ class Embeddings(object):
 
             for token in tokens_word:
                 
+                t = token   
+                token = token.lower()
+                token = token.replace("'s","")
                 try:
                     vectors.append(np.asarray(self.model[token]))
                 except KeyError:
-                    print("_____________ Unknow=",self.unk)
+                    # print("_____________ Unknow=",self.unk)
                     vectors.append(np.asarray(self.model[self.unk]))
 
                 # print(self.model.wv.most_similar("dog"))
@@ -132,8 +133,9 @@ def padder(list_of_tokens, seq_length=None, padding_symbol=0, max_seq_length=0):
         # print("--- 3.1",padded_tokens[i, :len(seq)][0])
         # print(" ---- 3 seq = ",len(padded_tokens[i, :len(seq)]),len(padded_tokens[i, :len(seq)][0]))
 
-
         padded_tokens[i, :len(seq)] = seq
+
+    # print("-- NL_UTILS | Max_Seq = {}".format(max_seq_length))
 
     return padded_tokens, seq_length
 

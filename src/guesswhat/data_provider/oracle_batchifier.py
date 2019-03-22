@@ -58,6 +58,8 @@ class OracleBatchifier(AbstractBatchifier):
                 embedding_vectors = self.embedding.get_embeddings(words) # slow (copy gloves in process)
                 # print(" Oracle_batchifier | embedding_vector= {}".format(embedding_vectors))
 
+                # print("---- Embedding = ",len(embedding_vectors))
+                # print("----  =",len(embedding_vectors[0]))
 
                 batch['embedding_vector'].append(embedding_vectors)
 

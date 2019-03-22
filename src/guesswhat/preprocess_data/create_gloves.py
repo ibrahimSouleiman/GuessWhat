@@ -25,6 +25,7 @@ if __name__ == '__main__':
     parser.add_argument("-glove_out", type=str, default="glove_dict.pkl", help="Name of the output glove file")
     parser.add_argument("-year", type=int, default=2014, help="VQA dataset year (2014/2017)")
     parser.add_argument("-config", type=str,default="config/oracle/config.json",help='Config file')
+    parser.add_argument("-exp_dir", type=str, help="Directory in which experiments are stored")
 
     args = parser.parse_args()
 
@@ -66,6 +67,7 @@ if __name__ == '__main__':
         for line in f:
             vals = line.rstrip().split(' ')
             vectors[vals[0]] = [float(x) for x in vals[1:]]
+            
 
     print("Mapping glove...")
     glove_dict = {}

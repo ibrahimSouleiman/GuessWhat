@@ -5,6 +5,8 @@ import os
 
 from PIL import ImageFont, ImageDraw
 from PIL import Image as PImage
+from nltk.tokenize import TweetTokenizer
+from nltk import WordNetLemmatizer
 
 
 from generic.data_provider.dataset import AbstractDataset
@@ -188,7 +190,7 @@ class Dataset(AbstractDataset):
 
                     
 
-                if len(games) > 1: break
+            #    if len(games) > 300: break
 
         super(Dataset, self).__init__(games)
 
@@ -200,9 +202,13 @@ class OracleDataset(AbstractDataset):
     def __init__(self, dataset):
         old_games = dataset.get_data()
         new_games = []
-        for g in old_games:
+        self.compteur = 0
+        self.lemmas = WordNetLemmatizer()
+        for i,g in enumerate(old_games):
             new_games += self.split(g)
-          
+       
+
+        print(" Guess_dataset | Lemme different = {} ",format(self.compteur))
         #for i in range(150):
         # print(" guesswhat_dataset | Question = ",new_games[0].game.questions)
 
@@ -215,10 +221,20 @@ class OracleDataset(AbstractDataset):
     def split(self, game):
         games = []
         for i, q, a in zip(game.question_ids, game.questions, game.answers):
-            # print(" GuessWhat | oracleDataSet q={}".format(q))
+            # print("****** GuessWhat | oracleDataSet q={}".format(q))
             # if( i == 10):
             #     exit()
+            wpt = TweetTokenizer(preserve_case=False)
+            tokens = [ token for token in wpt.tokenize(q)]
+            lemme = [self.lemmas.lemmatize(token) for token in tokens]
+
+            if tokens != lemme:
+                self.compteur += 1
+
             
+
+            
+
             new_game = copy.copy(game)
             new_game.questions = [q]
             new_game.question_ids = [i]
