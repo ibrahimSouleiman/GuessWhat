@@ -19,6 +19,7 @@ class Embeddings(object):
         self.embedding = embedding
         self.total_words = total_words
 
+
         
         
 
@@ -34,7 +35,6 @@ class Embeddings(object):
             # print("nlp_utils | ",tokens_word)
 
             for token in tokens_word:
-                # print(self.model[token])
                 try:
                     vectors.append(np.asarray(self.model[token]))
                 except KeyError:
