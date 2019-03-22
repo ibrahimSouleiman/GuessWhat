@@ -11,7 +11,7 @@ import json
 import os
 import numpy as np
 # from gensim.models import word2vec,FastText,KeyedVectors
-from pyfasttext import FastText 
+#from pyfasttext import FastText 
 from guesswhat.data_provider.guesswhat_dataset import OracleDataset
 from nltk.tokenize import TweetTokenizer
 

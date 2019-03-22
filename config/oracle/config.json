@@ -3,12 +3,12 @@
     "question": true,
     "description": false,
     "allcategory":false,
-    "category": false,
+    "category": true,
     "spatial": false,
     "crop": false,
     "image": false
   },
-  "embedding":"fasttext",
+  "embedding":"None",
   "model": {
     "question": {
       "no_LSTM_hiddens": 512,
