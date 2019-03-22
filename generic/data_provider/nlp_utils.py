@@ -9,36 +9,90 @@ from guesswhat.data_provider.guesswhat_dataset import OracleDataset
 from nltk.tokenize import TweetTokenizer
 
 
+from pathlib import Path
+
+
+
 class Embeddings(object):
 
-    def __init__(self, file,total_words=0,emb_dim=100,embedding="fasttext"):
-        print("**************** File=",file)
-        self.data = np.load(file)
+    def __init__(self, file,total_words=0,emb_dim=100,embedding="fasttext",train=None,valid=None,test=None):
+
+        self.unk = "<unknow>"
+        all_questions = [[self.unk]]
+        tknzr = TweetTokenizer(preserve_case=False)
+
+        file_allquestion = Path("data/all_question.npy")
+        
+        print(" nlp_utls | start to create list_question [] ...")
+        if file_allquestion.is_file():
+            all_questions=np.load(file_allquestion)
+        else:
+            for game in train.games:
+
+                question = game.questions[0]
+                tokens = tknzr.tokenize(question)
+                all_questions.append(tokens)
+            print(" nlp_ulis | finish train .....")
+            for game in valid.games:
+
+                question = game.questions[0]
+                tokens = tknzr.tokenize(question)
+                all_questions.append(tokens)
+
+            print(" nlp_ulis | finish valid .....")
+
+            for game in test.games:
+
+                question = game.questions[0]
+                tokens = tknzr.tokenize(question)
+                all_questions.append(tokens)
+
+            print(" nlp_ulis | finish test .....")
+            
+            np.save("data/all_question.npy",all_questions)
+
+        
+
+            
+        
+        self.tknzr = tknzr
         self.emb_dim = emb_dim
         self.model = None
         self.embedding = embedding
         self.total_words = total_words
+        self.data = all_questions
+
+
+        self.model = FastText(size=100, window=3, min_count=1) 
+        self.model.build_vocab(sentences=self.data)
+        self.model.train(sentences=self.data, total_words=len(self.data), epochs=5)
+        
+
 
 
         
         
 
     def get_embeddings(self, tokens_word):
+        """
+        tokens_word : all word 
+
+        """
         vectors = []
 
         if self.embedding == "fasttext":
-            self.model = FastText(size=100, window=3, min_count=1) 
-            self.model.build_vocab(sentences=self.data)
-            self.model.train(sentences=self.data, total_words=len(self.data), epochs=5)
+           
             # self.model.load_model("data/Embedding/wiki-simple.vec")
             
             # print("nlp_utils | ",tokens_word)
 
             for token in tokens_word:
+                
                 try:
                     vectors.append(np.asarray(self.model[token]))
                 except KeyError:
-                    vectors.append(np.zeros((self.emb_dim,)))
+                    print("_____________ Unknow=",self.unk)
+                    vectors.append(np.asarray(self.model[self.unk]))
 
                 # print(self.model.wv.most_similar("dog"))
 
