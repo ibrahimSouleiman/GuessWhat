@@ -8,7 +8,7 @@
     "crop": false,
     "image": false
   },
-  "embedding":"None",
+  "embedding":"fasttext",
   "model": {
     "question": {
       "no_LSTM_hiddens": 512,

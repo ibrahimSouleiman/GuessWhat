@@ -134,7 +134,7 @@ if __name__ == '__main__':
     embedding = None
     if use_embedding:
         logger.info('Loading embedding..')
-        embedding = Embeddings(args.all_dictfile,total_words=tokenizer.no_words)
+        embedding = Embeddings(args.all_dictfile,total_words=tokenizer.no_words,train=trainset,valid=validset,test=testset)
     
 
 
