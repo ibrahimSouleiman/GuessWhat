@@ -8,15 +8,18 @@
     "crop": false,
     "image": false
   },
-
+  "embedding":"None",
   "model": {
     "question": {
       "no_LSTM_hiddens": 512,
-      "embedding_dim": 300
+      "embedding_dim": 300,
+      "embedding":"Word2Vec"
+
     },
     "description": {
       "no_LSTM_hiddens": 512,
-      "embedding_dim": 300
+      "embedding_dim": 300,
+      "embedding":"Word2Vec"
     },
     "allcategory": {
       "no_LSTM_hiddens": 512,
@@ -24,16 +27,35 @@
     },
     "category": {
       "n_categories": 90,
-      "embedding_dim": 512
+      "embedding_dim": 512,
+      "glove": true,
+      "embedding":"Word2Vec"
     },
     
     "MLP": {
       "num_hiddens": 512
     },
+    
+    "image":
+    {
+      "image_input": "raw",
+      "dim": [224, 224, 3],
+      "normalize": true,
 
-    "image": {
-      "image_input": "fc8",
-      "dim": [1000]
+      "resnet_version": 50,
+      "finetune" : [],
+
+      "attention" : {
+        "mode": "classic",
+        "no_attention_mlp": 256
+      },
+
+      "cbn": {
+        "use_cbn": true,
+        "cbn_embedding_size": 512,
+        "excluded_scope_names": ["*"]
+      }
+
     },
 
     "crop": {

@@ -62,7 +62,7 @@ def extract_features(
                     image_id_set[game.image.id] = 1
 
             print("+++ 6")
-            #
+        
             #         img = game.image.url.split("/")[-1]
             #         img = img + ".jpg"
             #

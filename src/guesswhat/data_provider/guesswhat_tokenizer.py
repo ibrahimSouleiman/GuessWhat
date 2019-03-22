@@ -33,17 +33,21 @@ class GWTokenizer:
     Input: String
     Output: List of tokens
     """
-    def apply(self, question, is_answer=False):
+    def apply(self, question, is_answer=False,tokent_int = True):
 
         tokens = []
         if is_answer:
             token = '<' + question.lower() + '>'
-            tokens.append(self.word2i[token])
+            if tokent_int:
+                tokens.append(self.word2i[token])
+            else:tokens.append(token)
         else:
             for token in self.wpt.tokenize(question):
                 if token not in self.word2i:
                     token = '<unk>'
-                tokens.append(self.word2i[token])
+                if tokent_int:
+                     tokens.append(self.word2i[token])
+                else:tokens.append(token)
 
         return tokens
 

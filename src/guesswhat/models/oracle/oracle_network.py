@@ -28,9 +28,18 @@ class OracleNetwork(ResnetModel):
                                             n_dim=int(config['model']['question']["embedding_dim"]),
                                             scope="word_embedding")
 
+
+
+                if config['embedding'] != "None":
+                    self._glove = tf.placeholder(tf.float32, [None, None, 100], name="embedding_vector")
+                    word_emb = tf.concat([word_emb, self._glove], axis=2)
+                
+                
                 lstm_states, _ = rnn.variable_length_LSTM(word_emb,
                                                     num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
                                                     seq_length=self.seq_length_question)
+                
+
                 embeddings.append(lstm_states)
 
             # DESCRIPTION
