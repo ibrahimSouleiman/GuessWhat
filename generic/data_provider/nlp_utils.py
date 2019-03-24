@@ -74,18 +74,17 @@ class Embeddings(object):
                 if self.description:
                     data = game.image.description
                     # print(game.questions[0])
-                    print("--- if=",data)
-                    print("---- else = ",game.questions[0])
+                    # print("--- if=",data)
+                    # print("---- else = ",game.questions[0])
                      
                 else:
-                    data = game.questions[0]
+                    data = game.questions
                      
 
               
                 
                 tokens = tknzr.tokenize(data)
-                print(data)
-                print(tokens)
+                
                 all_lemme = [self.word2i[token][1] for token in tokens]
 
                 all_pos = [self.word2i[token][2][0][1] for token in tokens]
