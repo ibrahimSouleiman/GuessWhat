@@ -85,9 +85,27 @@ class Embeddings(object):
                 
                 tokens = tknzr.tokenize(data)
                 
-                all_lemme = [self.word2i[token][1] for token in tokens]
+                # all_lemme = [self.word2i[token][1] for token in tokens]
+                all_lemme = []
+                all_pos = []
+                for token in tokens:
+                    try:
+                        lemme= self.word2i[token][1]
+                    except KeyError:
+                        lemme = self.word2i[self.unk][1]
+                   
+                    all_lemme.append(lemme)
+                   
+                    try:
+                        pos= self.word2i[token][2][0][1] 
+                    except KeyError:
+                        pos = self.word2i[self.unk][2][0][1] 
+                    
+                    all_pos.append(pos)
 
-                all_pos = [self.word2i[token][2][0][1] for token in tokens]
+
+
+                # all_pos = [self.word2i[token][2][0][1] for token in tokens]
 
 
                 all_questions.append(tokens)
