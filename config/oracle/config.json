@@ -6,7 +6,7 @@
     "category": true,
     "spatial": true,
     "crop": false,
-    "image": false
+    "image": true
   },
   "embedding":"fasttext",
   "lemme":true,
