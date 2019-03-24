@@ -43,7 +43,9 @@ if __name__ == '__main__':
     parser.add_argument("-data_dir", type=str, help="Directory with data")
     parser.add_argument("-exp_dir", type=str, help="Directory in which experiments are stored")
     parser.add_argument("-config", type=str, help='Config file')
-    parser.add_argument("-dict_file", type=str, default="dict.json", help="Dictionary file name")
+    parser.add_argument("-dict_file_question", type=str, default="dict.json", help="Dictionary file name")
+    parser.add_argument("-dict_file_description", type=str, default="dict.json", help="Dictionary file name")
+
     parser.add_argument("-all_dictfile", type=str, default="data/list_allquestion1.npy", help="Dictionary file name")
     parser.add_argument("-img_dir", type=str, help='Directory with images')
     parser.add_argument("-crop_dir", type=str, help='Directory with images')
@@ -91,11 +93,11 @@ if __name__ == '__main__':
 
     # Load dictionary
     logger.info('Loading dictionary Question..')
-    tokenizer = GWTokenizer(os.path.join(args.data_dir, args.dict_file))
+    tokenizer = GWTokenizer(os.path.join(args.data_dir, args.dict_file_question))
 
     # Load dictionary
     logger.info('Loading dictionary Description..')
-    tokenizer_description = GWTokenizer(os.path.join(args.data_dir, "dictDescription.json"))
+    tokenizer_description = GWTokenizer(os.path.join(args.data_dir,args.dict_file_description),question=False)
 
 
 
@@ -135,10 +137,11 @@ if __name__ == '__main__':
     embedding = None
     if use_embedding:
         logger.info('Loading embedding..')
-        embedding = Embeddings(args.all_dictfile,total_words=tokenizer.no_words,train=trainset,valid=validset,test=testset)
+        embedding = Embeddings(args.all_dictfile,total_words=tokenizer.no_words,train=trainset,valid=validset,test=testset,dictionary_file_question=os.path.join(args.data_dir, args.dict_file_question),dictionary_file_description=os.path.join(args.data_dir, args.dict_file_description),description=config["inputs"]["description"],lemme=config["lemme"],pos=config["pos"])
     
 
-    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True,)) as sess:
+
+    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True,)) as sess:     
 
         sources = network.get_sources(sess)
         logger.info("Sources: " + ', '.join(sources))
@@ -146,30 +149,30 @@ if __name__ == '__main__':
         sess.run(tf.global_variables_initializer())
         if use_resnet:
             resnet_saver.restore(sess, os.path.join(args.data_dir, 'resnet_v1_{}.ckpt'.format(resnet_version)))
-
         start_epoch = load_checkpoint(sess, saver, args, save_path)
         best_val_err = 0
         best_train_err = None
-
         # create training tools
         evaluator = Evaluator(sources, network.scope_name)
+
         batchifier = OracleBatchifier(tokenizer, sources,tokenizer_description,embedding=embedding, status=config['status'])
+            
 
         for t in range(start_epoch, no_epoch):
             logger.info('Epoch {}..'.format(t + 1))
             print('Epoch {}..'.format(t + 1))
 
-            # print(" train_oracle | Iterator ...")
+            print(" train_oracle | Iterator ...")
             train_iterator = Iterator(trainset,
                                       batch_size=batch_size, pool=cpu_pool,
                                       batchifier=batchifier,
                                       shuffle=True)
 
-            # print(" train_oracle | evaluator ...")
+            print(" train_oracle | evaluator ...")
 
             train_loss, train_accuracy = evaluator.process(sess, train_iterator, outputs=outputs + [optimizer])
 
-            # print(" train_oracle | Iterator ...")
+            print(" train_oracle | Iterator ...")
 
             valid_iterator = Iterator(validset, pool=cpu_pool,
                                       batch_size=batch_size*2,

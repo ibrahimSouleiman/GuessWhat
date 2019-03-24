@@ -23,17 +23,16 @@ class OracleNetwork(ResnetModel):
                 self._question = tf.placeholder(tf.int32, [self.batch_size, None], name='question')
                 self.seq_length_question = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question')
 
-                word_emb = utils.get_embedding(self._question,
+                word_emb_init = utils.get_embedding(self._question,
                                             n_words=num_words_question,
-                                            n_dim=int(config['model']['question']["embedding_dim"]),
+                                            n_dim=int(300),
                                             scope="word_embedding")
 
 
 
                 if config['embedding'] != "None":
-                
-                    self._glove = tf.placeholder(tf.float32, [None, None, 100], name="embedding_vector")
-                    word_emb = tf.concat([word_emb, self._glove], axis=2)
+                    self._glove = tf.placeholder(tf.float32, [None, None,  int(config['model']['question']["embedding_dim_pos"])], name="embedding_vector")
+                    word_emb = tf.concat([word_emb_init, self._glove], axis=2)
                 else:
                     print("None -------------------------- None")
 		  
@@ -45,24 +44,60 @@ class OracleNetwork(ResnetModel):
 
                 embeddings.append(lstm_states)
 
+                # QUESTION-Pos
+
+                if config['model']['question'] ['pos']:
+                    print("----------------------------------------")
+                    print("**** Oracle_network |  inpurt = question-pos ")
+
+                    self._question_pos = tf.placeholder(tf.int32, [self.batch_size, None], name='question_pos')
+                    self.seq_length_pos = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_pos')
+
+                    word_emb = utils.get_embedding(self._question_pos,
+                                                n_words=num_words_question,
+                                                n_dim=300,
+                                                scope="word_embedding_pos")
+
+                    if config['embedding'] != "None":
+                        self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['question']["embedding_dim_pos"])], name="embedding_vector_pos")
+                        word_emb = tf.concat([word_emb, self._glove], axis=2)
+                    else:
+                        print("None ****************")
+                    
+                    lstm_states, _ = rnn.variable_length_LSTM(word_emb,
+                                                        num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
+                                                        seq_length=self.seq_length_pos,scope="lstm2")
+                    
+
+                    embeddings.append(lstm_states)
+
             # DESCRIPTION
             if config['inputs']['description']:
                 print("****  Oracle_network |  inpurt = Description ")
 
-                self._is_training = tf.placeholder(tf.bool, name="is_training")
                 self._description = tf.placeholder(tf.int32, [self.batch_size, None], name='description')
                 self.seq_length_description = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_description')
 
                 word_emb = utils.get_embedding(self._description,
                                             n_words=num_words_description,
-                                            n_dim=int(config['model']['description']["embedding_dim"]),
+                                            n_dim=100,
                                             scope="word_embedding_description")
+                if config['embedding'] != "None":
+                    self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['description']["embedding_dim_pos"])], name="embedding_vector_description")
+                    word_emb = tf.concat([word_emb, self._glove], axis=2)
+                else:
+                    print("None ****************")
 
-                #print(" SeqDescription = ",self.seq_length_description)
+                
+
+                print(" SeqDescription = ",self.seq_length_description)
                 lstm_states_description, _ = rnn.variable_length_LSTM(word_emb,
                                                     num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
-                                                    seq_length=self.seq_length_description,scope="lstm2")
-                embeddings.append(lstm_states_description)
+                                                    seq_length=self.seq_length_description,scope="lstm3")
+
+
+                
+                embeddings.append(lstm_states_description )
 
 
                 

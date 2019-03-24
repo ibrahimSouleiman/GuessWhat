@@ -12,6 +12,7 @@ def load_config(config_file, exp_dir):
         config = json.loads(config_str.decode('utf-8'))
 
     save_path = '{}/{{}}'.format(os.path.join(exp_dir, exp_identifier))
+    print("save_path = ",save_path)
     if not os.path.isdir(save_path.format('')):
         os.makedirs(save_path.format(''))
 

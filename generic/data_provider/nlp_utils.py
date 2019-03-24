@@ -10,48 +10,129 @@ from nltk.tokenize import TweetTokenizer
 
 #from guesswhat.data_provider.lemmatize import lemmatize
 from pathlib import Path
-import time
 
+import time
 
 class Embeddings(object):
 
-    def __init__(self, file,total_words=0,emb_dim=100,embedding="fasttext",train=None,valid=None,test=None):
+    def __init__(self, file,total_words=0,emb_dim=100,emb_window=3,embedding="fasttext",train=None,valid=None,test=None,dictionary_file_question="dict.json",dictionary_file_description="dict_Description.json",lemme=False,pos=False,description=False):
 
-        self.unk = "<unknow>"
-        all_questions = [[self.unk]]
+        self.unk = "<unk>"
+        self.lemme = lemme
+        self.pos = pos
+        self.description=description
+
+        self.total_words = total_words
+        self.emb_dim = emb_dim
+        self.emb_window = emb_window
+        self.embedding = embedding
+        self.train = train
+        self.valid = valid
+        self.test = test
+        
+            
+        self.dictionary_file_question = dictionary_file_question
+        self.dictionary_file_description = dictionary_file_description
+      
+        print(" nlp_utls | start to create list_question [] ...")
+
+        self.model_word,self.model_pos = self.build("all_question.npy","all_lemmes.npy","all_pos.npy",dictionary_file=self.dictionary_file_question)
+        if self.description:
+             self.model_wordd,self.model_posd = self.build("all_description.npy","all_dlemme.npy","all_dpos.npy",dictionary_file=self.dictionary_file_description)
+        
+        
+     
+
+    def build(self,file_question,file_lemme,file_pos,dictionary_file):
+
+        # file_allquestion = Path("data/all_question.npy")
+        # file_allLemme = Path("data/all_lemmes.npy")
+        # file_allpos = Path("data/all_pos.npy")
         tknzr = TweetTokenizer(preserve_case=False)
 
-        file_allquestion = Path("data/all_question.npy")
-        
-        print(" nlp_utls | start to create list_question [] ...")
-        if file_allquestion.is_file():
-            all_questions=np.load(file_allquestion)
+        all_questions = [[self.unk]]
+        all_lemmes = [[self.unk]]
+        all_postags = [[self.unk]]
+
+    
+
+        file_allquestion = Path("data/"+file_question)
+        file_allLemme = Path("data/"+file_lemme)
+        file_allpos = Path("data/"+file_pos)
+
+    
+        if file_allquestion.is_file() & file_allLemme.is_file() & file_allpos.is_file():
+             all_questions=np.load(file_allquestion)
+             all_lemmes=np.load(file_allLemme)
+             all_postags=np.load(file_allpos)
+       
         else:
-            for game in train.games:
+            with open(dictionary_file, 'r') as f:
+                  self.word2i = json.load(f)['word2i']
+            
+            for game in self.train.games:
+                if self.description:
+                    data = game.image.description
+                    # print(game.questions[0])
+                    print("--- if=",data)
+                    print("---- else = ",game.questions[0])
+                     
+                else:
+                    data = game.questions[0]
+                     
 
-                question = game.questions[0]
-                tokens = tknzr.tokenize(question)
+              
+                
+                tokens = tknzr.tokenize(data)
+                print(data)
+                print(tokens)
+                all_lemme = [self.word2i[token][1] for token in tokens]
+
+                all_pos = [self.word2i[token][2][0][1] for token in tokens]
+
+
                 all_questions.append(tokens)
-            print(" nlp_ulis | finish train .....")
-            for game in valid.games:
+                all_lemmes.append(all_lemme)
+                all_postags.append(all_pos)
 
-                question = game.questions[0]
-                tokens = tknzr.tokenize(question)
-                all_questions.append(tokens)
 
-            print(" nlp_ulis | finish valid .....")
+            # print(" nlp_ulis | finish train .....")
+            # for game in self.valid.games:
 
-            for game in test.games:
+            #     question = game.questions[0]
+            #     tokens = tknzr.tokenize(question)
+                
+            #     all_lemme = [self.word2i[token][1] for token in tokens]
+            #     all_pos = [self.word2i[token][2] for token in tokens]
 
-                question = game.questions[0]
-                tokens = tknzr.tokenize(question)
-                all_questions.append(tokens)
+
+            #     all_questions.append(tokens)
+            #     all_lemmes.append(all_lemme)
+            #     all_postags.append(all_lemme)
+
+
+
+            # print(" nlp_ulis | finish valid .....")
+
+            # for game in self.test.games:
+
+            #     question = game.questions[0]
+            #     tokens = tknzr.tokenize(question)
+                
+            #     all_lemme = [self.word2i[token][1] for token in tokens]
+            #     all_pos = [self.word2i[token][2] for token in tokens]
+
+            #     all_questions.append(tokens)
+            #     all_lemmes.append(all_lemme)
+            #     all_postags.append(all_lemme)
 
             print(" nlp_ulis | finish test .....")
             
-            np.save("data/all_question.npy",all_questions)
+            np.save("data/"+file_question,all_questions)
+            np.save("data/"+file_lemme,all_lemmes)
+            np.save("data/"+file_pos,all_postags)
 
-            
+           
         #self.lemmatize = lemmatize()
         self.tknzr = tknzr
         self.emb_dim = emb_dim
@@ -59,52 +140,93 @@ class Embeddings(object):
         self.embedding = embedding
         self.total_words = total_words
         self.data = all_questions
+        self.lemmatize = lemmatize()
+        self.tknzr = tknzr
+        self.emb_dim = self.emb_dim
+
+        self.model_word = None
+        self.embedding = self.embedding
+        self.total_words = self.total_words
 
 
-        self.model = FastText(size=100, window=3, min_count=1) 
-        self.model.build_vocab(sentences=self.data)
-        self.model.train(sentences=self.data, total_words=len(self.data), epochs=5)
         
+        self.data = all_questions
+
+        if self.lemme:
+            print("-----------------------****** -- Lemme true nlp_utilis",all_lemmes[1])
+            self.data = all_lemmes
 
         
         
-        
+        self.model_word = FastText(size=self.emb_dim, window=3, min_count=0) 
+        self.model_word.build_vocab(sentences=self.data)
+        self.model_word.train(sentences=self.data, total_words=len(self.data), epochs=5)
 
-    def get_embeddings(self, tokens_word):
+        self.model_pos = None
+        if self.pos:
+            self.model_pos = FastText(size=self.emb_dim, window=3, min_count=0) 
+            self.model_pos.build_vocab(sentences=all_postags)
+            self.model_pos.train(sentences=all_postags, total_words=len(all_postags), epochs=5)
+        
+        # print(all_lemmes)
+        # print("..... ",all_lemmes[0])
+        # self.model_word[self.unk]
+        
+        return self.model_word,self.model_pos
+
+            
+       
+
+
+
+
+    def get_embeddings(self, tokens_word,lemme=False,pos=False,description=False):
         """
         tokens_word : all word 
 
         """
         vectors = []
+        
+        pos_vectors = []
+        
+
 
         if self.embedding == "fasttext":
            
-            # self.model.load_model("data/Embedding/wiki-simple.vec")
-            
-            # print("nlp_utils | ",tokens_word)
-
             for token in tokens_word:
                 
-                t = token   
-                token = token.lower()
-                token = token.replace("'s","")
-                try:
-                    vectors.append(np.asarray(self.model[token]))
-                except KeyError:
-                    # print("_____________ Unknow=",self.unk)
-                    vectors.append(np.asarray(self.model[self.unk]))
+                if description:
 
-                # print(self.model.wv.most_similar("dog"))
+                    token = token.replace("'s","")
+                    try:
+                        vectors.append(np.asarray(self.model_wordd[token]))
+                    except KeyError:
+                        # print("_____________ 1Unknow=",self.unk)
+                        vectors.append(np.asarray(self.model_wordd[self.unk]))
+                    
+                    if self.pos:
+                        try:
+                            pos_vectors.append(np.asarray(self.model_posd[token]))
+                        except KeyError:
+                            # print("_____________ 2Unknow=",self.unk)
+                            pos_vectors.append(np.asarray(self.model_posd[self.unk]))
+                else:
+                    token = token.replace("'s","")
+                    try:
+                        vectors.append(np.asarray(self.model_word[token]))
+                    except KeyError:
+                        # print("_____________ 3Unknow=",self.unk)
+                        vectors.append(np.asarray(self.model_word[self.unk]))
+                    
+                    if self.pos:
+                        try:
+                            pos_vectors.append(np.asarray(self.model_pos[token]))
+                        except KeyError:
+                            # print("_____________ 4Unknow=",self.unk)
+                            pos_vectors.append(np.asarray(self.model_pos[self.unk]))
 
-        # for token in tokens_word:
-        #     token = token.lower().replace("\'s", "")    
-        #     if token in self.tokens.append(token):
-        #         vectors.append(np.array(self.model[token]))
-        #     else:
-        #         vectors.append(np.zeros((self.emb_dim)))
 
-
-        return vectors
+        return vectors,pos_vectors
 
 def padder(list_of_tokens, seq_length=None, padding_symbol=0, max_seq_length=0):
 
@@ -131,6 +253,7 @@ def padder(list_of_tokens, seq_length=None, padding_symbol=0, max_seq_length=0):
         # print("---- 2 seq=",len(seq),len(seq[0]))
         # print("--- 3.1",padded_tokens[i, :len(seq)][0])
         # print(" ---- 3 seq = ",len(padded_tokens[i, :len(seq)]),len(padded_tokens[i, :len(seq)][0]))
+
 
         padded_tokens[i, :len(seq)] = seq
 
