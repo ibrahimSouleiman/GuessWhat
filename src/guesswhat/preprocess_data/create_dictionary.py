@@ -78,7 +78,6 @@ if __name__ == '__main__':
         for game in trainset.games:
             description = game.image.description
             tokens = tknzr.tokenize(description)
-            print(tokens)
             for tok in tokens:
                 word2occ[tok] += 1
 

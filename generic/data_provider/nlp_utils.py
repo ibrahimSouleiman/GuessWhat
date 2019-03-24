@@ -8,7 +8,6 @@ import glove
 from guesswhat.data_provider.guesswhat_dataset import OracleDataset
 from nltk.tokenize import TweetTokenizer
 
-from guesswhat.data_provider.lemmatize import lemmatize
 from pathlib import Path
 
 import time
@@ -88,10 +87,14 @@ class Embeddings(object):
                 # all_lemme = [self.word2i[token][1] for token in tokens]
                 all_lemme = []
                 all_pos = []
+                nb_erreur_lemme = 0
+                nb_erreur_pos = 0
+
                 for token in tokens:
                     try:
                         lemme= self.word2i[token][1]
                     except KeyError:
+                        nb_erreur_lemme += 1
                         lemme = self.word2i[self.unk][1]
                    
                     all_lemme.append(lemme)
@@ -99,6 +102,7 @@ class Embeddings(object):
                     try:
                         pos= self.word2i[token][2][0][1] 
                     except KeyError:
+                        nb_erreur_pos += 1
                         pos = self.word2i[self.unk][2][0][1] 
                     
                     all_pos.append(pos)
@@ -150,7 +154,6 @@ class Embeddings(object):
             np.save("data/"+file_pos,all_postags)
 
 
-            self.lemmatize = lemmatize()
         self.tknzr = tknzr
         self.emb_dim = self.emb_dim
 

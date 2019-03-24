@@ -23,7 +23,7 @@ class OracleNetwork(ResnetModel):
                 self._question = tf.placeholder(tf.int32, [self.batch_size, None], name='question')
                 self.seq_length_question = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question')
 
-                word_emb_init = utils.get_embedding(self._question,
+                word_emb = utils.get_embedding(self._question,
                                             n_words=num_words_question,
                                             n_dim=int(300),
                                             scope="word_embedding")
@@ -32,7 +32,7 @@ class OracleNetwork(ResnetModel):
 
                 if config['embedding'] != "None":
                     self._glove = tf.placeholder(tf.float32, [None, None,  int(config['model']['question']["embedding_dim_pos"])], name="embedding_vector")
-                    word_emb = tf.concat([word_emb_init, self._glove], axis=2)
+                    word_emb = tf.concat([word_emb, self._glove], axis=2)
                 else:
                     print("None ****************")
                 
