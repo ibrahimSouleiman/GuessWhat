@@ -9,7 +9,7 @@
     "image": false
   },
   "embedding":"fasttext",
-  "lemme":true,
+  "lemme":false,
   "pos":false,
   "model": {
     "question": {
@@ -17,14 +17,14 @@
       "embedding_dim": 100,
       "embedding_dim_pos":100,
       "embedding_window":3,
-      "pos":true
+      "pos":false
     },
     "description": {
       "no_LSTM_hiddens": 512,
       "embedding_dim": 300,
       "embedding_dim_pos":100,
       "embedding_window":3,
-      "pos":true
+      "pos":false
     },
     "allcategory": {
       "no_LSTM_hiddens": 512,
