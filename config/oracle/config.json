@@ -9,7 +9,7 @@
     "image": false
   },
   "embedding":"fasttext",
-  "lemme":false,
+  "lemme":true,
   "pos":false,
   "model": {
     "question": {
