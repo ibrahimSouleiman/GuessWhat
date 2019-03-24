@@ -78,7 +78,7 @@ class Embeddings(object):
                     # print("---- else = ",game.questions[0])
                      
                 else:
-                    data = game.questions
+                    data = game.questions[0]
                      
 
               
