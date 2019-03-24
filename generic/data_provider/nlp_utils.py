@@ -10,7 +10,7 @@ from nltk.tokenize import TweetTokenizer
 
 #from guesswhat.data_provider.lemmatize import lemmatize
 from pathlib import Path
-
+import time
 
 
 class Embeddings(object):
@@ -66,8 +66,7 @@ class Embeddings(object):
         self.model.train(sentences=self.data, total_words=len(self.data), epochs=5)
         
 
-
-
+        
         
         
 

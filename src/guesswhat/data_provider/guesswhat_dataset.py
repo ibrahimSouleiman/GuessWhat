@@ -189,7 +189,10 @@ class Dataset(AbstractDataset):
                 # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass))
 
                     
-            #    if len(games) > 1: break
+
+                #if len(games) > 5000: break
+
+
         super(Dataset, self).__init__(games)
 
 
@@ -229,12 +232,9 @@ class OracleDataset(AbstractDataset):
             if tokens != lemme:
                 self.compteur += 1
 
-            
-
-            
-
+            ql = " ".join(lemme)
             new_game = copy.copy(game)
-            new_game.questions = [q]
+            new_game.questions = [ql]
             new_game.question_ids = [i]
             new_game.answers = [a]
             games.append(new_game)
@@ -244,8 +244,7 @@ class OracleDataset(AbstractDataset):
 
 
 class CropDataset(AbstractDataset):
-    """
-    Each game contains no question/answers but a new object
+    """    Each game contains no question/answers but a new object
     """
     def __init__(self, dataset):
         old_games = dataset.get_data()

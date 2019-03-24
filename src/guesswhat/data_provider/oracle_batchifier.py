@@ -6,6 +6,7 @@ from generic.data_provider.batchifier import AbstractBatchifier
 
 from generic.data_provider.image_preprocessors import get_spatial_feat, resize_image
 from generic.data_provider.nlp_utils import padder,padder_3d
+import time
 
 answer_dict = \
     {  'Yes': np.array([1, 0, 0], dtype=np.int32),
@@ -31,7 +32,7 @@ class OracleBatchifier(AbstractBatchifier):
 
     def apply(self, games):
         sources = self.sources
-        
+        t1 = time.time()
 
 
         batch = collections.defaultdict(list)
@@ -132,7 +133,11 @@ class OracleBatchifier(AbstractBatchifier):
             # complete par padding en prenons la taille maximal
             batch['description'], batch['seq_length_description'] = padder_3d(batch['description'])
 
-        print("finish oracle_bachifier ....")
+        t2 = time.time()
+        
+        total = t2 - t1
+
+        # print("finish oracle_bachifier .... time=",total)
         return batch
 
 

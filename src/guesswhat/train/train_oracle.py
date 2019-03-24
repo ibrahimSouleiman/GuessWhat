@@ -49,9 +49,9 @@ if __name__ == '__main__':
     parser.add_argument("-crop_dir", type=str, help='Directory with images')
     parser.add_argument("-load_checkpoint", type=str, help="Load model parameters from specified checkpoint")
     parser.add_argument("-continue_exp", type=lambda x: bool(strtobool(x)), default="False", help="Continue previously started experiment?")
-    parser.add_argument("-gpu_ratio", type=float, default=0.30, help="How many GPU ram is required? (ratio)")
+    parser.add_argument("-gpu_ratio", type=float, default=0.95, help="How many GPU ram is required? (ratio)")
 
-    parser.add_argument("-no_thread", type=int, default=6, help="No thread to load batch")
+    parser.add_argument("-no_thread", type=int, default=10, help="No thread to load batch")
 
 
 
@@ -138,8 +138,7 @@ if __name__ == '__main__':
         embedding = Embeddings(args.all_dictfile,total_words=tokenizer.no_words,train=trainset,valid=validset,test=testset)
     
 
-
-    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True,device_count = {'GPU': 0})) as sess:
+    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True,)) as sess:
 
         sources = network.get_sources(sess)
         logger.info("Sources: " + ', '.join(sources))

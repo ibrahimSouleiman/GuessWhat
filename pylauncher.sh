@@ -8,6 +8,7 @@ if [[ $# -lt 2 ]]; then
     exit 1
 fi
 
+export PYTHONPATH=src:${PYTHONPATH}
 cuda_path="/usr/local/cuda-8.0"
 
 while [[ $1 == -* ]]; do
