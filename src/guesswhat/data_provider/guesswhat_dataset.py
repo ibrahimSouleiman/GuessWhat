@@ -2,6 +2,8 @@ import gzip
 import json
 import copy
 import os
+import nltk
+import time
 
 from PIL import ImageFont, ImageDraw
 from PIL import Image as PImage
@@ -21,9 +23,11 @@ except ImportError:
     pass
 
 
+
+
 class Game:
 
-    def __init__(self, id, object_id, image, objects, qas , status, which_set, image_builder, crop_builder):
+    def __init__(self, id, object_id, image, objects, qas , status, which_set, image_builder, crop_builder,lemmatizer):
         self.dialogue_id = id
         self.object_id = object_id
         self.image = Image(id=image["id"],
@@ -33,6 +37,9 @@ class Game:
                            description=image["description"],
                            which_set=which_set,
                            image_builder=image_builder)
+
+
+
         self.objects = []
         for o in objects:
 
@@ -51,8 +58,20 @@ class Game:
                 self.object = new_obj  # Keep ref on the object to find
 
         self.question_ids = [qa['id'] for qa in qas]
+        
         self.questions = [qa['question'] for qa in qas]
+
+       
+        # wpt = TweetTokenizer(preserve_case=False)
+        # self.question_words = []
+
+        # for question in self.questions:
+        #     tokens = [ token for token in wpt.tokenize(question)]
+        #     words = [Word(token,True,True,lemmatizer=lemmatizer) for token in tokens]
+        #     self.question_words.append(words)
+        
         self.answers = [qa['answer'] for qa in qas]
+
         self.status = status
 
     def show(self, img_raw_dir, display_index=False, display_mask=False):
@@ -69,6 +88,42 @@ class Game:
 
             img.show()
 
+
+
+class Word:
+    """
+    classe qui contient pour chaque mot , son lemme sa parti de discourt
+
+    
+    """
+
+    def __init__(self,word,lemme=False,pos=False,lemmatizer=None):
+
+        self.word = word
+        self.lemme = ""
+        self.pos = ""
+        self.lemmetizer = lemmatizer
+        if self.lemmetizer != None:
+        
+            if lemme :
+                self.lemme = self.lemmetizer.lemmatize(word)
+            
+        if pos:
+
+            self.pos = nltk.pos_tag([word])
+
+    def get_word(self):
+        return self.word
+
+    def get_lemme(self):
+        return self.lemme
+    
+    def get_pos(self):
+        return self.pos
+
+    def get_all(self):
+        return self.word,self.lemme,self.pos
+    
 
 
 
@@ -149,7 +204,7 @@ class Object:
 class Dataset(AbstractDataset):
     """Loads the dataset."""
     def __init__(self, folder, which_set, image_builder=None, crop_builder=None):
-        file = '{}/guesswhat_{}2014.jsonl.gz'.format(folder,which_set)
+        filegues = '{}/guesswhat_{}2014.jsonl.gz'.format(folder,which_set)
         file_description = '{}/captions_{}2014.json'.format(folder, which_set)
 
         games = []
@@ -157,40 +212,49 @@ class Dataset(AbstractDataset):
         nb_erreur = 0
 
         self.set = which_set
+        self.lemmas = WordNetLemmatizer()
 
-        with gzip.open(file) as f:
-            for line in f:
+        t1 = time.time()
+        with gzip.open(filegues) as f:
+            for i,line in enumerate(f):
                 line = line.decode("utf-8")
                 game = json.loads(line.strip('\n'))
-                try : 
+                # try : 
                     # print(game["image"])
                     # print("Dans try")
                     # print(game["id"],type(game["id"]))
-                    nb_pass += 1
-                    g = Game(id=game['id'],
-                         object_id=game['object_id'],
-                         objects=game['objects'],
-                         qas=game['qas'],
-                         image=game['image'],
-                         status=game['status'],
-                         which_set=which_set,
-                         image_builder=image_builder,
-                         crop_builder=crop_builder)
+                nb_pass += 1
+                g = Game(id=game['id'],
+                        object_id=game['object_id'],
+                        objects=game['objects'],
+                        qas=game['qas'],
+                        image=game['image'],
+                        status=game['status'],
+                        which_set=which_set,
+                        image_builder=image_builder,
+                        crop_builder=crop_builder,
+                        lemmatizer = self.lemmas
+                        )
 
 
-                    games.append(g)
+                games.append(g)
 
 
-                    # exit()
-                except TypeError:
-                    print("error to create dataset")
-                    nb_erreur += 1
+                #     # exit()
+                # except TypeError:
+                #     print("error to create dataset")
+                #     nb_erreur += 1
 
                 # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass))
 
-                    
+               
+                if len(games) > 100: break
 
-                if len(games) > 300: break
+        t2 = time.time()
+        total = t2 - t1
+
+        # print("Total = ",total)
+        # exit()
 
         super(Dataset, self).__init__(games)
 
@@ -203,7 +267,7 @@ class OracleDataset(AbstractDataset):
         old_games = dataset.get_data()
         new_games = []
         self.compteur = 0
-        self.lemmas = WordNetLemmatizer()
+        
         for i,g in enumerate(old_games):
             new_games += self.split(g)
        
@@ -216,6 +280,7 @@ class OracleDataset(AbstractDataset):
 
     @classmethod
     def load(cls, folder, which_set, image_builder=None, crop_builder=None):
+
         return cls(Dataset(folder, which_set, image_builder, crop_builder))
 
     def split(self, game):
@@ -224,16 +289,12 @@ class OracleDataset(AbstractDataset):
             # print("****** GuessWhat | oracleDataSet q={}".format(q))
             # if( i == 10):
             #     exit()
-            wpt = TweetTokenizer(preserve_case=False)
-            tokens = [ token for token in wpt.tokenize(q)]
-            lemme = [self.lemmas.lemmatize(token) for token in tokens]
-
-            if tokens != lemme:
-                self.compteur += 1
-
-            ql = " ".join(lemme)
+            # wpt = TweetTokenizer(preserve_case=False)
+            # tokens = [ token for token in wpt.tokenize(q)]
+            # lemme = [self.lemmas.lemmatize(token) for token in tokens]
+            
             new_game = copy.copy(game)
-            new_game.questions = [ql]
+            new_game.questions = [q]
             new_game.question_ids = [i]
             new_game.answers = [a]
             games.append(new_game)

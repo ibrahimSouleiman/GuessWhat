@@ -3,30 +3,34 @@ import json
 
 class GWTokenizer:
     """ """
-    def __init__(self, dictionary_file):
+    def __init__(self, dictionary_file,question=True):
         with open(dictionary_file, 'r') as f:
             self.word2i = json.load(f)['word2i']
-          
+    
         self.wpt = TweetTokenizer(preserve_case=False)
 
         if "<stop_dialogue>" not in self.word2i:
-            self.word2i["<stop_dialogue>"] = len(self.word2i)
+            self.word2i["<stop_dialogue>"] = [len(self.word2i)," "," "]
 
         self.i2word = {}
         for (k, v) in self.word2i.items():
-            self.i2word[v] = k
+            # print(k,v)
+            self.i2word[v[0]] = k
 
 
         # Retrieve key values
         self.no_words = len(self.word2i)
-        self.start_token = self.word2i["<start>"]
-        self.stop_token = self.word2i["?"]
-        self.stop_dialogue = self.word2i["<stop_dialogue>"]
-        self.padding_token = self.word2i["<padding>"]
+  
+        
+        if question:
+              self.stop_token = self.word2i["?"][0]
 
-        self.yes_token = self.word2i["<yes>"]
-        self.no_token = self.word2i["<no>"]
-        self.non_applicable_token = self.word2i["<n/a>"]
+        self.stop_dialogue = self.word2i["<stop_dialogue>"][0]
+        self.padding_token = self.word2i["<padding>"][0]
+        
+        self.yes_token = self.word2i["<yes>"][0]
+        self.no_token = self.word2i["<no>"][0]
+        self.non_applicable_token = self.word2i["<n/a>"][0]
         self.answers = [self.yes_token, self.no_token, self.non_applicable_token]
 
     """
@@ -39,14 +43,14 @@ class GWTokenizer:
         if is_answer:
             token = '<' + question.lower() + '>'
             if tokent_int:
-                tokens.append(self.word2i[token])
+                tokens.append(self.word2i[token][0])
             else:tokens.append(token)
         else:
             for token in self.wpt.tokenize(question):
                 if token not in self.word2i:
                     token = '<unk>'
                 if tokent_int:
-                     tokens.append(self.word2i[token])
+                     tokens.append(self.word2i[token][0])
                 else:tokens.append(token)
 
         return tokens
