@@ -60,15 +60,6 @@ class Game:
         self.question_ids = [qa['id'] for qa in qas]
         
         self.questions = [qa['question'] for qa in qas]
-
-       
-        # wpt = TweetTokenizer(preserve_case=False)
-        # self.question_words = []
-
-        # for question in self.questions:
-        #     tokens = [ token for token in wpt.tokenize(question)]
-        #     words = [Word(token,True,True,lemmatizer=lemmatizer) for token in tokens]
-        #     self.question_words.append(words)
         
         self.answers = [qa['answer'] for qa in qas]
 
@@ -238,17 +229,9 @@ class Dataset(AbstractDataset):
 
 
                 games.append(g)
-
-
-                #     # exit()
-                # except TypeError:
-                #     print("error to create dataset")
-                #     nb_erreur += 1
-
-                # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass))
-
-               
-                if len(games) > 5000: break
+                
+                if len(games) > 5: 
+                    break
 
         t2 = time.time()
         total = t2 - t1

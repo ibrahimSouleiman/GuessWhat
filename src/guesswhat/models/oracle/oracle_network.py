@@ -7,7 +7,7 @@ from generic.tf_factory.image_factory import get_image_features
 
 class OracleNetwork(ResnetModel):
 
-    def __init__(self, config, num_words_question ,num_words_description,  device='', reuse=False):
+    def __init__(self, config, num_words_question ,num_words_description=None,  device='', reuse=False):
         ResnetModel.__init__(self, "oracle", device=device)
 
         with tf.variable_scope(self.scope_name, reuse=reuse) as scope:
@@ -16,22 +16,18 @@ class OracleNetwork(ResnetModel):
 
             # QUESTION
             if config['inputs']['question']:
-                print("----------------------------------------")
-                print("**** Oracle_network |  inpurt = question ")
-
+     
                 self._is_training = tf.placeholder(tf.bool, name="is_training")
                 self._question = tf.placeholder(tf.int32, [self.batch_size, None], name='question')
                 self.seq_length_question = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question')
 
                 word_emb = utils.get_embedding(self._question,
                                             n_words=num_words_question,
-                                            n_dim=int(300),
+                                            n_dim=300,
                                             scope="word_embedding")
 
-
-
                 if config['embedding'] != "None":
-                    self._glove = tf.placeholder(tf.float32, [None, None,  int(config['model']['question']["embedding_dim_pos"])], name="embedding_vector")
+                    self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['question']["embedding_dim_pos"])], name="embedding_vector_ques")
                     word_emb = tf.concat([word_emb, self._glove], axis=2)
                 else:
                     print("None ****************")
@@ -50,7 +46,7 @@ class OracleNetwork(ResnetModel):
                     print("**** Oracle_network |  inpurt = question-pos ")
 
                     self._question_pos = tf.placeholder(tf.int32, [self.batch_size, None], name='question_pos')
-                    self.seq_length_pos = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_pos')
+                    self.seq_length_pos = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_ques_pos')
 
                     word_emb = utils.get_embedding(self._question_pos,
                                                 n_words=num_words_question,
@@ -58,7 +54,7 @@ class OracleNetwork(ResnetModel):
                                                 scope="word_embedding_pos")
 
                     if config['embedding'] != "None":
-                        self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['question']["embedding_dim_pos"])], name="embedding_vector_pos")
+                        self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['question']["embedding_dim_pos"])], name="embedding_vector_ques_pos")
                         word_emb = tf.concat([word_emb, self._glove], axis=2)
                     else:
                         print("None ****************")
@@ -79,10 +75,10 @@ class OracleNetwork(ResnetModel):
 
                 word_emb = utils.get_embedding(self._description,
                                             n_words=num_words_description,
-                                            n_dim=100,
+                                            n_dim=300,
                                             scope="word_embedding_description")
                 if config['embedding'] != "None":
-                    self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['description']["embedding_dim_pos"])], name="embedding_vector_description")
+                    self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['description']["embedding_dim_pos"])], name="embedding_vector_des")
                     word_emb = tf.concat([word_emb, self._glove], axis=2)
                 else:
                     print("None ****************")
@@ -99,7 +95,32 @@ class OracleNetwork(ResnetModel):
                 embeddings.append(lstm_states_description )
 
 
-                
+             # Description-Pos
+
+                if config['model']['description'] ['pos']:
+                    print("----------------------------------------")
+                    print("**** Oracle_network |  inpurt = question-pos ")
+
+                    self._question_pos = tf.placeholder(tf.int32, [self.batch_size, None], name='des_pos')
+                    self.seq_length_pos = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_des_pos')
+
+                    word_emb = utils.get_embedding(self._question_pos,
+                                                n_words=num_words_question,
+                                                n_dim=300,
+                                                scope="word_embedding_pos")
+
+                    if config['embedding'] != "None":
+                        self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['question']["embedding_dim_pos"])], name="embedding_vector_des_pos")
+                        word_emb = tf.concat([word_emb, self._glove], axis=2)
+                    else:
+                        print("None ****************")
+                    
+                    lstm_states, _ = rnn.variable_length_LSTM(word_emb,
+                                                        num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
+                                                        seq_length=self.seq_length_pos,scope="lstm4")
+                    
+
+                    embeddings.append(lstm_states)
 
             # CATEGORY
             if config['inputs']['category']:
