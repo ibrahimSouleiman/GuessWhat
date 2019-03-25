@@ -52,7 +52,7 @@ class Iterator(object):
 
     def __init__(self, dataset, batch_size, batchifier, pool,
                  shuffle= False, use_padding = False, no_semaphore= 20):
-
+        print(batch_size," ----------------- Iterator")
         # Filtered games
         games = dataset.get_data()
         games = batchifier.filter(games)

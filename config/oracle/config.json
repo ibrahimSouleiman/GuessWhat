@@ -3,28 +3,29 @@
     "question": true,
     "description": false,
     "allcategory":false,
-    "category": false,
-    "spatial": false,
+    "category": true,
+    "spatial":true,
     "crop": false,
     "image": false
   },
-  "embedding":"fasttext",
-  "lemme":false,
-  "pos":false,
+  "embedding":"fattext",
+
   "model": {
     "question": {
-      "no_LSTM_hiddens": 512,
-      "embedding_dim": 100,
-      "embedding_dim_pos":100,
-      "embedding_window":3,
-      "pos":true
-    },
-    "description": {
-      "no_LSTM_hiddens": 512,
+      "no_LSTM_hiddens": 312,
       "embedding_dim": 300,
       "embedding_dim_pos":100,
       "embedding_window":3,
-      "pos":true
+      "pos":false,
+      "lemme":false
+    },
+    "description": {
+      "no_LSTM_hiddens": 312,
+      "embedding_dim": 300,
+      "embedding_dim_pos":100,
+      "embedding_window":3,
+      "pos":false,
+      "lemme":false
     },
     "allcategory": {
       "no_LSTM_hiddens": 512,

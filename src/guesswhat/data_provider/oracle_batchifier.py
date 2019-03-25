@@ -6,11 +6,16 @@ from generic.data_provider.batchifier import AbstractBatchifier
 
 from generic.data_provider.image_preprocessors import get_spatial_feat, resize_image
 from generic.data_provider.nlp_utils import padder,padder_3d
-import time
-
 
 import time
 
+from generic.data_provider.nlp_utils import Embeddings,get_embeddings
+from gensim.models import word2vec,FastText,KeyedVectors
+
+
+
+
+import os
 answer_dict = \
     {  'Yes': np.array([1, 0, 0], dtype=np.int32),
        'No': np.array([0, 1, 0], dtype=np.int32),
@@ -19,12 +24,32 @@ answer_dict = \
 
 class OracleBatchifier(AbstractBatchifier):
 
-    def __init__(self, tokenizer_question, sources,tokenizer_description = None ,embedding=None, status=list()):
+    def __init__(self, tokenizer_question, sources,tokenizer_description = None ,embedding=None, status=list(),args=None,config=None,trainset=None):
         self.tokenizer_question = tokenizer_question
         self.tokenizer_description = tokenizer_description
         self.sources = sources
         self.status = status
-        self.embedding=embedding
+        self.config = config
+
+        self.model_worddl = FastText.load(os.path.join("data","ftext_lemme_des.model"))
+        
+        self.model_wordd = FastText.load(os.path.join("data","ftext_word_des.model"))
+
+        
+        self.model_posd = FastText.load(os.path.join("data","ftext_pos_des.model"))
+       
+
+        self.model_wordl = FastText.load(os.path.join("data","ftext_lemme_ques.model"))
+      
+        self.model_word = FastText.load(os.path.join("data","ftext_word_ques.model"))
+
+       
+        self.model_pos = FastText.load(os.path.join("data","ftext_pos_ques.model"))
+    
+        # self.embedding = Embeddings(args.all_dictfile,total_words=tokenizer_question.no_words,train=trainset,valid=None,test=None,dictionary_file_question=os.path.join(args.data_dir, args.dict_file_question),dictionary_file_description=os.path.join(args.data_dir, args.dict_file_description),description=config["inputs"]["description"],lemme=config["lemme"],pos=config["pos"])
+
+
+
 
     def filter(self, games):
         if len(self.status) > 0:
@@ -45,11 +70,13 @@ class OracleBatchifier(AbstractBatchifier):
 
             image = game.image
             question = self.tokenizer_question.apply(game.questions[0])
-            
-            batch['question'].append(question)
-            # 
+            # print("question =____",game.questions[0])
+            # print("tokenize = ___",self.tokenizer_question.apply(game.questions[0]))
 
-            if 'embedding_vector' in sources:
+            batch['question'].append(question)
+        
+
+            if 'embedding_vector_ques' in sources:
                 
                 assert  len(game.questions) == 1
                 # Add glove vectors (NB even <unk> may have a specific glove)
@@ -64,21 +91,20 @@ class OracleBatchifier(AbstractBatchifier):
                 
                 if "question_pos" in sources:
                     # print("/////////// question_pos")
-                    embedding_vectors,embedding_pos = self.embedding.get_embeddings(words) # slow (copy gloves in process)
+                    embedding_vectors,embedding_pos = get_embeddings(words,pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos) # slow (copy gloves in process)
                     # print("..... question_pos............. embedding_vectors",len(embedding_vectors[0]))
-
-                    batch['embedding_vector'].append(embedding_vectors)
-                    batch['embedding_vector_pos'].append(embedding_pos)
+                    batch['embedding_vector_ques'].append(embedding_vectors)
+                    batch['embedding_vector_ques_pos'].append(embedding_pos)
                     batch['question_pos'].append(question)
 
                     # print(batch['embedding_vector_pos'])
                 else:
                     # print("/////////// question_pos NOT EXIST")
 
-                    embedding_vectors,_ = self.embedding.get_embeddings(words) # slow (copy gloves in process)
+                    embedding_vectors,_ = get_embeddings(words,pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos)
 
                     # print("////////// embedding_vectors=",len(embedding_vectors[0]))
-                    batch['embedding_vector'].append(embedding_vectors)
+                    batch['embedding_vector_ques'].append(embedding_vectors)
 
                 # print(" Oracle_batchifier | embedding_vector= {}".format(embedding_vectors))
 
@@ -97,15 +123,21 @@ class OracleBatchifier(AbstractBatchifier):
                 
 
                 description = self.tokenizer_question.apply(game.image.description)
-       
+
                 batch['description'].append(description)
 
-                # print("/////////// question_pos")
-                embedding_vectors,_ = self.embedding.get_embeddings(words,description=True) # slow (copy gloves in process)
+       
+                if "des_pos" in sources:
+                    embedding_vectors,embedding_pos = get_embeddings(words,pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos) # slow (copy gloves in process)
+                    batch['embedding_vector_des'].append(embedding_vectors)
+                    batch['embedding_vector_des_pos'].append(embedding_pos)
+                    batch['des_pos'].append(question)
 
-                # print("...........description....... embedding_vectors",len(embedding_vectors[0]))
-                batch['embedding_vector_description'].append(embedding_vectors)
-               
+                else:
+
+                    embedding_vectors,_ = get_embeddings(words,pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos) # slow (copy gloves in process)
+
+                    batch['embedding_vector_des'].append(embedding_vectors)
 
 
             if 'answer' in sources:
@@ -152,32 +184,33 @@ class OracleBatchifier(AbstractBatchifier):
 
         # pad the questions
         
-    
         
-
-        batch['question'], batch['seq_length_question'] = padder(batch['question'],
+        
+        if "question" in sources:
+            batch['question'], batch['seq_length_question'] = padder(batch['question'],
                                                         padding_symbol=self.tokenizer_question.padding_token)
 
         if "question_pos" in sources:
-            batch['question_pos'], batch['seq_length_pos'] = padder(batch['question_pos'],
+            batch['question_pos'], batch['seq_length_ques_pos'] = padder(batch['question_pos'],
                                                             padding_symbol=self.tokenizer_question.padding_token)
 
         if "description" in sources:
             batch['description'], batch['seq_length_description'] = padder(batch['description'],
-                                                            padding_symbol=self.tokenizer_description.padding_token)
+                                                            padding_symbol=self.tokenizer_question.padding_token)
 
         # batch['embedding_vector_pos'], _ = padder_3d(batch['embedding_vector_pos'])
-        if 'embedding_vector' in sources:
-                        batch['embedding_vector'], _ = padder_3d(batch['embedding_vector'])
+        if 'embedding_vector_ques' in sources:
+                        batch['embedding_vector_ques'], _ = padder_3d(batch['embedding_vector_ques'])
 
-        if 'embedding_vector_pos' in sources:
-                        batch['embedding_vector_pos'], _ = padder_3d(batch['embedding_vector_pos'])
+        if 'embedding_vector_ques_pos' in sources:
+                        batch['embedding_vector_ques_pos'], _ = padder_3d(batch['embedding_vector_ques_pos'])
 
-        if 'embedding_vector_description' in sources:
-                        batch['embedding_vector_description'],_ = padder_3d(batch['embedding_vector_description'])
+        if 'embedding_vector_des' in sources:
+                        batch['embedding_vector_des'], _ = padder_3d(batch['embedding_vector_des'])
 
+        if 'embedding_vector_des_pos' in sources:
+                        batch['embedding_vector_des_pos'], _ = padder_3d(batch['embedding_vector_des_pos'])
 
-        
 
 
 
@@ -186,17 +219,21 @@ class OracleBatchifier(AbstractBatchifier):
         # batch['description'], batch['seq_length_description'] = padder_3d(batch['description'])
 
 
-        t2 = time.time()
-
-        total = t2-t1
 
 
 
-        t2 = time.time()
+
+
+
+
+
         
-        total = t2 - t1
+
 
         # print("finish oracle_bachifier .... time=",total)
+
+        # print("TotalBatch=",total)
+
         return batch
 
 

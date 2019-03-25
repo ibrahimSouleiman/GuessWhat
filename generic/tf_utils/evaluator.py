@@ -38,7 +38,6 @@ class Evaluator(object):
         self.network=network
         self.tokenizer = tokenizer
 
-
     def process(self, sess, iterator, outputs, listener=None):
 
         assert isinstance(outputs, list), "outputs must be a list"
@@ -56,14 +55,10 @@ class Evaluator(object):
         n_iter = 1.
         aggregated_outputs = [0.0 for v in outputs if is_scalar(v) and v in original_outputs]
 
-        #print(" Evaluator | iterator =",iterator)
-
         for batch in tqdm(iterator):
-
-            
             # Appending is_training flag to the feed_dict
             batch["is_training"] = is_training
-
+            # print(batch,".............. batch")
             # evaluate the network on the batch
             results = self.execute(sess, outputs, batch)
             # process the results
@@ -85,6 +80,53 @@ class Evaluator(object):
             listener.after_epoch(is_training)
 
         return aggregated_outputs
+            
+    # def process(self, sess, iterator, outputs, listener=None):
+
+    #     assert isinstance(outputs, list), "outputs must be a list"
+
+    #     original_outputs = list(outputs)
+
+    #     is_training = any([is_optimizer(x) for x in outputs])
+
+    #     if listener is not None:
+    #         outputs += [listener.require()]  # add require outputs
+    #         # outputs = flatten(outputs) # flatten list (when multiple requirement)
+    #         outputs = list(OrderedDict.fromkeys(outputs))  # remove duplicate while preserving ordering
+    #         listener.before_epoch(is_training)
+
+    #     n_iter = 1.
+    #     aggregated_outputs = [0.0 for v in outputs if is_scalar(v) and v in original_outputs]
+
+    #     #print(" Evaluator | iterator =",iterator)
+
+    #     for batch in tqdm(iterator):
+
+            
+    #         # Appending is_training flag to the feed_dict
+    #         batch["is_training"] = is_training
+
+    #         # evaluate the network on the batch
+    #         results = self.execute(sess, outputs, batch)
+    #         # process the results
+    #         i = 0
+    #         for var, result in zip(outputs, results):
+    #             if is_scalar(var) and var in original_outputs:
+    #                 # moving average
+    #                 aggregated_outputs[i] = ((n_iter - 1.) / n_iter) * aggregated_outputs[i] + result / n_iter
+    #                 i += 1
+    #             elif is_summary(var):  # move into listener?
+    #                 self.writer.add_summary(result)
+
+    #             if listener is not None and listener.valid(var):
+    #                 listener.after_batch(result, batch, is_training)
+
+    #         n_iter += 1
+
+    #     if listener is not None:
+    #         listener.after_epoch(is_training)
+
+    #     return aggregated_outputs
 
     def execute(self, sess, output, batch):
         feed_dict = {self.scope + key + ":0": value for key, value in batch.items() if key in self.provided_sources}

@@ -4,12 +4,19 @@ from generic.utils.file_handlers import pickle_loader
 
 from gensim.models import word2vec,FastText,KeyedVectors
 # from pyfasttext import FastText
+
 #import glove
 from guesswhat.data_provider.guesswhat_dataset import OracleDataset
 from nltk.tokenize import TweetTokenizer
 
 #from guesswhat.data_provider.lemmatize import lemmatize
+import os
 from pathlib import Path
+
+from guesswhat.data_provider.guesswhat_dataset import OracleDataset
+from nltk.tokenize import TweetTokenizer
+
+
 
 import time
 
@@ -22,7 +29,6 @@ class Embeddings(object):
         self.pos = pos
         self.description=description
 
-        self.total_words = total_words
         self.emb_dim = emb_dim
         self.emb_window = emb_window
         self.embedding = embedding
@@ -31,14 +37,14 @@ class Embeddings(object):
         self.test = test
         
             
-        self.dictionary_file_question = dictionary_file_question
-        self.dictionary_file_description = dictionary_file_description
+        # self.dictionary_file_question = dictionary_file_question
+        # self.dictionary_file_description = dictionary_file_description
       
-        print(" nlp_utls | start to create list_question [] ...")
+        # print(" nlp_utls | start to create list_question [] ...")
 
-        self.model_word,self.model_pos = self.build("all_question.npy","all_lemmes.npy","all_pos.npy",dictionary_file=self.dictionary_file_question)
-        if self.description:
-             self.model_wordd,self.model_posd = self.build("all_description.npy","all_dlemme.npy","all_dpos.npy",dictionary_file=self.dictionary_file_description)
+        # self.model_word,self.model_pos = self.build("all_question.npy","all_lemmes.npy","all_pos.npy",dictionary_file=self.dictionary_file_question)
+        # if self.description:
+        #      self.model_wordd,self.model_posd = self.build("all_description.npy","all_dlemme.npy","all_dpos.npy",dictionary_file=self.dictionary_file_description)
         
         
      
@@ -88,10 +94,14 @@ class Embeddings(object):
                 # all_lemme = [self.word2i[token][1] for token in tokens]
                 all_lemme = []
                 all_pos = []
+                nb_erreur_lemme = 0
+                nb_erreur_pos = 0
+
                 for token in tokens:
                     try:
                         lemme= self.word2i[token][1]
                     except KeyError:
+                        nb_erreur_lemme += 1
                         lemme = self.word2i[self.unk][1]
                    
                     all_lemme.append(lemme)
@@ -99,6 +109,7 @@ class Embeddings(object):
                     try:
                         pos= self.word2i[token][2][0][1] 
                     except KeyError:
+                        nb_erreur_pos += 1
                         pos = self.word2i[self.unk][2][0][1] 
                     
                     all_pos.append(pos)
@@ -149,8 +160,12 @@ class Embeddings(object):
             np.save("data/"+file_lemme,all_lemmes)
             np.save("data/"+file_pos,all_postags)
 
+
            
         #self.lemmatize = lemmatize()
+
+
+
         self.tknzr = tknzr
         self.model = None
 
@@ -194,87 +209,111 @@ class Embeddings(object):
 
 
 
-    def get_embeddings(self, tokens_word,lemme=False,pos=False,description=False):
-        """
-        tokens_word : all word 
+def get_embeddings(tokens_word,lemme=False,pos=False,description=False,embedding="fasttext",model_wordd=None,model_worddl=None,model_word=None,model_wordl=None,model_pos=None,model_posd=None):
+    """
+    tokens_word : all word 
 
-        """
-        vectors = []
+    """
+    vectors = []
+    
+
+
+    pos_vectors = []
+    unk = "<unk>"
+
+
+    if embedding == "fasttext":
         
-        pos_vectors = []
-        
+        for token in tokens_word:
+            
+            if description:
 
+                token = token.replace("'s","")
+                try:
+                    if lemme:
+                        vectors.append(np.asarray(model_worddl[token]))
+                    else:vectors.append(np.asarray(model_wordd[token]))
 
-        if self.embedding == "fasttext":
-           
-            for token in tokens_word:
                 
-                if description:
-
-                    token = token.replace("'s","")
+                except KeyError:
+                    # print("_____________ 1Unknow=",self.unk)
+                    vectors.append(np.asarray(model_wordd[unk]))
+                
+                if pos:
                     try:
-                        vectors.append(np.asarray(self.model_wordd[token]))
+                        pos_vectors.append(np.asarray(model_posd[token]))
                     except KeyError:
-                        # print("_____________ 1Unknow=",self.unk)
-                        vectors.append(np.asarray(self.model_wordd[self.unk]))
-                    
-                    if self.pos:
-                        try:
-                            pos_vectors.append(np.asarray(self.model_posd[token]))
-                        except KeyError:
-                            # print("_____________ 2Unknow=",self.unk)
-                            pos_vectors.append(np.asarray(self.model_posd[self.unk]))
-                else:
-                    token = token.replace("'s","")
+                        # print("_____________ 2Unknow=",self.unk)
+                        pos_vectors.append(np.asarray(model_posd[unk]))
+            else:
+                token = token.replace("'s","")
+                try:
+                    if lemme:
+                        vectors.append(np.asarray(model_word[token]))
+                    else:vectors.append(np.asarray(model_wordl[token]))
+                
+                except KeyError:
+                    # print("_____________ 3Unknow=",self.unk)
+                    vectors.append(np.asarray(model_word[unk]))
+                
+                if pos:
                     try:
-                        vectors.append(np.asarray(self.model_word[token]))
+                        pos_vectors.append(np.asarray(model_pos[token]))
                     except KeyError:
-                        # print("_____________ 3Unknow=",self.unk)
-                        vectors.append(np.asarray(self.model_word[self.unk]))
-                    
-                    if self.pos:
-                        try:
-                            pos_vectors.append(np.asarray(self.model_pos[token]))
-                        except KeyError:
-                            # print("_____________ 4Unknow=",self.unk)
-                            pos_vectors.append(np.asarray(self.model_pos[self.unk]))
+                        # print("_____________ 4Unknow=",self.unk)
+                        pos_vectors.append(np.asarray(model_pos[unk]))
 
 
-        return vectors,pos_vectors
+    return vectors,pos_vectors
 
+# def padder(list_of_tokens, seq_length=None, padding_symbol=0, max_seq_length=0):
+
+#     if seq_length is None:
+#         seq_length = np.array([len(q) for q in list_of_tokens], dtype=np.int32)
+#         #print("nlp | sequence_length = {} ",seq_length)
+
+
+#     if max_seq_length == 0:
+#         max_seq_length = seq_length.max()
+
+#     batch_size = len(list_of_tokens)
+#     # print("-- nlp | list_of_tokens= {}".format(list_of_tokens))
+#     # print("--- nlp | batch_size = {} ,max_seq_length={} ",batch_size,max_seq_length)
+#     padded_tokens = np.full(shape=(batch_size, max_seq_length), fill_value=padding_symbol)
+#     # print("--- nlp | padded_tokens={}")
+#     # print(" --- list_of_tokens | = {}",list_of_tokens)
+#     # print(" --- list_of_tokens[0] | = {}",list_of_tokens[0])
+
+#     for i, seq in enumerate(list_of_tokens):
+
+#         # print("---- 1 seq=",seq)
+#         seq = seq[:max_seq_length]
+#         # print("---- 2 seq=",len(seq),len(seq[0]))
+#         # print("--- 3.1",padded_tokens[i, :len(seq)][0])
+#         # print(" ---- 3 seq = ",len(padded_tokens[i, :len(seq)]),len(padded_tokens[i, :len(seq)][0]))
+#         padded_tokens[i, :len(seq)] = seq
+
+#     # print("-- NL_UTILS | Max_Seq = {}".format(max_seq_length))
+
+#     return padded_tokens, seq_length
 def padder(list_of_tokens, seq_length=None, padding_symbol=0, max_seq_length=0):
 
     if seq_length is None:
         seq_length = np.array([len(q) for q in list_of_tokens], dtype=np.int32)
-        #print("nlp | sequence_length = {} ",seq_length)
-
+        #  print("nlp | sequence_length = {} ",seq_length)
 
     if max_seq_length == 0:
         max_seq_length = seq_length.max()
 
     batch_size = len(list_of_tokens)
-    # print("-- nlp | list_of_tokens= {}".format(list_of_tokens))
-    # print("--- nlp | batch_size = {} ,max_seq_length={} ",batch_size,max_seq_length)
+
     padded_tokens = np.full(shape=(batch_size, max_seq_length), fill_value=padding_symbol)
-    # print("--- nlp | padded_tokens={}")
-    # print(" --- list_of_tokens | = {}",list_of_tokens)
-    # print(" --- list_of_tokens[0] | = {}",list_of_tokens[0])
 
     for i, seq in enumerate(list_of_tokens):
-
-        # print("---- 1 seq=",seq)
         seq = seq[:max_seq_length]
-        # print("---- 2 seq=",len(seq),len(seq[0]))
-        # print("--- 3.1",padded_tokens[i, :len(seq)][0])
-        # print(" ---- 3 seq = ",len(padded_tokens[i, :len(seq)]),len(padded_tokens[i, :len(seq)][0]))
-
-
         padded_tokens[i, :len(seq)] = seq
 
-    # print("-- NL_UTILS | Max_Seq = {}".format(max_seq_length))
-
     return padded_tokens, seq_length
-
 
 def padder_3d(list_of_tokens, max_seq_length=0):
     seq_length = np.array([len(q) for q in list_of_tokens], dtype=np.int32)
