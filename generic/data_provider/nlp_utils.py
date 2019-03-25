@@ -152,15 +152,12 @@ class Embeddings(object):
            
         #self.lemmatize = lemmatize()
         self.tknzr = tknzr
-        self.emb_dim = emb_dim
         self.model = None
-        self.embedding = embedding
-        self.total_words = total_words
-        self.data = all_questions
-        self.lemmatize = lemmatize()
-        self.tknzr = tknzr
-        self.emb_dim = self.emb_dim
 
+
+
+
+        self.tknzr = tknzr
         self.model_word = None
         self.embedding = self.embedding
         self.total_words = self.total_words

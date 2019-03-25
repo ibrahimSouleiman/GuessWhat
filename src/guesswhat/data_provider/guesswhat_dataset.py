@@ -248,12 +248,12 @@ class Dataset(AbstractDataset):
                 # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass))
 
                
-        #        if len(games) > 100: break
+                if len(games) > 15000: break
 
         t2 = time.time()
         total = t2 - t1
 
-        #if len(games) > 5000: break
+        if len(games) > 50000: break
 
         # print("Total = ",total)
         # exit()

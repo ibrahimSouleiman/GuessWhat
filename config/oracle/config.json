@@ -3,14 +3,14 @@
     "question": true,
     "description": false,
     "allcategory":false,
-    "category": true,
-    "spatial": true,
+    "category": false,
+    "spatial": false,
     "crop": false,
     "image": false
   },
   "embedding":"fasttext",
-  "lemme":true,
-  "pos":true,
+  "lemme":false,
+  "pos":false,
   "model": {
     "question": {
       "no_LSTM_hiddens": 512,
