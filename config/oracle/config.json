@@ -1,17 +1,17 @@
 {
   "inputs": {
     "question": true,
-    "description": true,
+    "description": false,
     "allcategory":false,
     "category": false,
     "spatial": false,
     "crop": false,
-    "image": false
+    "image": true
   },
   "embedding":"fattext",
   "model": {
     "question": {
-      "no_LSTM_hiddens": 312,
+      "no_LSTM_hiddens": 12,
       "embedding_dim": 300,
       "embedding_dim_pos":100,
       "embedding_window":3,
@@ -19,7 +19,7 @@
       "lemme":true
     },
     "description": {
-      "no_LSTM_hiddens": 312,
+      "no_LSTM_hiddens": 5312,
       "embedding_dim": 300,
       "embedding_dim_pos":100,
       "embedding_window":3,
