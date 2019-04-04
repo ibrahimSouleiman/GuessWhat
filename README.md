@@ -188,6 +188,16 @@ python src/guesswhat/data_provider/add_descriptionToData.py -data_type valid
 
 python src/guesswhat/data_provider/add_descriptionToData.py -data_type test
 ```
+```
+
+gzip guesswhat_train2014.jsonl
+
+gzip guesswhat_valid2014.jsonl
+
+gzip guesswhat_test2014.jsonl
+
+```
+
 
 GuessWhat?! requires to both computes the image features from the full image
 To do so, you need to use the pythn script guesswhat/src/guesswhat/preprocess_data/extract_img_features.py .
