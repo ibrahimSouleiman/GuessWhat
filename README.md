@@ -173,6 +173,22 @@ wget http://download.tensorflow.org/models/vgg_16_2016_08_28.tar.gz -P data/
 tar zxvf data/vgg_16_2016_08_28.tar.gz -C data/
 ```
 
+Add Description data imported Mscoco
+
+
+```
+wget http://images.cocodataset.org/annotations/annotations_trainval2014.zip -P data/
+unzip -x data/annotations_trainval2014.zip  -d data/
+```
+```
+
+python src/guesswhat/data_provider/add_descriptionToData.py -data_type train
+
+python src/guesswhat/data_provider/add_descriptionToData.py -data_type valid
+
+python src/guesswhat/data_provider/add_descriptionToData.py -data_type test
+```
+
 GuessWhat?! requires to both computes the image features from the full image
 To do so, you need to use the pythn script guesswhat/src/guesswhat/preprocess_data/extract_img_features.py .
 ```
