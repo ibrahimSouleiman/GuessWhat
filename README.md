@@ -190,11 +190,11 @@ python src/guesswhat/data_provider/add_descriptionToData.py -data_type test
 ```
 ```
 
-gzip guesswhat_train2014.jsonl
+gzip data/guesswhat_train2014.jsonl
 
-gzip guesswhat_valid2014.jsonl
+gzip data/guesswhat_valid2014.jsonl
 
-gzip guesswhat_test2014.jsonl
+gzip data/guesswhat_test2014.jsonl
 
 ```
 
