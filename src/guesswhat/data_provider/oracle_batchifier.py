@@ -206,7 +206,7 @@ class OracleBatchifier(AbstractBatchifier):
         # batch['embedding_vector_pos'], _ = padder_3d(batch['embedding_vector_pos'])
         if 'embedding_vector_ques' in sources:
                         batch['embedding_vector_ques'], batch['seq_length_question'] = padder_3d(batch['embedding_vector_ques'])
-        print("+++++ Batch = ",batch['seq_length_question'])
+       # print("+++++ Batch = ",batch['seq_length_question'])
 
 
         if 'embedding_vector_ques_pos' in sources:
