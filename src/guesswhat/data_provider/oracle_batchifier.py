@@ -123,14 +123,14 @@ class OracleBatchifier(AbstractBatchifier):
 
                 description = self.tokenizer_question.apply(game.image.description)
 
-                batch['description'].append(description)
+                # batch['description'].append(description)
 
        
                 if "des_pos" in sources:
                     embedding_vectors,embedding_pos = get_embeddings(words,pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos) # slow (copy gloves in process)
                     batch['embedding_vector_des'].append(embedding_vectors)
                     batch['embedding_vector_des_pos'].append(embedding_pos)
-                    batch['des_pos'].append(question)
+                    # batch['des_pos'].append(question)
 
                 else:
 
@@ -194,9 +194,9 @@ class OracleBatchifier(AbstractBatchifier):
             batch['question_pos'], batch['seq_length_ques_pos'] = padder(batch['question_pos'],
                                                             padding_symbol=self.tokenizer_question.padding_token)
 
-        if "description" in sources:
-            batch['description'], batch['seq_length_description'] = padder(batch['description'],
-                                                            padding_symbol=self.tokenizer_question.padding_token)
+        # if "description" in sources:
+        #     batch['description'], batch['seq_length_description'] = padder(batch['description'],
+        #                                                     padding_symbol=self.tokenizer_question.padding_token)
         
 
         # batch['embedding_vector_pos'], _ = padder_3d(batch['embedding_vector_pos'])
@@ -209,7 +209,7 @@ class OracleBatchifier(AbstractBatchifier):
                         batch['embedding_vector_ques_pos'], _ = padder_3d(batch['embedding_vector_ques_pos'])
 
         if 'embedding_vector_des' in sources:
-                        batch['embedding_vector_des'], _ = padder_3d(batch['embedding_vector_des'])
+                        batch['embedding_vector_des'], batch['seq_length_description'] = padder_3d(batch['embedding_vector_des'])
 
         if 'embedding_vector_des_pos' in sources:
                         batch['embedding_vector_des_pos'], _ = padder_3d(batch['embedding_vector_des_pos'])

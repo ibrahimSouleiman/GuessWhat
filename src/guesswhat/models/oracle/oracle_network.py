@@ -79,16 +79,17 @@ class OracleNetwork(ResnetModel):
             if config['inputs']['description']:
                 print("****  Oracle_network |  inpurt = Description ")
 
-                self._description = tf.placeholder(tf.int32, [self.batch_size, None], name='description')
+                #self._description = tf.placeholder(tf.int32, [self.batch_size, None], name='description')
                 self.seq_length_description = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_description')
 
-                word_emb = utils.get_embedding(self._description,
-                                            n_words=num_words_description,
-                                            n_dim=300,
-                                            scope="word_embedding_description")
+                # word_emb = utils.get_embedding(self._description,
+                #                             n_words=num_words_description,
+                #                             n_dim=300,
+                #                             scope="word_embedding_description")
+                
                 if config['embedding'] != "None":
-                    self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['description']["embedding_dim_pos"])], name="embedding_vector_des")
-                    word_emb = tf.concat([word_emb, self._glove], axis=2)
+                    self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['description']["embedding_dim"])], name="embedding_vector_des")
+                    word_emb =  self._glove
                 else:
                     print("None ****************")
 
