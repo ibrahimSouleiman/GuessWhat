@@ -20,6 +20,22 @@ from nltk.tokenize import TweetTokenizer
 
 import time
 
+class GloveEmbeddings(object):
+
+    def __init__(self, file, glove_dim=300):
+        self.glove = pickle_loader(file)
+        self.glove_dim = glove_dim
+
+    def get_embeddings(self, tokens):
+        vectors = []
+        for token in tokens:
+            token = token.lower().replace("\'s", "")
+            if token in self.glove:
+                vectors.append(np.array(self.glove[token]))
+            else:
+                vectors.append(np.zeros((self.glove_dim,)))
+        return vectors
+
 class Embeddings(object):
 
     def __init__(self, file,total_words=0,emb_dim=100,emb_window=3,embedding="fasttext",train=None,valid=None,test=None,dictionary_file_question="dict.json",dictionary_file_description="dict_Description.json",lemme=False,pos=False,description=False):
@@ -330,7 +346,8 @@ def padder_3d(list_of_tokens, max_seq_length=0):
         seq = seq[:max_seq_length]
         padded_tokens[i, :len(seq), :] = seq
 
-    return padded_tokens, max_seq_length
+    # max_seq_length
+    return padded_tokens, seq_length
 
 
 class DummyTokenizer(object):

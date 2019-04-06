@@ -133,11 +133,16 @@ class Image:
             self.filename = "{}.jpg".format(id)
             self.image_loader = image_builder.build(id, which_set=which_set, filename=self.filename, optional=False)
 
+
+
     def get_image(self, **kwargs):
         if self.image_loader is not None:
             return self.image_loader.get_image(**kwargs)
         else:
             return None
+
+
+
 
 class Bbox:
     def __init__(self, bbox, im_width, im_height):
@@ -243,6 +248,10 @@ class Dataset(AbstractDataset):
                 #if len(games) > 50: break
 
                 
+
+                if len(games) > 1: 
+                    break
+
 
 
 
