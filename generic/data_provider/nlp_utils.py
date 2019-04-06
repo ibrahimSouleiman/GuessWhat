@@ -328,7 +328,8 @@ def padder_3d(list_of_tokens, max_seq_length=0):
         seq = seq[:max_seq_length]
         padded_tokens[i, :len(seq), :] = seq
 
-    return padded_tokens, max_seq_length
+    # max_seq_length
+    return padded_tokens, seq_length
 
 
 class DummyTokenizer(object):

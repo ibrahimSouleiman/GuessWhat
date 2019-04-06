@@ -10,14 +10,16 @@
   },
   "embedding":"fasttext",
   "model": {
+
+    "glove":false,
+
     "question": {
       "no_LSTM_hiddens": 12,
-      "embedding_dim": 300,
+      "embedding_dim": 100,
       "embedding_dim_pos":100,
       "embedding_window":3,
       "pos":false,
-      "lemme":false,
-      "glove":true
+      "lemme":false
     },
     "description": {
       "no_LSTM_hiddens": 5312,

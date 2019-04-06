@@ -95,6 +95,7 @@ if __name__ == '__main__':
 
     # Build Network
     logger.info('Building network..')
+    
     if tokenizer_description != None:
         network = OracleNetwork(config, num_words_question=tokenizer.no_words,num_words_description=tokenizer_description.no_words)
     else:        network = OracleNetwork(config, num_words_question=tokenizer.no_words,num_words_description=None)
@@ -149,7 +150,7 @@ if __name__ == '__main__':
         best_train_err = None
 
         # create training tools
-        evaluator = Evaluator(sources, network.scope_name,network=networks[0], tokenizer=tokenize)
+        evaluator = Evaluator(sources, network.scope_name,network=network,tokenizer=tokenizer)
 
         #train_evaluator = MultiGPUEvaluator(sources, scope_names, networks=networks, tokenizer=tokenizer)
         #train_evaluator = Evaluator(sources, scope_names[0], network=networks[0], tokenizer=tokenizer)

@@ -235,7 +235,7 @@ class Dataset(AbstractDataset):
 
                 games.append(g)
                 
-                if len(games) > 2: 
+                if len(games) > 1: 
                     break
 
         t2 = time.time()
