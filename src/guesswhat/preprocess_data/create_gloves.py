@@ -26,6 +26,7 @@ if __name__ == '__main__':
     parser.add_argument("-year", type=int, default=2014, help="VQA dataset year (2014/2017)")
     parser.add_argument("-config", type=str,default="config/oracle/config.json",help='Config file')
     parser.add_argument("-exp_dir", type=str, help="Directory in which experiments are stored")
+    parser.add_argument("-img_dir", type=str, help='Directory with images')
 
     args = parser.parse_args()
 
@@ -41,22 +42,17 @@ if __name__ == '__main__':
 
     # Load image
     image_builder, crop_builder = None, None
-    use_resnet = False
-    if config['inputs'].get('image', False):
-        logger.info('Loading images..')
-        image_builder = get_img_builder(config['model']['image'], args.img_dir)
-        use_resnet = image_builder.is_raw_image()
+   
 
-    if config['inputs'].get('crop', False):
-        logger.info('Loading crops..')
-        crop_builder = get_img_builder(config['model']['crop'], args.crop_dir, is_crop=True)
-        use_resnet = crop_builder.is_raw_image()
+    print("load ... train")
 
-
-
-    trainset = OracleDataset.load(args.data_dir, "train", image_builder, crop_builder)
-    validset = OracleDataset.load(args.data_dir, "valid", image_builder, crop_builder)
-    testset = OracleDataset.load(args.data_dir, "test", image_builder, crop_builder)
+    trainset = OracleDataset.load(args.data_dir, "train")
+    
+    print("load ... valid")
+    validset = OracleDataset.load(args.data_dir, "valid")
+    
+    print("load ... test")
+    testset = OracleDataset.load(args.data_dir, "test")
 
 
     tokenizer = TweetTokenizer(preserve_case=False)
@@ -68,8 +64,10 @@ if __name__ == '__main__':
             vals = line.rstrip().split(' ')
             vectors[vals[0]] = [float(x) for x in vals[1:]]
             
-
     print("Mapping glove...")
+    pickle_dump(vectors, "vectors.pkl")
+    exit()
+
     glove_dict = {}
     not_in_dict = {}
     for _set in [trainset, validset, testset]:

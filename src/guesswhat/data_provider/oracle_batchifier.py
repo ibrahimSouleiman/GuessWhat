@@ -20,12 +20,13 @@ answer_dict = \
 
 class OracleBatchifier(AbstractBatchifier):
 
-    def __init__(self, tokenizer_question, sources,tokenizer_description = None ,embedding=None, status=list(),args=None,config=None,trainset=None):
+    def __init__(self, tokenizer_question, sources,glove,tokenizer_description = None ,embedding=None, status=list(),args=None,config=None,trainset=None):
         self.tokenizer_question = tokenizer_question
         self.tokenizer_description = tokenizer_description
         self.sources = sources
         self.status = status
         self.config = config
+        self.glove = glove
 
         self.model_worddl = FastText.load(os.path.join("data","ftext_lemme_des.model"))
         
@@ -70,6 +71,7 @@ class OracleBatchifier(AbstractBatchifier):
             # print("tokenize = ___",self.tokenizer_question.apply(game.questions[0]))
 
             batch['question'].append(question)
+            print("---------------- FINISH QUESTION=",question)
         
 
             if 'embedding_vector_ques' in sources:
@@ -107,7 +109,8 @@ class OracleBatchifier(AbstractBatchifier):
                 # print("---- Embedding = ",len(embedding_vectors))
                 # print("----  =",len(embedding_vectors[0]))
 
-                
+                print("---------------- FINISH QUESTION_Emb =",embedding_vectors)
+
 
 
 
@@ -166,6 +169,7 @@ class OracleBatchifier(AbstractBatchifier):
 
             if 'image' in sources:
                 batch['image'].append(image.get_image())
+                print("---------------- FINISH IMAGE=",image.get_image().shape)
 
             if 'mask' in sources:
                 assert "image" in batch['image'], "mask input require the image source"
@@ -220,7 +224,9 @@ class OracleBatchifier(AbstractBatchifier):
         total = t2-t1
 
 
-        # print("TotalBatch=",total)
+        print("TotalBatch=",total)
+
+
         return batch
 
 

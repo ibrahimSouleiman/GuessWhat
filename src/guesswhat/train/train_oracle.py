@@ -15,6 +15,7 @@ from generic.utils.file_handlers import pickle_dump
 
 from generic.data_provider.image_loader import get_img_builder
 from generic.data_provider.nlp_utils import Embeddings
+from generic.data_provider.nlp_utils import GloveEmbeddings
 
 from guesswhat.data_provider.guesswhat_dataset import OracleDataset
 from guesswhat.data_provider.oracle_batchifier import OracleBatchifier
@@ -24,7 +25,7 @@ import time
 
 if __name__ == '__main__':
 
-    ###############################
+    #############################
     #  LOAD CONFIG
     #############################
 
@@ -39,7 +40,7 @@ if __name__ == '__main__':
     parser.add_argument("-crop_dir", type=str, help='Directory with images')
     parser.add_argument("-load_checkpoint", type=str, help="Load model parameters from specified checkpoint")
     parser.add_argument("-continue_exp", type=lambda x: bool(strtobool(x)), default="False", help="Continue previously started experiment?")
-    parser.add_argument("-gpu_ratio", type=float, default=0.40, help="How many GPU ram is required? (ratio)")
+    parser.add_argument("-gpu_ratio", type=float, default=0.50, help="How many GPU ram is required? (ratio)")
     parser.add_argument("-no_thread", type=int, default=4, help="No thread to load batch")
 
     args = parser.parse_args()
@@ -52,7 +53,9 @@ if __name__ == '__main__':
     finetune = config["model"]["image"].get('finetune', list())
     batch_size = config['optimizer']['batch_size']
     no_epoch = config["optimizer"]["no_epoch"]
-    # learning_rate = config["optimizer"]["learning_rate"]
+    use_glove = config["model"]["glove"]
+
+
 
 
     ###############################
@@ -96,6 +99,8 @@ if __name__ == '__main__':
         network = OracleNetwork(config, num_words_question=tokenizer.no_words,num_words_description=tokenizer_description.no_words)
     else:        network = OracleNetwork(config, num_words_question=tokenizer.no_words,num_words_description=None)
 
+
+
     # Build Optimizer
     logger.info('Building optimizer..')
     optimizer, outputs = create_optimizer(network, config, finetune=finetune)
@@ -114,6 +119,10 @@ if __name__ == '__main__':
     # use_embedding = False
     # if config["embedding"] != "None":
     #      use_embedding = True
+    glove = None
+    if use_glove:
+        logger.info('Loading glove..')
+        glove = GloveEmbeddings(os.path.join(args.data_dir, config["glove_name"]))
 
     # embedding = None
     # if use_embedding:
@@ -140,7 +149,13 @@ if __name__ == '__main__':
         best_train_err = None
 
         # create training tools
-        evaluator = Evaluator(sources, network.scope_name)
+        evaluator = Evaluator(sources, network.scope_name,network=networks[0], tokenizer=tokenize)
+
+        #train_evaluator = MultiGPUEvaluator(sources, scope_names, networks=networks, tokenizer=tokenizer)
+        #train_evaluator = Evaluator(sources, scope_names[0], network=networks[0], tokenizer=tokenizer)
+        #eval_evaluator = Evaluator(sources, scope_names[0], network=networks[0], tokenizer=tokenizer)
+
+
        
         batchifier =  OracleBatchifier(tokenizer, sources, status=config['status'],tokenizer_description=tokenizer_description,args = args,config=config)
 

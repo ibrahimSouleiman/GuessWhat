@@ -27,10 +27,18 @@ class OracleNetwork(ResnetModel):
                                             scope="word_embedding")
 
                 if config['embedding'] != "None":
-                    self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['question']["embedding_dim_pos"])], name="embedding_vector_ques")
+                    self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['question']["embedding_dim"])], name="embedding_vector_ques")
                     word_emb = tf.concat([word_emb, self._glove], axis=2)
                 else:
                     print("None ****************")
+                #     if config['glove']:
+                # self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['question']["embedding_dim"])], name="glove")
+                # word_emb = tf.concat([word_emb, self._glove], axis=2)
+                    
+
+
+
+            
                 
                 lstm_states, _ = rnn.variable_length_LSTM(word_emb,
                                                     num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),

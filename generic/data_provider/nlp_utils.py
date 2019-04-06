@@ -13,6 +13,22 @@ from pathlib import Path
 
 import time
 
+class GloveEmbeddings(object):
+
+    def __init__(self, file, glove_dim=300):
+        self.glove = pickle_loader(file)
+        self.glove_dim = glove_dim
+
+    def get_embeddings(self, tokens):
+        vectors = []
+        for token in tokens:
+            token = token.lower().replace("\'s", "")
+            if token in self.glove:
+                vectors.append(np.array(self.glove[token]))
+            else:
+                vectors.append(np.zeros((self.glove_dim,)))
+        return vectors
+
 class Embeddings(object):
 
     def __init__(self, file,total_words=0,emb_dim=100,emb_window=3,embedding="fasttext",train=None,valid=None,test=None,dictionary_file_question="dict.json",dictionary_file_description="dict_Description.json",lemme=False,pos=False,description=False):
