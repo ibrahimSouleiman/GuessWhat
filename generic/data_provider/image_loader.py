@@ -4,7 +4,7 @@ import numpy as np
 import h5py
 
 from generic.data_provider.image_preprocessors import resize_image, scaled_crop_and_pad
-
+import matplotlib.pyplot as plt
 # Why doing an image builder/loader?
 # Well, there are two reasons:
 #  - first you want to abstract the kind of image you are using (raw/conv/feature) when you are loading the dataset/batch.
@@ -75,6 +75,8 @@ class h5FeatureBuilder(AbstractImgBuilder):
 
     def build(self, image_id, filename, optional=True, which_set=None,**kwargs):
 
+
+        # print(" ++++++++++ image_loader | image_id = {} , filename = {} ",image_id,filename)
         # Is the h5 features split into train/val/etc. files or gather into a single file
         if which_set is not None:
             h5filename = which_set + "_" + h5_basename
@@ -162,8 +164,11 @@ class RawImageLoader(AbstractImgLoader):
 
     def get_image(self, **kwargs):
         img = Image.open(self.img_path).convert('RGB')
-
         img = resize_image(img, self.width , self.height)
+        # print("/*/*/*/*/******* Image ********/*/*/*/*/*/*/*/ {}".format(self.img_path))
+        # imgplot = plt.imshow(img)
+        # plt.show()
+
         img = np.array(img, dtype=np.float32)
 
         if self.channel is not None:
@@ -199,9 +204,17 @@ class RawCropLoader(AbstractImgLoader):
     def get_image(self, **kwargs):
 
         img = Image.open(self.img_path).convert('RGB')
-
+       
+        # plt.imshow(img)
+        # plt.show()
+        
         crop = scaled_crop_and_pad(raw_img=img, bbox=self.bbox, scale=self.scale)
         crop = resize_image(crop, self.width , self.height)
+        # print("/*/*/*/*/******* Image ********/*/*/*/*/*/*/*/ {}".format(self.img_path))
+        
+        # plt.imshow(crop)
+        # plt.show()
+
         crop = np.array(crop, dtype=np.float32)
 
         if self.channel is not None:

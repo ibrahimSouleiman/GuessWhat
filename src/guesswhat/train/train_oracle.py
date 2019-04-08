@@ -33,18 +33,13 @@ if __name__ == '__main__':
     parser.add_argument("-data_dir", type=str, help="Directory with data")
     parser.add_argument("-exp_dir", type=str, help="Directory in which experiments are stored")
     parser.add_argument("-config", type=str, help='Config file')
-    parser.add_argument("-dict_file_question", type=str, default="dict_pos_tag.json", help="Dictionary file name")
+    parser.add_argument("-dict_file_question", type=str, default="dict.json", help="Dictionary file name")# default dict_pos_tag
     parser.add_argument("-dict_file_description", type=str, default="dict_Description.json", help="Dictionary file name")
     parser.add_argument("-all_dictfile", type=str, default="data/list_allquestion1.npy", help="Dictionary file name")
     parser.add_argument("-img_dir", type=str, help='Directory with images')
     parser.add_argument("-crop_dir", type=str, help='Directory with images')
     parser.add_argument("-load_checkpoint", type=str, help="Load model parameters from specified checkpoint")
     parser.add_argument("-continue_exp", type=lambda x: bool(strtobool(x)), default="False", help="Continue previously started experiment?")
-
-
-
-
-
     parser.add_argument("-gpu_ratio", type=float, default=0.50, help="How many GPU ram is required? (ratio)")
     parser.add_argument("-no_thread", type=int, default=4, help="No thread to load batch")
 
