@@ -1,12 +1,12 @@
 {
   "inputs": {
     "question": true,
-    "description": false,
+    "description":false,
     "allcategory":false,
-    "category": true,
-    "spatial":true,
-    "crop": false,
-    "image": true
+    "category": false,
+    "spatial":false,
+    "crop": true,
+    "image": false
   },
 
   "embedding":"fattext",
@@ -24,11 +24,11 @@
     },
     "description": {
       "no_LSTM_hiddens": 5312,
-      "embedding_dim": 300,
+      "embedding_dim": 100,
       "embedding_dim_pos":100,
       "embedding_window":3,
       "pos":false,
-      "lemme":true
+      "lemme":false
     },
     "allcategory": {
       "no_LSTM_hiddens": 512,
@@ -68,8 +68,23 @@
     },
 
     "crop": {
-      "image_input": "fc8",
-      "dim": [1000],
+      "image_input": "raw",
+      "dim": [224, 224, 3],
+      "normalize": true,
+
+      "resnet_version": 50,
+      "finetune" : [],
+   
+       "attention" : {
+        "mode": "classic",
+        "no_attention_mlp": 256
+      },
+
+      "cbn": {
+        "use_cbn": true,
+        "cbn_embedding_size": 512,
+        "excluded_scope_names": ["*"]
+      },      
       "scale" : 1.1
     }
 

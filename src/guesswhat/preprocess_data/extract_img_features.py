@@ -24,12 +24,12 @@ parser = argparse.ArgumentParser('Feature extractor! ')
 
 parser.add_argument("-img_dir", type=str, required=True, help="Input Image folder")
 parser.add_argument("-data_dir", type=str, required=True,help="Dataset folder")
-parser.add_argument("-set_type", type=list, default=["valid", "train", "test"], help='Select the dataset to dump')
+parser.add_argument("-set_type", type=list, default=["valid","train", "test"], help='Select the dataset to dump')
 
 parser.add_argument("-out_dir", type=str, required=True, help="Output folder")
 
 parser.add_argument("-network", type=str, choices=["resnet", "vgg","inception","alexnet"], help="Use resnet/vgg/inception/alexnet network")
-parser.add_argument("-resnet_version", type=int, default=152, choices=[50, 101, 152], help="Pick the resnet version [50/101/152]")
+parser.add_argument("-resnet_version", type=int, default=50, choices=[50, 101, 152], help="Pick the resnet version [50/101/152]")
 parser.add_argument("-ckpt", type=str, required=True, help="Path for network checkpoint: ")
 parser.add_argument("-feature_name", type=str, default="", help="Pick the name of the network features default=(fc8 - block4)")
 

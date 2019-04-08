@@ -114,21 +114,21 @@ def extract_features(
                 print("--- 5")
 
                 for batch in tqdm(iterator):
-                    print("--- 6")
+                    # print("--- 6")
                     # print(" ... ",numpy.array(batch[source_name]),numpy.array(batch[source_name]).shape)
                     feat = sess.run(ft_output, feed_dict={img_input: numpy.array(batch[source_name])})
     
                     # Store dataset
-                    print("--- 7")
+                    #print("--- 7")
                     batch_size = len(batch["raw"])
                     ft_dataset[pt_hd5: pt_hd5 + batch_size] = feat
     
-                    print("--- 8")
+                    #print("--- 8")
                     # Store idx to image.id
                     for i, game in enumerate(batch["raw"]):
                         idx2img[pt_hd5 + i] = game.image.id
 
-                    print("--- 9")
+                    #print("--- 9")
                     # update hd5 pointer
                     pt_hd5 += batch_size
                 print("Start dumping file: {}".format(filepath))
