@@ -210,6 +210,11 @@ class Dataset(AbstractDataset):
         self.set = which_set
         self.lemmas = WordNetLemmatizer()
 
+        self.maxlength_question = 0
+        self.count_questions = {}
+        self.indice = 0
+        self.total = 0
+
         t1 = time.time()
         with gzip.open(filegues) as f:
             for i,line in enumerate(f):
@@ -231,9 +236,14 @@ class Dataset(AbstractDataset):
                         crop_builder=crop_builder,
                         lemmatizer = self.lemmas
                         )
+                question_length = len(g.questions)
+                self.count_questions[len(self.count_questions)] = question_length
+                self.total += question_length 
 
+                if self.maxlength_question < question_length: self.maxlength_question = question_length
 
                 games.append(g)
+                
 
 
 
@@ -242,27 +252,17 @@ class Dataset(AbstractDataset):
                 #     print("error to create dataset")
                 #     nb_erreur += 1
 
-                # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass))
-
-               
+                # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass)               
                 #if len(games) > 50: break
-
-                
-
                 # if  len(games) > 5: 
                 #  break
 
-
-
-
-
-
-
-
-
+               
+                #print(" Max Length of Question = {} , total_question = {}, nb_parties = {} | {}".format(self.maxlength_question,self.total,len(self.count_questions),which_set))
 
         # print("Total = ",total)
         # exit()
+        
 
 
         super(Dataset, self).__init__(games)
@@ -280,19 +280,19 @@ class OracleDataset(AbstractDataset):
         for i,g in enumerate(old_games):
             new_games += self.split(g)   
 
-        print(" Guess_dataset | Lemme different = {} ",format(self.compteur))
+        # print(" Guess_dataset | Lemme different = {} ",format(self.compteur))
 
         #for i in range(150):
         # print(" guesswhat_dataset | Question = ",new_games[0].game.questions)
-
         super(OracleDataset, self).__init__(new_games)
 
     @classmethod
     def load(cls, folder, which_set, image_builder=None, crop_builder=None):
-
         return cls(Dataset(folder, which_set, image_builder, crop_builder))
 
     def split(self, game):
+
+
         games = []
         for i, q, a in zip(game.question_ids, game.questions, game.answers):
             # print("****** GuessWhat | oracleDataSet q={}".format(q))

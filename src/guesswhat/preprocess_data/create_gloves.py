@@ -1,7 +1,7 @@
 import argparse
 import logging
 import io
-
+import os
 
 from nltk.tokenize import TweetTokenizer
 from generic.utils.file_handlers import pickle_dump
@@ -62,6 +62,8 @@ if __name__ == '__main__':
         vectors = {}
         for line in f:
             vals = line.rstrip().split(' ')
+            print(len(vals))
+            exit()
             vectors[vals[0]] = [float(x) for x in vals[1:]]
             
     print("Mapping glove...")
@@ -90,7 +92,4 @@ if __name__ == '__main__':
     print("Dumping file...")
     pickle_dump(glove_dict, args.glove_out)
 
-    print("Done!")
-
-
-
+print("Done!")

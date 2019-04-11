@@ -82,7 +82,7 @@ if __name__ == '__main__':
     validset = OracleDataset.load(args.data_dir, "valid", image_builder, crop_builder)
     testset = OracleDataset.load(args.data_dir, "test", image_builder, crop_builder)
 
-
+    # exit()
     # Load dictionary
     logger.info('Loading dictionary Question..')
     tokenizer = GWTokenizer(os.path.join(args.data_dir, args.dict_file_question))
@@ -115,6 +115,11 @@ if __name__ == '__main__':
     saver = tf.train.Saver()
     resnet_saver = None
 
+
+
+    cpu_pool = Pool(args.no_thread, maxtasksperchild=1000)
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=args.gpu_ratio)
+
     # Retrieve only resnet variabes
     if use_resnet:
         resnet_saver = create_resnet_saver([network])
@@ -133,23 +138,6 @@ if __name__ == '__main__':
 
 
     # CPU/GPU option
-    cpu_pool = Pool(args.no_thread, maxtasksperchild=1000)
-    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=args.gpu_ratio)
-
-
-    # gov load
-    # Load glove
-
-
-
-
-
-
-
-    
-
-
-
 
     with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True)) as sess:
 
@@ -175,7 +163,7 @@ if __name__ == '__main__':
 
 
        
-        batchifier =  OracleBatchifier(tokenizer, sources, status=config['status'],tokenizer_description=tokenizer_description,args = args,config=config)
+        batchifier =  OracleBatchifier(tokenizer, sources, status=config['status'],glove=glove,tokenizer_description=tokenizer_description,args = args,config=config)
 
         
         for t in range(start_epoch, no_epoch):

@@ -1,7 +1,7 @@
 {
   "inputs": {
     "question": true,
-    "description":true,
+    "description":false,
     "allcategory":false,
     "category": true,
     "spatial":true,
@@ -11,8 +11,7 @@
 
   "embedding":"fattext",
   "model": {
-
-    "glove":false,
+    "glove":true,
     "fasttext":false,
     "question": {
       "no_LSTM_hiddens": 12,

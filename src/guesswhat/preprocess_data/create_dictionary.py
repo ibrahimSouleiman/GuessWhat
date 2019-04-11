@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
 
     parser.add_argument("-data_dir", type=str, help="Path where are the Guesswhat dataset")
-    parser.add_argument("-texteType", default="Question" ,type=str, help="Path where are the Guesswhat dataset")
+    parser.add_argument("-texte_type", default="Question" ,choices=["Question","Description"], type=str, help="Path where are the Guesswhat dataset")
     parser.add_argument("-dict_file", type=str, default="dict.json", help="Name of the dictionary file")
     parser.add_argument("-min_occ", type=int, default=0,
                         help='Minimum number of occurences to add word to dictionary')
@@ -63,7 +63,7 @@ if __name__ == '__main__':
 
     
 
-    if args.texteType == "Question":
+    if args.texte_type == "Question":
         # Set default values
         for game in trainset.games:
             question = game.questions[0]
@@ -73,7 +73,7 @@ if __name__ == '__main__':
                 word2occ[tok] += 1
             
 
-    elif args.texteType == "Description":
+    elif args.texte_type == "Description":
         # Set default values
         for game in trainset.games:
             description = game.image.description
