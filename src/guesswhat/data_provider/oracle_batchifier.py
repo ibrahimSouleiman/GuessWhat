@@ -30,22 +30,19 @@ class OracleBatchifier(AbstractBatchifier):
         self.sources = sources
         self.status = status
         self.config = config
-        self.glove = glove
 
-        self.model_worddl = FastText.load(os.path.join("data","ftext_lemme_des.model"))
-        
-        self.model_wordd = FastText.load(os.path.join("data","ftext_word_des.model"))
+        if self.config["model"]["fasttext"] : 
+            self.model_worddl = FastText.load(os.path.join("data","ftext_lemme_des.model"))
+            self.model_wordd = FastText.load(os.path.join("data","ftext_word_des.model"))        
+            self.model_posd = FastText.load(os.path.join("data","ftext_pos_des.model"))
+            self.model_wordl = FastText.load(os.path.join("data","ftext_lemme_ques.model"))
+            self.model_word = FastText.load(os.path.join("data","ftext_word_ques.model"))
+            self.model_pos = FastText.load(os.path.join("data","ftext_pos_ques.model"))
+        elif self.config["model"]["glove"]:
+            self.glove = glove
 
-        
-        self.model_posd = FastText.load(os.path.join("data","ftext_pos_des.model"))
-       
 
-        self.model_wordl = FastText.load(os.path.join("data","ftext_lemme_ques.model"))
-      
-        self.model_word = FastText.load(os.path.join("data","ftext_word_ques.model"))
 
-       
-        self.model_pos = FastText.load(os.path.join("data","ftext_pos_ques.model"))
     
         # self.embedding = Embeddings(args.all_dictfile,total_words=tokenizer_question.no_words,train=trainset,valid=None,test=None,dictionary_file_question=os.path.join(args.data_dir, args.dict_file_question),dictionary_file_description=os.path.join(args.data_dir, args.dict_file_description),description=config["inputs"]["description"],lemme=config["lemme"],pos=config["pos"])
 
@@ -103,8 +100,16 @@ class OracleBatchifier(AbstractBatchifier):
                 else:
                     # print("/////////// question_pos NOT EXIST")
 
-                    embedding_vectors,_ = get_embeddings(words,pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos)
+                    if self.config["model"]["fasttext"] : 
+                        print("++++++----- ++++++++ Dans fasttext ")
+                        embedding_vectors,_ = get_embeddings(words,pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos)
+                    elif self.config["model"]["glove"] : 
+                        print("++++++----- ++++++++ Dans glove ")
+                        embedding_vectors,_ = self.glove.get_embeddings(words)
+                    
+                    print("taille = {} ".format(embedding_vectors))
 
+                    exit()
                     # print("////////// embedding_vectors=",len(embedding_vectors[0]))
                     batch['embedding_vector_ques'].append(embedding_vectors)
 

@@ -1,18 +1,19 @@
 {
   "inputs": {
     "question": true,
-    "description":true,
+    "description":false,
     "allcategory":false,
     "category": false,
     "spatial":false,
-    "crop": true,
+    "crop": false,
     "image": false
   },
 
   "embedding":"fattext",
   "model": {
 
-    "glove":false,
+    "glove":true,
+    "fasttext":false,
 
     "question": {
       "no_LSTM_hiddens": 12,

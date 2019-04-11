@@ -15,6 +15,7 @@ from pathlib import Path
 
 from guesswhat.data_provider.guesswhat_dataset import OracleDataset
 from nltk.tokenize import TweetTokenizer
+from gensim.scripts.glove2word2vec import glove2word2vec
 
 
 
@@ -22,18 +23,29 @@ import time
 
 class GloveEmbeddings(object):
 
-    def __init__(self, file, glove_dim=300):
-        self.glove = pickle_loader(file)
+    def __init__(self, file, glove_dim=100,input_file = 'glove.42B.300d.txt' ):
         self.glove_dim = glove_dim
+        self.glove_input_file = os.path.join("data",input_file)
+        self.word2vec_output_file = 'glove.42B.300d.txt.word2vec'
+        file_word2vec = Path(os.path.join("data",'glove.42B.300d.txt.word2vec'))
+        if file_word2vec.is_file() == False:
+            glove2word2vec(self.glove_input_file, self.word2vec_output_file)
+        self.filename = os.path.join("data","glove.42B.300d.txt.word2vec")
+        self.glove = KeyedVectors.load_word2vec_format(self.filename, binary=False)
+        self.unk = "<unk>"
+  
+
 
     def get_embeddings(self, tokens):
         vectors = []
         for token in tokens:
             token = token.lower().replace("\'s", "")
-            if token in self.glove:
+            try:
+                emb_token = self.glove[token]
                 vectors.append(np.array(self.glove[token]))
-            else:
+            except KeyError:
                 vectors.append(np.zeros((self.glove_dim,)))
+
         return vectors
 
 class Embeddings(object):
