@@ -19,7 +19,7 @@ test = {'person':[ 364378], 'car':[ 67190], 'book':[ 56996], 'chair':[ 47388], '
 # plt.legend(list(train.keys()))
 # plt.axes(1],80)
 # plt.show()
-df = pd.DataFrame.from_dict(data = train,orient='index',index=["Categories"])
+df = pd.DataFrame.from_dict(data = test,orient='index')
 print(df)
 # field = "Day"
 # day_order = ["Monday"], "Tuesday"], "Wednesday"], "Thursday"], "Friday"], "Saturday"], "Sunday"]

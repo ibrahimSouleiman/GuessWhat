@@ -18,7 +18,7 @@ class OracleNetwork(ResnetModel):
             if config['inputs']['question']:
      
                 self._is_training = tf.placeholder(tf.bool, name="is_training")
-                # self._question = tf.placeholder(tf.int32, [self.batch_size, None], name='question')
+                self._question = tf.placeholder(tf.int32, [self.batch_size, None], name='question')
                 self.seq_length_question = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question')
 
                 # word_emb = utils.get_embedding(self._question,
@@ -221,15 +221,17 @@ class OracleNetwork(ResnetModel):
             num_classes = 3
             self._answer = tf.placeholder(tf.float32, [self.batch_size, num_classes], name='answer')
 
+
             with tf.variable_scope('mlp'):
                 num_hiddens = config['model']['MLP']['num_hiddens']
                 l1 = utils.fully_connected(emb, num_hiddens, activation='relu', scope='l1')
-
                 self.pred = utils.fully_connected(l1, num_classes, activation='softmax', scope='softmax')
-                self.best_pred = tf.argmax(self.pred, axis=1)
+                print("------+ tf=",self.pred)
+            self.best_pred = tf.argmax(self.pred, axis=1,name="best_pred")
 
             self.loss = tf.reduce_mean(utils.cross_entropy(self.pred, self._answer))
             self.error = tf.reduce_mean(utils.error(self.pred, self._answer))
+
 
             print('Model... Oracle build!')
             # print(" Summary = ",tf.summary())
@@ -239,3 +241,6 @@ class OracleNetwork(ResnetModel):
 
     def get_accuracy(self):
         return 1. - self.error
+
+    def get_predict(self):
+        return self.best_pred

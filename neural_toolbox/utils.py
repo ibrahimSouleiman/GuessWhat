@@ -57,6 +57,7 @@ def cross_entropy(y_hat, y):
 
 
 def error(y_hat, y):
+
     if rank(y) == 1:
         mistakes = tf.not_equal(
             tf.argmax(y_hat, 1), tf.cast(y, tf.int64))

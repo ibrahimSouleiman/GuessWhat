@@ -47,6 +47,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
  
     config, exp_identifier, save_path = load_config(args.config, args.exp_dir)
+    # print(save_path)
+    # exit()
+
+
     logger = logging.getLogger()
 
     # Load config
@@ -78,11 +82,13 @@ if __name__ == '__main__':
 
     # Load data
     logger.info('Loading data..')
-    trainset = OracleDataset.load(args.data_dir, "train", image_builder, crop_builder)
-    validset = OracleDataset.load(args.data_dir, "valid", image_builder, crop_builder)
-    testset = OracleDataset.load(args.data_dir, "test", image_builder, crop_builder)
 
-    # exit()
+    all_category = {}
+
+    trainset = OracleDataset.load(args.data_dir, "train", all_category,image_builder, crop_builder)
+    validset = OracleDataset.load(args.data_dir, "valid", all_category,  image_builder, crop_builder)
+    testset = OracleDataset.load(args.data_dir, "test", all_category, image_builder, crop_builder)
+
     # Load dictionary
     logger.info('Loading dictionary Question..')
     tokenizer = GWTokenizer(os.path.join(args.data_dir, args.dict_file_question))
@@ -143,104 +149,108 @@ if __name__ == '__main__':
 
 
         sources = network.get_sources(sess)
-        logger.info("Sources: " + ', '.join(sources))
+        
+        out_net = network.get_parameters()[-1]
+   
+        # logger.info("Sources: " + ', '.join(sources))
 
-        sess.run(tf.global_variables_initializer())
-        if use_resnet:
-            resnet_saver.restore(sess, os.path.join(args.data_dir, 'resnet_v1_{}.ckpt'.format(resnet_version)))
+        # sess.run(tf.global_variables_initializer())
+        # if use_resnet:
+        #     resnet_saver.restore(sess, os.path.join(args.data_dir, 'resnet_v1_{}.ckpt'.format(resnet_version)))
 
-        start_epoch = load_checkpoint(sess, saver, args, save_path)
+        # start_epoch = load_checkpoint(sess, saver, args, save_path)
 
-        best_val_err = 0
-        best_train_err = None
+        # best_val_err = 0
+        # best_train_err = None
 
-        # create training tools
+        # # create training tools
         evaluator = Evaluator(sources, network.scope_name,network=network,tokenizer=tokenizer)
 
-        #train_evaluator = MultiGPUEvaluator(sources, scope_names, networks=networks, tokenizer=tokenizer)
-        #train_evaluator = Evaluator(sources, scope_names[0], network=networks[0], tokenizer=tokenizer)
-        #eval_evaluator = Evaluator(sources, scope_names[0], network=networks[0], tokenizer=tokenizer)
-
-
-       
+        # #train_evaluator = MultiGPUEvaluator(sources, scope_names, networks=networks, tokenizer=tokenizer)
+        # #train_evaluator = Evaluator(sources, scope_names[0], network=networks[0], tokenizer=tokenizer)
+        # #eval_evaluator = Evaluator(sources, scope_names[0], network=networks[0], tokenizer=tokenizer)
         batchifier =  OracleBatchifier(tokenizer, sources, status=config['status'],glove=glove,tokenizer_description=tokenizer_description,args = args,config=config)
 
         
-        for t in range(start_epoch, no_epoch):
-            logger.info('Epoch {}..'.format(t + 1))
-            # print('Epoch {}..'.format(t + 1))
+        # for t in range(start_epoch, no_epoch):
+        #     logger.info('Epoch {}..'.format(t + 1))
+        #     # print('Epoch {}..'.format(t + 1))
 
-            # print(" train_oracle | Iterator ...")
+        #     # print(" train_oracle | Iterator ...")
             
-            t1 = time.time()
-            train_iterator = Iterator(trainset,
-                                      batch_size=batch_size, pool=cpu_pool,
-                                      batchifier=batchifier,
-                                      shuffle=True)
-            t2 = time.time()
+        #     t1 = time.time()
+        #     train_iterator = Iterator(trainset,
+        #                               batch_size=batch_size, pool=cpu_pool,
+        #                               batchifier=batchifier,
+        #                               shuffle=True)
+        #     t2 = time.time()
 
-            print(" train_oracle | Iterator  trainset...Total=",t2-t1)
+        #     print(" train_oracle | Iterator  trainset...Total=",t2-t1)
 
-            t1 = time.time()
+        #     t1 = time.time()
 
-            train_loss, train_accuracy = evaluator.process(sess, train_iterator, outputs=outputs + [optimizer])
-            t2 = time.time()
-
-
-            print(" train_oracle | Iterevaluatorator...Total=",t2-t1)
-            t1 = time.time()
-            valid_iterator = Iterator(validset, pool=cpu_pool,
-                                      batch_size=batch_size*2,
-                                      batchifier=batchifier,
-                                      shuffle=False)
-            t2 = time.time()
-
-            print(" train_oracle | Iterator validset...Total=",t2-t1)
+        #     train_loss, train_accuracy = evaluator.process(sess, train_iterator, outputs=outputs + [optimizer])
+        #     t2 = time.time()
 
 
-            t1 = time.time()
-            valid_loss, valid_accuracy = evaluator.process(sess, valid_iterator, outputs=outputs)
-            t2 = time.time()
+        #     print(" train_oracle | Iterevaluatorator...Total=",t2-t1)
+        #     t1 = time.time()
+        #     valid_iterator = Iterator(validset, pool=cpu_pool,
+        #                               batch_size=batch_size*2,
+        #                               batchifier=batchifier,
+        #                               shuffle=False)
+        #     t2 = time.time()
 
-            print(" train_oracle | evaluator ...Total=",t2-t1)
+        #     print(" train_oracle | Iterator validset...Total=",t2-t1)
+
+
+        #     t1 = time.time()
+        #     valid_loss, valid_accuracy = evaluator.process(sess, valid_iterator, outputs=outputs)
+        #     t2 = time.time()
+
+        #     print(" train_oracle | evaluator ...Total=",t2-t1)
 
 
             
-            # print("Training loss: {}".format(train_loss))
-            # print("Training error: {}".format(1-train_accuracy))
-            # print("Validation loss: {}".format(valid_loss))
-            # print("Validation error: {}".format(1-valid_accuracy))
+        #     # print("Training loss: {}".format(train_loss))
+        #     # print("Training error: {}".format(1-train_accuracy))
+        #     # print("Validation loss: {}".format(valid_loss))
+        #     # print("Validation error: {}".format(1-valid_accuracy))
 
-
-            logger.info("Training loss: {}".format(train_loss))
-            logger.info("Training error: {}".format(1-train_accuracy))
-            logger.info("Validation loss: {}".format(valid_loss))
-            logger.info("Validation error: {}".format(1-valid_accuracy))
+        #     logger.info("Training loss: {}".format(train_loss))
+        #     logger.info("Training error: {}".format(1-train_accuracy))
+        #     logger.info("Validation loss: {}".format(valid_loss))
+        #     logger.info("Validation error: {}".format(1-valid_accuracy))
             
-            t1 = time.time()
+        #     t1 = time.time()
 
-            if valid_accuracy > best_val_err:
-                best_train_err = train_accuracy
-                best_val_err = valid_accuracy
-                saver.save(sess, save_path.format('params.ckpt'))
-                logger.info("Oracle checkpoint saved...")
+        #     if valid_accuracy > best_val_err:
+        #         best_train_err = train_accuracy
+        #         best_val_err = valid_accuracy
+        #         saver.save(sess, save_path.format('params.ckpt'))
+        #         logger.info("Oracle checkpoint saved...")
 
-                pickle_dump({'epoch': t}, save_path.format('status.pkl'))
+        #         pickle_dump({'epoch': t}, save_path.format('status.pkl'))
 
 
-            t2 = time.time()
-            print(" train_oracle | Condition ...Total=",t2-t1)
+        #     t2 = time.time()
+        #     print(" train_oracle | Condition ...Total=",t2-t1)
 
         # Load early stopping
 
         t1 = time.time()
+        save_path = "out/oracle/3a29ed734c5d13860f61ccea17f6f90b/{}"
         saver.restore(sess, save_path.format('params.ckpt'))
         test_iterator = Iterator(testset, pool=cpu_pool,
                                  batch_size=batch_size*2,
                                  batchifier=batchifier,
                                  shuffle=True)
-        [test_loss, test_accuracy] = evaluator.process(sess, test_iterator, outputs)
+
+       
+        [test_loss, test_accuracy] = evaluator.process(sess, test_iterator, outputs,network.get_predict(),inference=True)
         t2 = time.time()
+        
+        
 
         print(" train_oracle | Iterator testset  ...Total=",t2-t1)
         # print("Testing loss: {}".format(test_loss))
