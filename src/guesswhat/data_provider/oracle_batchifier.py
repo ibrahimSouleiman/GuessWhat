@@ -108,7 +108,7 @@ class OracleBatchifier(AbstractBatchifier):
                         embedding_vectors,_ = self.glove.get_embeddings(words)
                     
                     #print("taille = {} ".format(embedding_vectors))
-
+                    # exit()=
                     # print("////////// embedding_vectors=",len(embedding_vectors[0]))
                     batch['embedding_vector_ques'].append(embedding_vectors)
 

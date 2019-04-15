@@ -257,22 +257,21 @@ class Dataset(AbstractDataset):
                 #     print("error to create dataset")
                 #     nb_erreur += 1
 
-                # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass))
 
+                # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass)               
                
                 # if len(games) > 100: break
                 # if  len(games) > 5000: 
                 #   break
 
 
-        print(" Max Length of Question = {} , total_question = {}, nb_parties = {} | {}".format(self.maxlength_question,self.total,len(self.count_questions),which_set))
+        # print(" Max Length of Question = {} , total_question = {}, nb_parties = {} | {}".format(self.maxlength_question,self.total,len(self.count_questions),which_set))
         # print("Total = ",total)
         # exit()
         
 
 
         super(Dataset, self).__init__(games)
-
 
 class OracleDataset(AbstractDataset):
     """
