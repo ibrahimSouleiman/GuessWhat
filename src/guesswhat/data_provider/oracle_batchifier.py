@@ -104,12 +104,12 @@ class OracleBatchifier(AbstractBatchifier):
                         print("++++++----- ++++++++ Dans fasttext ")
                         embedding_vectors,_ = get_embeddings(words,pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos)
                     elif self.config["model"]["glove"] : 
-                        print("++++++----- ++++++++ Dans glove ")
+                        #print("++++++----- ++++++++ Dans glove ")
                         embedding_vectors,_ = self.glove.get_embeddings(words)
                     
-                    print("taille = {} ".format(embedding_vectors))
+                    #print("taille = {} ".format(embedding_vectors))
 
-                    exit()
+                    # exit()
                     # print("////////// embedding_vectors=",len(embedding_vectors[0]))
                     batch['embedding_vector_ques'].append(embedding_vectors)
 

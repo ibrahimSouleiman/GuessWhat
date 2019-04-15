@@ -27,9 +27,10 @@ class GloveEmbeddings(object):
         self.glove_dim = glove_dim
         self.glove_input_file = os.path.join("data",input_file)
         self.word2vec_output_file = 'glove.42B.300d.txt.word2vec'
-        file_word2vec = Path(os.path.join("data",'glove.42B.300d.txt.word2vec'))
-        if file_word2vec.is_file() == False:
-            glove2word2vec(self.glove_input_file, self.word2vec_output_file)
+        self.file_word2vec = Path(os.path.join("data",'glove.42B.300d.txt.word2vec'))
+        print("----- Glove_file_exist =",self.file_word2vec.is_file())
+        if self.file_word2vec.is_file() == False:
+            glove2word2vec(self.glove_input_file, self.file_word2vec)
         self.filename = os.path.join("data","glove.42B.300d.txt.word2vec")
         self.glove = KeyedVectors.load_word2vec_format(self.filename, binary=False)
         self.unk = "<unk>"
