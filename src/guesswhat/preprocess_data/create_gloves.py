@@ -62,8 +62,6 @@ if __name__ == '__main__':
         vectors = {}
         for line in f:
             vals = line.rstrip().split(' ')
-            print(len(vals))
-            exit()
             vectors[vals[0]] = [float(x) for x in vals[1:]]
             
     print("Mapping glove...")

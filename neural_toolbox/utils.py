@@ -20,6 +20,7 @@ def fully_connected(inp, n_out, activation=None, scope="fully_connected",
                     weight_initializer=UniformUnitScaling(),
                     init_bias=0.0, use_bias=True, reuse=False):
     with tf.variable_scope(scope, reuse=reuse):
+        print("Input fully_connected = {}".format(inp))
         inp_size = int(inp.get_shape()[1])
         shape = [inp_size, n_out]
         weight = tf.get_variable(
@@ -28,14 +29,16 @@ def fully_connected(inp, n_out, activation=None, scope="fully_connected",
         out = tf.matmul(inp, weight)
 
         if use_bias:
-            bias = tf.get_variable(
-                "b", [n_out],
-                initializer=Constant(init_bias))
-            out += bias
+             bias = tf.get_variable(
+                 "b", [n_out],
+                 initializer=Constant(init_bias))
+             out += bias
 
     if activation == 'relu':
         return tf.nn.relu(out)
     if activation == 'softmax':
+        # print("out fully_connected= {}".format(out))
+        # print(tf.nn.softmax(out))
         return tf.nn.softmax(out)
     if activation == 'tanh':
         return tf.tanh(out)
@@ -57,6 +60,7 @@ def cross_entropy(y_hat, y):
 
 
 def error(y_hat, y):
+
     if rank(y) == 1:
         mistakes = tf.not_equal(
             tf.argmax(y_hat, 1), tf.cast(y, tf.int64))

@@ -33,11 +33,16 @@ def compute_attention(feature_maps, context, no_mlp_units, reuse=False):
         e = tf.reshape(e, shape=[-1, h * w, 1])
 
         # compute the softmax over the evidence
-        alpha = tf.nn.softmax(e, dim=1)
+        # print(e)
+        alpha = tf.nn.softmax(e,axis=1)
+        # print(alpha)
+
+
 
         # apply soft attention
         soft_attention = feature_maps * alpha
         soft_attention = tf.reduce_sum(soft_attention, axis=1)
+        # print(soft_attention)
 
     return soft_attention
 

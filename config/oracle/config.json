@@ -3,16 +3,16 @@
     "question": true,
     "description":false,
     "allcategory":false,
-    "category": false,
-    "spatial":false,
-    "crop": false,
+    "category": true,
+    "spatial":true,
+    "crop": true,
     "image": false
   },
 
   "embedding":"fattext",
   "model": {
-    "glove":true,
-    "fasttext":false,
+    "glove":false,
+    "fasttext":true,
     "question": {
       "no_LSTM_hiddens": 12,
       "embedding_dim": 300,
@@ -92,11 +92,10 @@
   "optimizer": {
     "no_epoch": 20,
     "learning_rate": 1e-4,
-    "batch_size": 200,
+    "batch_size": 1,
     "clip_val": 5
   },
   "glove_name" : "glove_dict.pkl",
-
   "status": ["success"],
   "seed": -1
 

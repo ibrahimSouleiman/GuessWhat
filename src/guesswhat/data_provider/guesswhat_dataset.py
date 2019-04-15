@@ -4,12 +4,14 @@ import copy
 import os
 import nltk
 import time
+import numpy as np
+
+from collections import Counter
 
 from PIL import ImageFont, ImageDraw
 from PIL import Image as PImage
 from nltk.tokenize import TweetTokenizer
 from nltk import WordNetLemmatizer
-
 
 from generic.data_provider.dataset import AbstractDataset
 
@@ -41,8 +43,9 @@ class Game:
 
 
         self.objects = []
+        self.all_category = []
         for o in objects:
-
+            self.all_category.append(o['category'])
             new_obj = Object(id=o['id'],
                              category=o['category'],
                              category_id=o['category_id'],
@@ -134,6 +137,8 @@ class Image:
             self.image_loader = image_builder.build(id, which_set=which_set, filename=self.filename, optional=False)
 
 
+    def get_idimage(self):
+        return self.id
 
     def get_image(self, **kwargs):
         if self.image_loader is not None:
@@ -252,21 +257,21 @@ class Dataset(AbstractDataset):
                 #     print("error to create dataset")
                 #     nb_erreur += 1
 
+
                 # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass)               
-                #if len(games) > 50: break
-                # if  len(games) > 5: 
-                #  break
-
                
-                #print(" Max Length of Question = {} , total_question = {}, nb_parties = {} | {}".format(self.maxlength_question,self.total,len(self.count_questions),which_set))
+                # if len(games) > 100: break
+                # if  len(games) > 5000: 
+                #   break
 
+
+        # print(" Max Length of Question = {} , total_question = {}, nb_parties = {} | {}".format(self.maxlength_question,self.total,len(self.count_questions),which_set))
         # print("Total = ",total)
         # exit()
         
 
 
         super(Dataset, self).__init__(games)
-
 
 class OracleDataset(AbstractDataset):
     """
@@ -276,18 +281,26 @@ class OracleDataset(AbstractDataset):
         old_games = dataset.get_data()
         new_games = []
         self.compteur = 0
+        self.all_category = []
         
         for i,g in enumerate(old_games):
             new_games += self.split(g)   
 
         # print(" Guess_dataset | Lemme different = {} ",format(self.compteur))
 
-        #for i in range(150):
-        # print(" guesswhat_dataset | Question = ",new_games[0].game.questions)
+        # for i in range(1000):
+        #     print("Question = ",new_games[i].questions)
+
+        self.unique_category = np.unique(np.asarray(self.all_category))
+        print(Counter(self.all_category))
+        print("len=",len(self.unique_category))
+        # print(self.unique_category)
+        
         super(OracleDataset, self).__init__(new_games)
 
     @classmethod
-    def load(cls, folder, which_set, image_builder=None, crop_builder=None):
+    def load(cls, folder, which_set,all_category=None, image_builder=None, crop_builder=None):
+        print("#################### {} ##########################".format(which_set))
         return cls(Dataset(folder, which_set, image_builder, crop_builder))
 
     def split(self, game):
@@ -306,7 +319,14 @@ class OracleDataset(AbstractDataset):
             new_game.questions = [q]
             new_game.question_ids = [i]
             new_game.answers = [a]
+
             games.append(new_game)
+            for category in game.all_category:
+                self.all_category.append(category)
+
+
+
+
 
         
         return games

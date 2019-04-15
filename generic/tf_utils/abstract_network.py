@@ -22,6 +22,9 @@ class AbstractNetwork(object):
 
     def get_loss(self):
         pass
+    
+    def get_predict(self):
+        pass
 
     def get_accuracy(self):
         pass

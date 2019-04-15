@@ -18,7 +18,7 @@ class OracleNetwork(ResnetModel):
             if config['inputs']['question']:
      
                 self._is_training = tf.placeholder(tf.bool, name="is_training")
-                # self._question = tf.placeholder(tf.int32, [self.batch_size, None], name='question')
+                self._question = tf.placeholder(tf.int32, [self.batch_size, None], name='question')
                 self.seq_length_question = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question')
 
                 # word_emb = utils.get_embedding(self._question,
@@ -40,12 +40,12 @@ class OracleNetwork(ResnetModel):
 
 
 
-                lstm_states, _ = rnn.variable_length_LSTM(word_emb,
+                self.lstm_states, _ = rnn.variable_length_LSTM(word_emb,
                                                     num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
                                                     seq_length=self.seq_length_question)
                 
 
-                embeddings.append(lstm_states)
+                embeddings.append(self.lstm_states)
 
                 # QUESTION-Pos
 
@@ -137,6 +137,8 @@ class OracleNetwork(ResnetModel):
 
                 self._category = tf.placeholder(tf.int32, [self.batch_size], name='category')
 
+                print(".... ORACLE =",self._category)
+
                 cat_emb = utils.get_embedding(self._category,
                                               int(config['model']['category']["n_categories"]) + 1,  # we add the unkwon category
                                               int(config['model']['category']["embedding_dim"]),
@@ -189,6 +191,8 @@ class OracleNetwork(ResnetModel):
             if config['inputs']['image']:
                 print("****  Oracle_network |  input = image ")
 
+                self._image_id = tf.placeholder(tf.float32, [self.batch_size], name='image_id')
+
                 self._image = tf.placeholder(tf.float32, [self.batch_size] + config['model']['image']["dim"], name='image')
                 self.image_out = get_image_features(
                     image=self._image, question=lstm_states,
@@ -202,10 +206,12 @@ class OracleNetwork(ResnetModel):
             # CROP
             if config['inputs']['crop']:
                 print("****  Oracle_network |  input = crop ")
+                self._image_id = tf.placeholder(tf.float32, [self.batch_size], name='image_id')
+                self._crop_id = tf.placeholder(tf.float32, [self.batch_size], name='crop_id')
 
                 self._crop = tf.placeholder(tf.float32, [self.batch_size] + config['model']['crop']["dim"], name='crop')
                 self.crop_out = get_image_features(
-                    image=self._crop, question=lstm_states,
+                    image=self._crop, question=self.lstm_states,
                     is_training=self._is_training,
                     scope_name=scope.name,
                     config=config["model"]['crop'])
@@ -215,21 +221,28 @@ class OracleNetwork(ResnetModel):
 
 
             # Compute the final embedding
-            emb = tf.concat(embeddings, axis=1)
-
+            self.emb = tf.concat(embeddings, axis=1)
+        
             # OUTPUT
             num_classes = 3
             self._answer = tf.placeholder(tf.float32, [self.batch_size, num_classes], name='answer')
 
+
             with tf.variable_scope('mlp'):
                 num_hiddens = config['model']['MLP']['num_hiddens']
-                l1 = utils.fully_connected(emb, num_hiddens, activation='relu', scope='l1')
+                # emb = tf.print(emb, [emb], "input: ")
 
+                l1 = utils.fully_connected(self.emb, num_hiddens, activation='relu', scope='l1')
+                # exit()
                 self.pred = utils.fully_connected(l1, num_classes, activation='softmax', scope='softmax')
                 self.best_pred = tf.argmax(self.pred, axis=1)
 
+
+            # self.best_pred = tf.reduce_mean(self.best_pred)
+
             self.loss = tf.reduce_mean(utils.cross_entropy(self.pred, self._answer))
             self.error = tf.reduce_mean(utils.error(self.pred, self._answer))
+
 
             print('Model... Oracle build!')
             # print(" Summary = ",tf.summary())
@@ -239,3 +252,6 @@ class OracleNetwork(ResnetModel):
 
     def get_accuracy(self):
         return 1. - self.error
+
+    def get_predict(self):
+        return self.pred
