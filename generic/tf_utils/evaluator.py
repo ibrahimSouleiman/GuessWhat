@@ -64,16 +64,16 @@ class Evaluator(object):
         for batch in tqdm(iterator):
             # Appending is_training flag to the feed_dict
             batch["is_training"] = is_training
-            
+
             if inference:
                 # print(batch,".............. batch")
                 # evaluate the network on the batch
                 # print("Batch_Length=",len(batch["embedding_vector_ques"]))
-                print("Dict_keys=",batch.keys())
+                # print("Dict_keys=",batch.keys())
                 batch_1 = {}
                 batch_2 = {}
 
-                print("true =",batch["question"])
+                question= batch["question"]
 
                 for key,values in batch.items():
                     if key=="question":
@@ -88,40 +88,68 @@ class Evaluator(object):
         
 
 
-                print("true_1=",batch_1["answer"])
-                print("true_2=",batch_2["answer"])
+                # print("true_1=",batch_1["answer"])
+                # print("true_2=",batch_2["answer"])
 
-                print("Categorie_1 =",batch_1["category"])
-                print("Categorie_1 =",batch_1["category"])
+                # print("Categorie_1 =",batch_1["category"])
+                # print("Categorie_1 =",batch_1["category"])
                 # print("Batch=",batch["embedding_vector_ques"])
 
 
                 
 
-                resul_net_1 = self.execute(sess, out_net, batch_1)
-                resul_net_2 = self.execute(sess, out_net, batch_2)
-                print(np.array_equal(np.asarray(resul_net_1),np.asarray(resul_net_2)))
+                # resul_net_1 = self.execute(sess, out_net, batch_1)
+                # resul_net_2 = self.execute(sess, out_net, batch_2)
+                # print(np.array_equal(np.asarray(resul_net_1),np.asarray(resul_net_2)))
 
-                if resul_net_1!= [0] or resul_net_2 != [0]:
-                    print(resul_net_1)
-                    print(resul_net_2)
-                    exit()
+                # if resul_net_1!= [0] or resul_net_2 != [0]:
+                #     print(resul_net_1)
+                #     print(resul_net_2)
+                #     exit()
 
-                elif np.array_equal(np.asarray(resul_net_1),np.asarray(resul_net_2)) == False:
-                    print("Resultat 1= ",resul_net_1)
-                    # resul_net = self.execute(sess, out_net, batch)
-                    print("Resultat 2= ",resul_net_2)
-                else:
-                    print("Resultat = ",resul_net_1,resul_net_2)
+                # elif np.array_equal(np.asarray(resul_net_1),np.asarray(resul_net_2)) == False:
+                #     print("Resultat 1= ",resul_net_1)
+                #     # resul_net = self.execute(sess, out_net, batch)
+                #     print("Resultat 2= ",resul_net_2)
+                # else:
+                #     print("Resultat = ",resul_net_1,resul_net_2)
 
                     # exit()
                 # process the results
                 # out = tf.get_variable("oracle/mlp/Softmax_1:0")
                 # r = self.execute(sess, out, batch)
-            
+                # batch = {key:value for key,value in batch.items() if key!="question"}
+
+                
             batch = {key:value for key,value in batch.items() if key!="question"}
+
             results = self.execute(sess, outputs,batch )
-            print(results)
+            output_1 = self.execute(sess,out_net, batch_1)
+            output_2 = self.execute(sess,out_net, batch_2)
+
+            out_1 = np.argmax(output_1[0])
+            out_2 = np.argmax(output_2[0])
+
+            gold_1 = np.argmax(batch_1["answer"][0])
+            gold_2 = np.argmax(batch_1["answer"][0])
+
+            if inference:
+                if gold_1 == out_1:
+                    print("GOOD Question= {} , Categorie_object={} ,gold={} ,prediction={} proba_predict ={}".format(question[0],batch_1["category"],batch_1["answer"],out_1,output_1[0]) )
+                else:
+                    print("BAD Question= {} , Categorie_object={} ,gold={} ,prediction={} proba_predict ={}".format(question[0],batch_1["category"],batch_1["answer"],out_1,output_1[0]) )
+
+                if gold_2 == out_2:
+
+                    print("GOOD Question= {} , Categorie_object={} ,gold={} ,prediction={} proba_predict ={}".format(question[1],batch_2["category"],batch_2["answer"],out_2,output_2[0]) )
+                else:
+                    print("BAD Question= {} , Categorie_object={} ,gold={} ,prediction={} proba_predict ={}".format(question[1],batch_2["category"],batch_2["answer"],out_2,output_2[0]) )
+
+                # print(results)
+
+            # result = self.execute(sess, out_net,batch )
+            # result = sess.run(out_net,batch)
+
 
             i = 0
             for var, result in zip(outputs, results):
@@ -136,9 +164,13 @@ class Evaluator(object):
                     listener.after_batch(result, batch, is_training)
 
             n_iter += 1
+            
+            
 
         if listener is not None:
             listener.after_epoch(is_training)
+        
+        aggregated_outputs=[None,None]
 
         return aggregated_outputs
             
@@ -192,8 +224,8 @@ class Evaluator(object):
     def execute(self, sess, output, batch):
         #print("+++++++++++++++++++++",batch.items())
         feed_dict = {self.scope +key + ":0": value for key, value in batch.items() if key in self.provided_sources}
-        # print("++++++",feed_dict.keys())
-        print("----------- ===",output)
+        #print("-- Feed_Dict = {}--",feed_dict.keys())
+        #print("------Output----- ===",output)
         # exit()
 
         

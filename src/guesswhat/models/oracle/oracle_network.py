@@ -40,12 +40,12 @@ class OracleNetwork(ResnetModel):
 
 
 
-                lstm_states, _ = rnn.variable_length_LSTM(word_emb,
+                self.lstm_states, _ = rnn.variable_length_LSTM(word_emb,
                                                     num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
                                                     seq_length=self.seq_length_question)
                 
 
-                embeddings.append(lstm_states)
+                embeddings.append(self.lstm_states)
 
                 # QUESTION-Pos
 
@@ -137,6 +137,8 @@ class OracleNetwork(ResnetModel):
 
                 self._category = tf.placeholder(tf.int32, [self.batch_size], name='category')
 
+                print(".... ORACLE =",self._category)
+
                 cat_emb = utils.get_embedding(self._category,
                                               int(config['model']['category']["n_categories"]) + 1,  # we add the unkwon category
                                               int(config['model']['category']["embedding_dim"]),
@@ -205,7 +207,7 @@ class OracleNetwork(ResnetModel):
 
                 self._crop = tf.placeholder(tf.float32, [self.batch_size] + config['model']['crop']["dim"], name='crop')
                 self.crop_out = get_image_features(
-                    image=self._crop, question=lstm_states,
+                    image=self._crop, question=self.lstm_states,
                     is_training=self._is_training,
                     scope_name=scope.name,
                     config=config["model"]['crop'])
@@ -215,8 +217,8 @@ class OracleNetwork(ResnetModel):
 
 
             # Compute the final embedding
-            emb = tf.concat(embeddings, axis=1)
-
+            self.emb = tf.concat(embeddings, axis=1)
+        
             # OUTPUT
             num_classes = 3
             self._answer = tf.placeholder(tf.float32, [self.batch_size, num_classes], name='answer')
@@ -224,10 +226,15 @@ class OracleNetwork(ResnetModel):
 
             with tf.variable_scope('mlp'):
                 num_hiddens = config['model']['MLP']['num_hiddens']
-                l1 = utils.fully_connected(emb, num_hiddens, activation='relu', scope='l1')
+                # emb = tf.print(emb, [emb], "input: ")
+
+                l1 = utils.fully_connected(self.emb, num_hiddens, activation='relu', scope='l1')
+                # exit()
                 self.pred = utils.fully_connected(l1, num_classes, activation='softmax', scope='softmax')
-                print("------+ tf=",self.pred)
-            self.best_pred = tf.argmax(self.pred, axis=1,name="best_pred")
+                self.best_pred = tf.argmax(self.pred, axis=1)
+
+
+            # self.best_pred = tf.reduce_mean(self.best_pred)
 
             self.loss = tf.reduce_mean(utils.cross_entropy(self.pred, self._answer))
             self.error = tf.reduce_mean(utils.error(self.pred, self._answer))
@@ -243,4 +250,4 @@ class OracleNetwork(ResnetModel):
         return 1. - self.error
 
     def get_predict(self):
-        return self.best_pred
+        return self.pred

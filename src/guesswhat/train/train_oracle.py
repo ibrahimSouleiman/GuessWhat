@@ -112,7 +112,7 @@ if __name__ == '__main__':
     # Build Optimizer
     logger.info('Building optimizer..')
     optimizer, outputs = create_optimizer(network, config, finetune=finetune)
-
+    best_param = network.get_predict()
     ###############################
     #  START  TRAINING
     #############################
@@ -154,11 +154,11 @@ if __name__ == '__main__':
    
         # logger.info("Sources: " + ', '.join(sources))
 
-        # sess.run(tf.global_variables_initializer())
-        # if use_resnet:
-        #     resnet_saver.restore(sess, os.path.join(args.data_dir, 'resnet_v1_{}.ckpt'.format(resnet_version)))
+        sess.run(tf.global_variables_initializer())
+        if use_resnet:
+            resnet_saver.restore(sess, os.path.join(args.data_dir, 'resnet_v1_{}.ckpt'.format(resnet_version)))
 
-        # start_epoch = load_checkpoint(sess, saver, args, save_path)
+        start_epoch = load_checkpoint(sess, saver, args, save_path)
 
         # best_val_err = 0
         # best_train_err = None
@@ -189,7 +189,7 @@ if __name__ == '__main__':
 
         #     t1 = time.time()
 
-        #     train_loss, train_accuracy = evaluator.process(sess, train_iterator, outputs=outputs + [optimizer])
+        #     train_loss, train_accuracy = evaluator.process(sess, train_iterator, outputs=outputs + [optimizer],out_net=best_param)
         #     t2 = time.time()
 
 
@@ -246,8 +246,9 @@ if __name__ == '__main__':
                                  batchifier=batchifier,
                                  shuffle=True)
 
-       
-        [test_loss, test_accuracy] = evaluator.process(sess, test_iterator, outputs,network.get_predict(),inference=True)
+        print("Output = {}".format(outputs[1]))
+        print("Best_param = {}".format(best_param))
+        [test_loss, test_accuracy] = evaluator.process(sess, test_iterator,  outputs=outputs + [optimizer],out_net=best_param,inference=True)
         t2 = time.time()
         
         
