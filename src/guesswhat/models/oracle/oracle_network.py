@@ -191,6 +191,8 @@ class OracleNetwork(ResnetModel):
             if config['inputs']['image']:
                 print("****  Oracle_network |  input = image ")
 
+                self._image_id = tf.placeholder(tf.float32, [self.batch_size], name='image_id')
+
                 self._image = tf.placeholder(tf.float32, [self.batch_size] + config['model']['image']["dim"], name='image')
                 self.image_out = get_image_features(
                     image=self._image, question=lstm_states,
@@ -204,6 +206,8 @@ class OracleNetwork(ResnetModel):
             # CROP
             if config['inputs']['crop']:
                 print("****  Oracle_network |  input = crop ")
+                self._image_id = tf.placeholder(tf.float32, [self.batch_size], name='image_id')
+                self._crop_id = tf.placeholder(tf.float32, [self.batch_size], name='crop_id')
 
                 self._crop = tf.placeholder(tf.float32, [self.batch_size] + config['model']['crop']["dim"], name='crop')
                 self.crop_out = get_image_features(

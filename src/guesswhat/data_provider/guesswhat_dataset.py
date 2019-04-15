@@ -137,6 +137,8 @@ class Image:
             self.image_loader = image_builder.build(id, which_set=which_set, filename=self.filename, optional=False)
 
 
+    def get_idimage(self):
+        return self.id
 
     def get_image(self, **kwargs):
         if self.image_loader is not None:
