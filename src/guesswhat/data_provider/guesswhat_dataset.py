@@ -265,9 +265,9 @@ class Dataset(AbstractDataset):
                 #   break
 
 
-        # print(" Max Length of Question = {} , total_question = {}, nb_parties = {} | {}".format(self.maxlength_question,self.total,len(self.count_questions),which_set))
+         print(" Max Length of Question = {} , total_question = {}, nb_parties = {} | {}".format(self.maxlength_question,self.total,len(self.count_questions),which_set))
         # print("Total = ",total)
-        # exit()
+         exit()
         
 
 

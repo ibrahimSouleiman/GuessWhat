@@ -34,7 +34,7 @@ def compute_attention(feature_maps, context, no_mlp_units, reuse=False):
 
         # compute the softmax over the evidence
         # print(e)
-        alpha = tf.nn.softmax(e,axis=1)
+        alpha = tf.nn.softmax(e,dim=1)
         # print(alpha)
 
 
