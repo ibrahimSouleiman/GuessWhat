@@ -289,17 +289,18 @@ class OracleDataset(AbstractDataset):
         
         for i,g in enumerate(old_games):
             new_games += self.split(g)   
-
+        # print(" Nb question = ",format(self.compteur))
+        # exit()
         # print(" Guess_dataset | Lemme different = {} ",format(self.compteur))
 
         # for i in range(1000):
         #     print("Question = ",new_games[i].questions)
 
         self.unique_category = np.unique(np.asarray(self.all_category))
-        print(Counter(self.all_category))
-        print("len=",len(self.unique_category))
-        # print(self.unique_category)
-        
+        # print(Counter(self.all_category))
+        # print("len=",len(self.unique_category))
+        # print("Conteur = ",self.compteur)
+        exit()
         super(OracleDataset, self).__init__(new_games)
 
     @classmethod
@@ -308,7 +309,6 @@ class OracleDataset(AbstractDataset):
         return cls(Dataset(folder, which_set, image_builder, crop_builder))
 
     def split(self, game):
-
 
         games = []
         for i, q, a in zip(game.question_ids, game.questions, game.answers):
@@ -323,13 +323,12 @@ class OracleDataset(AbstractDataset):
             new_game.questions = [q]
             new_game.question_ids = [i]
             new_game.answers = [a]
+            print(q)
+            self.compteur += 1 
 
             games.append(new_game)
             for category in game.all_category:
                 self.all_category.append(category)
-
-
-
 
 
         

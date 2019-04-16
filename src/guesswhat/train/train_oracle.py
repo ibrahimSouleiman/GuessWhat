@@ -87,8 +87,8 @@ if __name__ == '__main__':
 
     all_category = {}
 
-    trainset = OracleDataset.load(args.data_dir, "train", all_category,image_builder, crop_builder)
-    validset = OracleDataset.load(args.data_dir, "valid", all_category,  image_builder, crop_builder)
+    #trainset = OracleDataset.load(args.data_dir, "train", all_category,image_builder, crop_builder)
+    #validset = OracleDataset.load(args.data_dir, "valid", all_category,  image_builder, crop_builder)
     testset = OracleDataset.load(args.data_dir, "test", all_category, image_builder, crop_builder)
 
     # Load dictionary
