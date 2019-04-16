@@ -92,7 +92,7 @@
   "optimizer": {
     "no_epoch": 20,
     "learning_rate": 1e-4,
-    "batch_size": 2,
+    "batch_size": 200,
     "clip_val": 5
   },
   "glove_name" : "glove_dict.pkl",

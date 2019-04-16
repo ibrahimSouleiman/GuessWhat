@@ -231,13 +231,9 @@ class OracleNetwork(ResnetModel):
             with tf.variable_scope('mlp'):
                 num_hiddens = config['model']['MLP']['num_hiddens']
                 # emb = tf.print(emb, [emb], "input: ")
-
                 l1 = utils.fully_connected(self.emb, num_hiddens, activation='relu', scope='l1')
-                # exit()
                 self.pred = utils.fully_connected(l1, num_classes, activation='softmax', scope='softmax')
                 self.best_pred = tf.argmax(self.pred, axis=1)
-
-
             # self.best_pred = tf.reduce_mean(self.best_pred)
 
             self.loss = tf.reduce_mean(utils.cross_entropy(self.pred, self._answer))

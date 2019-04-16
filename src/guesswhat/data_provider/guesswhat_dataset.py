@@ -32,6 +32,7 @@ class Game:
     def __init__(self, id, object_id, image, objects, qas , status, which_set, image_builder, crop_builder,lemmatizer):
         self.dialogue_id = id
         self.object_id = object_id
+       
         self.image = Image(id=image["id"],
                            width=image["width"],
                            height=image["height"],
@@ -195,6 +196,9 @@ class Object:
     #     assert self.rle_mask is not None, "Mask option are not available, please compile and link cocoapi (cf. cocoapi/PythonAPI/setup.py)"
     #     return cocoapi.decode(self.rle_mask)
 
+    def get_idObject(self):
+        return self.id
+
     def get_crop(self, **kwargs):
         assert self.crop_loader is not None, "Invalid crop loader"
         return self.crop_loader.get_image(**kwargs)
@@ -261,14 +265,15 @@ class Dataset(AbstractDataset):
                 # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass)               
                
                 # if len(games) > 100: break
-                # if  len(games) > 5000: 
-                #   break
+                #if  len(games) > 5000: 
+                #  break
 
 
-         print(" Max Length of Question = {} , total_question = {}, nb_parties = {} | {}".format(self.maxlength_question,self.total,len(self.count_questions),which_set))
-        # print("Total = ",total)
-         exit()
-        
+
+        print(" Max Length of Question = {} , total_question = {}, nb_parties = {} | {}".format(self.maxlength_question,self.total,len(self.count_questions),which_set))
+
+
+       
 
 
         super(Dataset, self).__init__(games)

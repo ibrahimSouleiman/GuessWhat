@@ -177,9 +177,8 @@ class OracleBatchifier(AbstractBatchifier):
             if 'crop' in sources:
                 batch['crop'].append(game.object.get_crop())
                 batch['image_id'].append(image.get_idimage())
-                batch['crop_id'].append(game.object.id)
-
-
+                batch['crop_id'].append(game.object_id)
+                
             if 'image' in sources:
                 batch['image'].append(image.get_image())
 
