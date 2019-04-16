@@ -241,7 +241,7 @@ if __name__ == '__main__':
         # Load early stopping
 
         t1 = time.time()
-        save_path = "out/oracle/3a29ed734c5d13860f61ccea17f6f90b/{}"
+        save_path = "out/oracle/cb9f4ef9b53f30d092a697920383bb7a/{}"
         saver.restore(sess, save_path.format('params.ckpt'))
         test_iterator = Iterator(testset, pool=cpu_pool,
                                  batch_size=batch_size*2,
