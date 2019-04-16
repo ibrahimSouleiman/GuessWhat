@@ -43,6 +43,8 @@ if __name__ == '__main__':
     parser.add_argument("-gpu_ratio", type=float, default=0.50, help="How many GPU ram is required? (ratio)")
     parser.add_argument("-no_thread", type=int, default=4, help="No thread to load batch")
 
+    parser.add_argument("-inference_mode", type=bool, default=False, help="inference mode True if you want to execute only test_dataset")
+
 
     args = parser.parse_args()
  
@@ -248,7 +250,7 @@ if __name__ == '__main__':
 
         print("Output = {}".format(outputs[1]))
         print("Best_param = {}".format(best_param))
-        [test_loss, test_accuracy] = evaluator.process(sess, test_iterator,  outputs=outputs + [optimizer],out_net=best_param,inference=True)
+        [test_loss, test_accuracy] = evaluator.process(sess, test_iterator,  outputs=outputs ,out_net=best_param,inference=True)
         t2 = time.time()
         
         
@@ -256,7 +258,11 @@ if __name__ == '__main__':
         print(" train_oracle | Iterator testset  ...Total=",t2-t1)
         # print("Testing loss: {}".format(test_loss))
         # print("Testing error: {}".format(1-test_accuracy))
-
-        logger.info("Testing loss: {}".format(test_loss))
-        logger.info("Testing error: {}".format(1-test_accuracy))
-
+        try:
+            logger.info("Testing loss: {}".format(test_loss))
+        except Exception:
+            print("Erreur loss")
+        try:
+            logger.info("Testing error: {}".format(1-test_accuracy))
+        except Exception:
+            print("Erreur accuracy")
