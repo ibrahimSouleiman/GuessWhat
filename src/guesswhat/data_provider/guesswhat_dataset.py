@@ -14,7 +14,7 @@ from nltk.tokenize import TweetTokenizer
 from nltk import WordNetLemmatizer
 
 from generic.data_provider.dataset import AbstractDataset
-
+from draw.Generate_Category import get_category
 # TODO find a cleaner way!
 try:
     import cocoapi.PythonAPI.pycocotools.mask as cocoapi
@@ -29,7 +29,7 @@ except ImportError:
 
 class Game:
 
-    def __init__(self, id, object_id, image, objects, qas , status, which_set, image_builder, crop_builder,lemmatizer):
+    def __init__(self, id, object_id, image, objects, qas , status, which_set, image_builder, crop_builder,lemmatizer,all_img_bbox,all_img_describtion):
         self.dialogue_id = id
         self.object_id = object_id
        
@@ -41,7 +41,7 @@ class Game:
                            which_set=which_set,
                            image_builder=image_builder)
 
-
+    
 
         self.objects = []
         self.all_category = []
@@ -58,9 +58,13 @@ class Game:
                              image=self.image)
 
             self.objects.append(new_obj)
+
             if o['id'] == object_id:
                 self.object = new_obj  # Keep ref on the object to find
-        
+                all_img_bbox[image["id"] ]= o['bbox']         
+
+        all_img_describtion[image["id"]] = image["description"]
+
         self.question_ids = [qa['id'] for qa in qas]
         
         self.questions = [qa['question'] for qa in qas]
@@ -190,8 +194,9 @@ class Object:
 
         if crop_builder is not None:
             filename = "{}.jpg".format(image.id)
-            self.crop_loader = crop_builder.build(id, filename=filename, which_set=which_set, bbox=bbox)
-
+            self.crop_loader = crop_builder.build(id, filename=filename, which_set=which_set, bbox=bbox)            # print("Image_id=",image.id)
+            # print("Bbox=",bbox)
+            # exit()
     # def get_mask(self):
     #     assert self.rle_mask is not None, "Mask option are not available, please compile and link cocoapi (cf. cocoapi/PythonAPI/setup.py)"
     #     return cocoapi.decode(self.rle_mask)
@@ -208,7 +213,7 @@ class Object:
 
 class Dataset(AbstractDataset):
     """Loads the dataset."""
-    def __init__(self, folder, which_set, image_builder=None, crop_builder=None):
+    def __init__(self, folder, which_set, image_builder=None, crop_builder=None,all_img_bbox=None,all_img_describtion=None):
         filegues = '{}/guesswhat_{}2014.jsonl.gz'.format(folder,which_set)
         file_description = '{}/captions_{}2014.json'.format(folder, which_set)
 
@@ -224,7 +229,11 @@ class Dataset(AbstractDataset):
         self.indice = 0
         self.total = 0
 
+        tokenizer = TweetTokenizer(preserve_case=True)
+
+
         t1 = time.time()
+
         with gzip.open(filegues) as f:
             for i,line in enumerate(f):
                 line = line.decode("utf-8")
@@ -243,7 +252,9 @@ class Dataset(AbstractDataset):
                         which_set=which_set,
                         image_builder=image_builder,
                         crop_builder=crop_builder,
-                        lemmatizer = self.lemmas
+                        lemmatizer = self.lemmas,
+                        all_img_bbox = all_img_bbox,
+                        all_img_describtion = all_img_describtion
                         )
                 question_length = len(g.questions)
                 self.count_questions[len(self.count_questions)] = question_length
@@ -264,7 +275,7 @@ class Dataset(AbstractDataset):
 
                 # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass)               
                
-                # if len(games) > 100: break
+                if len(games) > 10: break
                 #if  len(games) > 5000: 
                 #  break
 
@@ -287,6 +298,7 @@ class OracleDataset(AbstractDataset):
         new_games = []
         self.compteur = 0
         self.all_category = []
+        self.categories_questions = {0:0,1:0,2:0,3:0}
         
         for i,g in enumerate(old_games):
             new_games += self.split(g)   
@@ -298,16 +310,19 @@ class OracleDataset(AbstractDataset):
         #     print("Question = ",new_games[i].questions)
 
         self.unique_category = np.unique(np.asarray(self.all_category))
+        print("Distrubution of category = ",self.categories_questions)
         # print(Counter(self.all_category))
         # print("len=",len(self.unique_category))
         # print("Conteur = ",self.compteur)
-        exit()
+        
         super(OracleDataset, self).__init__(new_games)
 
     @classmethod
-    def load(cls, folder, which_set,all_category=None, image_builder=None, crop_builder=None):
+    def load(cls, folder, which_set,all_category=None, image_builder=None, crop_builder=None,all_img_bbox=None,all_img_describtion=None):
+        
         print("#################### {} ##########################".format(which_set))
-        return cls(Dataset(folder, which_set, image_builder, crop_builder))
+
+        return cls(Dataset(folder, which_set, image_builder, crop_builder,all_img_bbox,all_img_describtion))
 
     def split(self, game):
 
@@ -316,15 +331,17 @@ class OracleDataset(AbstractDataset):
             # print("****** GuessWhat | oracleDataSet q={}".format(q))
             # if( i == 10):
             #     exit()
-            # wpt = TweetTokenizer(preserve_case=False)
+            wpt = TweetTokenizer(preserve_case=False)
             # tokens = [ token for token in wpt.tokenize(q)]
             # lemme = [self.lemmas.lemmatize(token) for token in tokens]
+            categorie_question = get_category(q,wpt)
+            self.categories_questions[categorie_question] += 1  
             
             new_game = copy.copy(game)
             new_game.questions = [q]
             new_game.question_ids = [i]
             new_game.answers = [a]
-            print(q)
+            # print(q)
             self.compteur += 1 
 
             games.append(new_game)

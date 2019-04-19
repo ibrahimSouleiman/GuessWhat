@@ -1,7 +1,7 @@
 {
   "inputs": {
     "question": true,
-    "description":false,
+    "description":true,
     "allcategory":false,
     "category": true,
     "spatial":true,
@@ -11,8 +11,8 @@
 
   "embedding":"fattext",
   "model": {
-    "glove":false,
-    "fasttext":true,
+    "glove":true,
+    "fasttext":false,
     "question": {
       "no_LSTM_hiddens": 12,
       "embedding_dim": 100,
@@ -90,9 +90,9 @@
   },
 
   "optimizer": {
-    "no_epoch": 20,
+    "no_epoch": 2,
     "learning_rate": 1e-4,
-    "batch_size": 200,
+    "batch_size": 64,
     "clip_val": 5
   },
   "glove_name" : "glove_dict.pkl",

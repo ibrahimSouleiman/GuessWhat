@@ -97,26 +97,27 @@ class Evaluator(object):
         
 
 
-            old_batch = batch   
-            batch = {key:value for key,value in batch.items() if key!="question" and key!="image_id" and key!="crop_id"}
-            
-            results = self.execute(sess, outputs,batch )
-            prediction = self.execute(sess,out_net, batch)
-       
+            # print(batch.keys())
 
-        
+            results = self.execute(sess, outputs,batch )
 
             if inference:
+                prediction = self.execute(sess,out_net, batch)
+                old_batch = batch   
+                batch = {key:value for key,value in batch.items() if key!="question" and key!="image_id" and key!="crop_id"}
+            
+                results = self.execute(sess, outputs,batch )
+
                 for image_id,crop_id,question,categories_object,gold,prediction in zip(old_batch["image_id"],old_batch["crop_id"],old_batch["question"],old_batch["category"],old_batch["answer"],prediction):
                     gold_argmax = np.argmax(gold)
                     predict_argmax = np.argmax(prediction)
-                    
-                    if gold_argmax == predict_argmax:
-                        self.good_predict += 1
-                        print("GOOD | Image_id ={}, Crop_id={}, Question= {}, Categorie_object={}, gold={}, prediction={}, proba_predict = {}".format(image_id,crop_id,question,categories_object,gold_argmax,predict_argmax,prediction) )
-                    else:
-                        self.bad_predict += 1
-                        print("BAD | Image_id ={}, Crop_id={}, Question= {}, Categorie_object={}, gold={}, prediction={}, proba_predict = {}".format(image_id,crop_id,question,categories_object,gold_argmax,predict_argmax,prediction) )
+                    self.good_predict += 1
+                    # if gold_argmax == predict_argmax:
+                    #     self.good_predict += 1
+                    #     print("GOOD | Image_id ={}, Crop_id={}, Question= {}, Categorie_object={}, gold={}, prediction={}, proba_predict = {}".format(image_id,crop_id,question,categories_object,gold_argmax,predict_argmax,prediction) )
+                    # else:
+                    #     self.bad_predict += 1
+                    #     print("BAD | Image_id ={}, Crop_id={}, Question= {}, Categorie_object={}, gold={}, prediction={}, proba_predict = {}".format(image_id,crop_id,question,categories_object,gold_argmax,predict_argmax,prediction) )
 
              
 
@@ -195,8 +196,8 @@ class Evaluator(object):
     def execute(self, sess, output, batch):
         #print("+++++++++++++++++++++",batch.items())
         feed_dict = {self.scope +key + ":0": value for key, value in batch.items() if key in self.provided_sources}
-        #print("-- Feed_Dict = {}--",feed_dict.keys())
-        #print("------Output----- ===",output)
+        #print("-- Feed_Dict = {}--".format(feed_dict.keys()))
+        # print("------Output----- ===",output)
         # exit()
 
         

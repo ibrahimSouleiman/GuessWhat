@@ -188,6 +188,7 @@ class RawCropBuilder(AbstractImgBuilder):
     def build(self, object_id, filename, **kwargs):
         bbox = kwargs["bbox"]
         img_path = os.path.join(self.img_dir, filename)
+
         return RawCropLoader(img_path, self.width, self.height, scale=self.scale, bbox=bbox, channel=self.channel)
 
 

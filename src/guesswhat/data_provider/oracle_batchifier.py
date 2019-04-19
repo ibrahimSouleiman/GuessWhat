@@ -16,6 +16,8 @@ from gensim.models import word2vec,FastText,KeyedVectors
 
 
 import os
+
+# TODO corriger erreur lié a embedding aleatoire des mot sans fasttext ou glove
 answer_dict = \
     {  'Yes': np.array([1, 0, 0], dtype=np.int32),
        'No': np.array([0, 1, 0], dtype=np.int32),
@@ -70,8 +72,8 @@ class OracleBatchifier(AbstractBatchifier):
             question = self.tokenizer_question.apply(game.questions[0])
             #print("question =____",game.questions[0])
             # print("tokenize = ___",self.tokenizer_question.apply(game.questions[0]))
-
-            batch['question'].append(game.questions[0])
+            # print(question)
+            # batch['question'].append(question)
             # print("---------------- FINISH QUESTION=",question)
         
 
@@ -105,7 +107,9 @@ class OracleBatchifier(AbstractBatchifier):
                         embedding_vectors,_ = get_embeddings(words,pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos)
                     elif self.config["model"]["glove"] : 
                         #print("++++++----- ++++++++ Dans glove ")
-                        embedding_vectors,_ = self.glove.get_embeddings(words)
+                        embedding_vectors = self.glove.get_embeddings(words)
+                    
+                    # print("************ Embedding_vector = ",embedding_vectors)
                     
                     #print("taille = {} ".format(embedding_vectors))
                     # exit()=
@@ -143,7 +147,13 @@ class OracleBatchifier(AbstractBatchifier):
 
                 else:
 
-                    embedding_vectors,_ = get_embeddings(description,pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos) # slow (copy gloves in process)
+                    if self.config["model"]["fasttext"] : 
+                        #print("++++++----- ++++++++ Dans fasttext ")
+                        embedding_vectors,_ = get_embeddings(description,pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos) # slow (copy gloves in process)
+                    elif self.config["model"]["glove"] : 
+                        #print("++++++----- ++++++++ Dans glove ")
+                        embedding_vectors = self.glove.get_embeddings(description)
+
 
                     batch['embedding_vector_des'].append(embedding_vectors)
 
@@ -176,8 +186,8 @@ class OracleBatchifier(AbstractBatchifier):
 
             if 'crop' in sources:
                 batch['crop'].append(game.object.get_crop())
-                batch['image_id'].append(image.get_idimage())
-                batch['crop_id'].append(game.object_id)
+                # batch['image_id'].append(image.get_idimage())
+                # batch['crop_id'].append(game.object_id)
                 
             if 'image' in sources:
                 batch['image'].append(image.get_image())

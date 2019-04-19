@@ -23,29 +23,35 @@ import time
 
 class GloveEmbeddings(object):
 
-    def __init__(self, file, glove_dim=100,input_file = 'glove.42B.300d.txt' ):
+    def __init__(self, file, glove_dim=100,input_file = 'glove.6B.100d.txt' ):
         self.glove_dim = glove_dim
         self.glove_input_file = os.path.join("data",input_file)
-        self.word2vec_output_file = 'glove.42B.300d.txt.word2vec'
-        self.file_word2vec = Path(os.path.join("data",'glove.42B.300d.txt.word2vec'))
-        print("----- Glove_file_exist =",self.file_word2vec.is_file())
+        self.word2vec_output_file = input_file + ".word2vec"
+        self.file_word2vec = Path(os.path.join("data",self.word2vec_output_file))
+        self.filename = os.path.join("data",self.word2vec_output_file)
+
         if self.file_word2vec.is_file() == False:
-            glove2word2vec(self.glove_input_file, self.file_word2vec)
-        self.filename = os.path.join("data","glove.42B.300d.txt.word2vec")
+            glove2word2vec(self.glove_input_file, self.filename)
         self.glove = KeyedVectors.load_word2vec_format(self.filename, binary=False)
         self.unk = "<unk>"
   
 
 
     def get_embeddings(self, tokens):
+        # print("........... get_embeddings")
         vectors = []
         for token in tokens:
             token = token.lower().replace("\'s", "")
+            # print("token=",token)
+            
             try:
                 emb_token = self.glove[token]
                 vectors.append(np.array(self.glove[token]))
             except KeyError:
                 vectors.append(np.zeros((self.glove_dim,)))
+
+        # print(vectors)
+        # print("Done ! get_embeddings")
 
         return vectors
 

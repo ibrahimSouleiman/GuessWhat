@@ -18,18 +18,19 @@ class OracleNetwork(ResnetModel):
             if config['inputs']['question']:
      
                 self._is_training = tf.placeholder(tf.bool, name="is_training")
-                self._question = tf.placeholder(tf.int32, [self.batch_size, None], name='question')
+                # self._question = tf.placeholder(tf.int32, [self.batch_size, None], name='question')
                 self.seq_length_question = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question')
 
                 # word_emb = utils.get_embedding(self._question,
                 #                             n_words=num_words_question,
-                #                             n_dim=300,
+                #                             n_dim=100,
                 #                             scope="word_embedding")
 
                 if config['embedding'] != "None":
                     self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['question']["embedding_dim"])], name="embedding_vector_ques")
                     word_emb = self._glove
-                    #tf.concat([], self._glove, axis=2)
+
+                    # word_emb = tf.concat([ word_emb,self._glove], axis=2)
                 else:
                     print("None -------------------------- None")
 		  
@@ -191,7 +192,7 @@ class OracleNetwork(ResnetModel):
             if config['inputs']['image']:
                 print("****  Oracle_network |  input = image ")
 
-                self._image_id = tf.placeholder(tf.float32, [self.batch_size], name='image_id')
+                # self._image_id = tf.placeholder(tf.float32, [self.batch_size], name='image_id')
 
                 self._image = tf.placeholder(tf.float32, [self.batch_size] + config['model']['image']["dim"], name='image')
                 self.image_out = get_image_features(
@@ -206,8 +207,8 @@ class OracleNetwork(ResnetModel):
             # CROP
             if config['inputs']['crop']:
                 print("****  Oracle_network |  input = crop ")
-                self._image_id = tf.placeholder(tf.float32, [self.batch_size], name='image_id')
-                self._crop_id = tf.placeholder(tf.float32, [self.batch_size], name='crop_id')
+                # self._image_id = tf.placeholder(tf.float32, [self.batch_size], name='image_id')
+                # self._crop_id = tf.placeholder(tf.float32, [self.batch_size], name='crop_id')
 
                 self._crop = tf.placeholder(tf.float32, [self.batch_size] + config['model']['crop']["dim"], name='crop')
                 self.crop_out = get_image_features(
