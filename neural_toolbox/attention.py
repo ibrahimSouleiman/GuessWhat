@@ -4,6 +4,13 @@ from neural_toolbox import utils
 
 
 def compute_attention(feature_maps, context, no_mlp_units, reuse=False):
+
+
+
+    print("Feature_maps ={},context={}".format(feature_maps,context))
+
+    # print("Feature_maps SHAPE={},context SHAPE={}".format(feature_maps.get_shape(),no_mlp_units.get_shape()))
+
     with tf.variable_scope("attention"):
 
         if len(feature_maps.get_shape()) == 3:
@@ -19,11 +26,19 @@ def compute_attention(feature_maps, context, no_mlp_units, reuse=False):
 
         feature_maps = tf.reshape(feature_maps, shape=[-1, h * w, c])
 
+        print("Reshape Feature_maps ={}".format(feature_maps))
+
         context = tf.expand_dims(context, axis=1)
-        context = tf.tile(context, [1, h * w, 1])
+        print("Reshape context ={}".format(context))
+
+        context = tf.tile(context, [1, h * w, 1]) # tf.tile([a,b,c],dimension=[2]) => [a,b,c,a,b,c]
+        print("Tile context ={}".format(context))
+
 
         embedding = tf.concat([feature_maps, context], axis=2)
         embedding = tf.reshape(embedding, shape=[-1, s + c])
+        print("Embedding = ",embedding)
+
 
         # compute the evidence from the embedding
         with tf.variable_scope("mlp"):

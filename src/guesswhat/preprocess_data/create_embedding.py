@@ -2,7 +2,7 @@
 
 example
 -------
-python src/guesswhat/preprocess_data/create_dictionary.py -data_dir=data/
+python src/guesswhat/preprocess_data/create_embedding.py -data_dir=data/
 """
 import argparse
 import collections
@@ -60,7 +60,7 @@ if __name__ == '__main__':
     parser.add_argument("-file_pos_ques", type=str, default="all_pos_ques", help="Name of the dictionary file")
     parser.add_argument("-file_pos_des", type=str, default="file_pos_des", help="Name of the dictionary file")
 
-    parser.add_argument("-emb_dim", type=int, default=100,help="Name of the dictionary file")
+    parser.add_argument("-emb_dim", type=int, default=300,help="Name of the dictionary file")
 
 
     parser.add_argument("-min_occ", type=int, default=0,
@@ -75,6 +75,7 @@ if __name__ == '__main__':
 
     word2occ = collections.defaultdict(int)
 
+    all_word = {}
 
 
     print("Processing train dataset...")
@@ -82,7 +83,9 @@ if __name__ == '__main__':
     print("Processing valid dataset...")
 
     validset = OracleDataset.load(args.data_dir, "valid")
+    print("Processing valid test...")
 
+    testset = OracleDataset.load(args.data_dir, "test")
 
     tknzr = TweetTokenizer(preserve_case=False)
     unk = "<unk>"
@@ -141,48 +144,51 @@ if __name__ == '__main__':
             # nb_erreur_pos = 0
 
             for token in tokens_question:
-                try:
-                    lemme= word2i_question[token][1]
-                except KeyError:
-                    # nb_erreur_lemme += 1
-                    lemme = word2i_question[unk][1]
+                all_word[token] = []
+                # try:
+                #     lemme= word2i_question[token][1]
+                # except KeyError:
+                #     # nb_erreur_lemme += 1
+                #     lemme = word2i_question[unk][1]
                 
-                all_lemme_ques.append(lemme)
+                # all_lemme_ques.append(lemme)
                 
-                try:
-                    pos= word2i_question[token][2][0][1] 
-                except KeyError:
-                    # nb_erreur_pos += 1
-                    pos = word2i_question[unk][2][0][1] 
+                # try:
+                #     pos= word2i_question[token][2][0][1] 
+                # except KeyError:
+                #     # nb_erreur_pos += 1
+                #     pos = word2i_question[unk][2][0][1] 
                 
-                all_pos_ques.append(pos)
+                # all_pos_ques.append(pos)
 
             for token in tokens_description:
-                try:
-                    lemme= word2i_des[token][1]
-                except KeyError:
-                    # nb_erreur_lemme += 1
-                    lemme = word2i_des[unk][1]
+                all_word[token] = []
+
+            #     try:
+            #         lemme= word2i_des[token][1]
+            #     except KeyError:
+            #         # nb_erreur_lemme += 1
+            #         lemme = word2i_des[unk][1]
                 
-                all_lemme_des.append(lemme)
+            #     all_lemme_des.append(lemme)
                 
-                try:
-                    pos= word2i_des[token][2][0][1] 
-                except KeyError:
-                    # nb_erreur_pos += 1
-                    pos = word2i_des[unk][2][0][1] 
+            #     try:
+            #         pos= word2i_des[token][2][0][1] 
+            #     except KeyError:
+            #         # nb_erreur_pos += 1
+            #         pos = word2i_des[unk][2][0][1] 
                 
-                all_pos_ques.append(pos)
+            #     all_pos_ques.append(pos)
 
-            all_questions.append(tokens_question)
-            all_descriptions.append(tokens_description)
+            # all_questions.append(tokens_question)
+            # all_descriptions.append(tokens_description)
 
 
-            all_lemmes_ques.append(all_lemme_ques)
-            all_postags_ques.append(all_pos_ques)
+            # all_lemmes_ques.append(all_lemme_ques)
+            # all_postags_ques.append(all_pos_ques)
 
-            all_lemmes_des.append(all_lemme_des)
-            all_postags_des.append(all_pos_des)
+            # all_lemmes_des.append(all_lemme_des)
+            # all_postags_des.append(all_pos_des)
 
 
         for game in validset.get_data():
@@ -203,123 +209,193 @@ if __name__ == '__main__':
             # nb_erreur_pos = 0
 
             for token in tokens_question:
-                try:
-                    lemme= word2i_question[token][1]
-                except KeyError:
-                    # nb_erreur_lemme += 1
-                    lemme = word2i_question[unk][1]
+                all_word[token] = []
+
+                # try:
+                #     lemme= word2i_question[token][1]
+                # except KeyError:
+                #     # nb_erreur_lemme += 1
+                #     lemme = word2i_question[unk][1]
                 
-                all_lemme_ques.append(lemme)
+                # all_lemme_ques.append(lemme)
                 
-                try:
-                    pos= word2i_question[token][2][0][1] 
-                except KeyError:
-                    # nb_erreur_pos += 1
-                    pos = word2i_question[unk][2][0][1] 
+                # try:
+                #     pos= word2i_question[token][2][0][1] 
+                # except KeyError:
+                #     # nb_erreur_pos += 1
+                #     pos = word2i_question[unk][2][0][1] 
                 
-                all_pos_ques.append(pos)
+                # all_pos_ques.append(pos)
 
             for token in tokens_description:
-                try:
-                    lemme= word2i_des[token][1]
-                except KeyError:
-                    # nb_erreur_lemme += 1
-                    lemme = word2i_des[unk][1]
+                all_word[token] = []
+            #     try:
+            #         lemme= word2i_des[token][1]
+            #     except KeyError:
+            #         # nb_erreur_lemme += 1
+            #         lemme = word2i_des[unk][1]
                 
-                all_lemme_des.append(lemme)
+            #     all_lemme_des.append(lemme)
                 
-                try:
-                    pos= word2i_des[token][2][0][1] 
-                except KeyError:
-                    # nb_erreur_pos += 1
-                    pos = word2i_des[unk][2][0][1] 
+            #     try:
+            #         pos= word2i_des[token][2][0][1] 
+            #     except KeyError:
+            #         # nb_erreur_pos += 1
+            #         pos = word2i_des[unk][2][0][1] 
                 
-                all_pos_des.append(pos)
+            #     all_pos_des.append(pos)
 
-            all_questions.append(tokens_question)
-            all_descriptions.append(tokens_description)
-
-
-            all_lemmes_ques.append(all_lemme_ques)
-            all_postags_ques.append(all_pos_ques)
-
-            all_lemmes_des.append(all_lemme_des)
-            all_postags_des.append(all_pos_des)
-
-    
+            # all_questions.append(tokens_question)
+            # all_descriptions.append(tokens_description)
 
 
-        np.save(os.path.join(args.data_dir,args.file_allquestion),all_questions)
-        np.save(os.path.join(args.data_dir,args.file_alldescription),all_descriptions)
+            # all_lemmes_ques.append(all_lemme_ques)
+            # all_postags_ques.append(all_pos_ques)
+
+            # all_lemmes_des.append(all_lemme_des)
+            # all_postags_des.append(all_pos_des)
+
+        for game in testset.get_data():
+            data_question = game.questions[0]
+            data_description = game.image.description
+
+            
+            
+            tokens_question = tknzr.tokenize(data_question)
+            tokens_description = tknzr.tokenize(data_description)
+            
+            # all_lemme = [self.word2i[token][1] for token in tokens]
+            all_lemme_ques = []
+            all_pos_ques = []
+            all_lemme_des = []
+            all_pos_des = []
+            # nb_erreur_lemme = 0
+            # nb_erreur_pos = 0
+
+            for token in tokens_question:
+                all_word[token] = []
+
+                # try:
+                #     lemme= word2i_question[token][1]
+                # except KeyError:
+                #     # nb_erreur_lemme += 1
+                #     lemme = word2i_question[unk][1]
+                
+                # all_lemme_ques.append(lemme)
+                
+                # try:
+                #     pos= word2i_question[token][2][0][1] 
+                # except KeyError:
+                #     # nb_erreur_pos += 1
+                #     pos = word2i_question[unk][2][0][1] 
+                
+                # all_pos_ques.append(pos)
+
+            for token in tokens_description:
+                all_word[token] = []
+            #     try:
+            #         lemme= word2i_des[token][1]
+            #     except KeyError:
+            #         # nb_erreur_lemme += 1
+            #         lemme = word2i_des[unk][1]
+                
+            #     all_lemme_des.append(lemme)
+                
+            #     try:
+            #         pos= word2i_des[token][2][0][1] 
+            #     except KeyError:
+            #         # nb_erreur_pos += 1
+            #         pos = word2i_des[unk][2][0][1] 
+                
+            #     all_pos_des.append(pos)
+
+            # all_questions.append(tokens_question)
+            # all_descriptions.append(tokens_description)
+
+
+            # all_lemmes_ques.append(all_lemme_ques)
+            # all_postags_ques.append(all_pos_ques)
+
+            # all_lemmes_des.append(all_lemme_des)
+            # all_postags_des.append(all_pos_des)
+
+
+
+        # np.save(os.path.join(args.data_dir,args.file_allquestion),all_questions)
+        # np.save(os.path.join(args.data_dir,args.file_alldescription),all_descriptions)
 
         
-        np.save(os.path.join(args.data_dir,args.file_lemme_ques),all_lemmes_ques)
-        np.save(os.path.join(args.data_dir,args.file_lemme_des),all_lemmes_des)
+        # np.save(os.path.join(args.data_dir,args.file_lemme_ques),all_lemmes_ques)
+        # np.save(os.path.join(args.data_dir,args.file_lemme_des),all_lemmes_des)
 
 
-        np.save(os.path.join(args.data_dir,args.file_pos_ques),all_postags_ques)
-        np.save(os.path.join(args.data_dir,args.file_pos_des),all_postags_des)
+        # np.save(os.path.join(args.data_dir,args.file_pos_ques),all_postags_ques)
+        # np.save(os.path.join(args.data_dir,args.file_pos_des),all_postags_des)
 
+        print(len(all_word))
 
+        print(all_word.keys())
+
+        np.save(os.path.join(args.data_dir,"all_word"),all_word)
 
         print("Fasttext train ...............................")
 
 
-        model_word_ques = FastText(size=args.emb_dim, window=3, min_count=3) 
-        model_word_ques.build_vocab(sentences=all_questions)
-        model_word_ques.train(sentences=all_questions, total_words=len(all_questions), epochs=10)
+        # model_word_ques = FastText(size=args.emb_dim, window=3, min_count=3) 
+        # model_word_ques.build_vocab(sentences=all_questions)
+        # model_word_ques.train(sentences=all_questions, total_words=len(all_questions), epochs=10)
 
-        fname = os.path.join(args.data_dir,"ftext_word_ques.model")
-        model_word_ques.save(fname)
-        # print(model_word_ques.wv[unk])
-
-
-        model_lemme_ques = FastText(size=args.emb_dim, window=3, min_count=3) 
-        model_lemme_ques.build_vocab(sentences=all_lemmes_ques)
-        model_lemme_ques.train(sentences=all_lemmes_ques, total_words=len(all_lemmes_ques), epochs=10)
-
-        fname = os.path.join(args.data_dir,"ftext_lemme_ques.model")
-        model_lemme_ques.save(fname)
-        # print(model_lemme_ques.wv[unk])
-
-        model_pos_ques = FastText(size=args.emb_dim, window=3, min_count=3) 
-        model_pos_ques.build_vocab(sentences=all_postags_ques)
-        model_pos_ques.train(sentences=all_postags_ques, total_words=len(all_postags_ques), epochs=10)
-
-        fname = os.path.join(args.data_dir,"ftext_pos_ques.model")
-        model_pos_ques.save(fname)
-
-        # print(model_pos_ques.wv[unk])
-        # exit()
-
-        print(" ................. Train description")
+        # fname = os.path.join(args.data_dir,"ftext_word_ques.model")
+        # model_word_ques.save(fname)
+        # # print(model_word_ques.wv[unk])
 
 
-        model_word_des = FastText(size=args.emb_dim, window=3, min_count=3) 
-        model_word_des.build_vocab(sentences=all_descriptions)
-        model_word_des.train(sentences=all_descriptions, total_words=len(all_questions), epochs=10)
+        # model_lemme_ques = FastText(size=args.emb_dim, window=3, min_count=3) 
+        # model_lemme_ques.build_vocab(sentences=all_lemmes_ques)
+        # model_lemme_ques.train(sentences=all_lemmes_ques, total_words=len(all_lemmes_ques), epochs=10)
 
-        fname = os.path.join(args.data_dir,"ftext_word_des.model")
-        model_word_des.save(fname)
+        # fname = os.path.join(args.data_dir,"ftext_lemme_ques.model")
+        # model_lemme_ques.save(fname)
+        # # print(model_lemme_ques.wv[unk])
+
+        # model_pos_ques = FastText(size=args.emb_dim, window=3, min_count=3) 
+        # model_pos_ques.build_vocab(sentences=all_postags_ques)
+        # model_pos_ques.train(sentences=all_postags_ques, total_words=len(all_postags_ques), epochs=10)
+
+        # fname = os.path.join(args.data_dir,"ftext_pos_ques.model")
+        # model_pos_ques.save(fname)
+
+        # # print(model_pos_ques.wv[unk])
+        # # exit()
+
+        # print(" ................. Train description")
 
 
-        model_lemme_des = FastText(size=args.emb_dim, window=3, min_count=3) 
-        model_lemme_des.build_vocab(sentences=all_lemmes_des)
-        model_lemme_des.train(sentences=all_lemmes_des, total_words=len(all_lemmes_des), epochs=10)
+        # model_word_des = FastText(size=args.emb_dim, window=3, min_count=3) 
+        # model_word_des.build_vocab(sentences=all_descriptions)
+        # model_word_des.train(sentences=all_descriptions, total_words=len(all_questions), epochs=10)
 
-        fname = os.path.join(args.data_dir,"ftext_lemme_des.model")
-        model_lemme_ques.save(fname)
+        # fname = os.path.join(args.data_dir,"ftext_word_des.model")
+        # model_word_des.save(fname)
+
+
+        # model_lemme_des = FastText(size=args.emb_dim, window=3, min_count=3) 
+        # model_lemme_des.build_vocab(sentences=all_lemmes_des)
+        # model_lemme_des.train(sentences=all_lemmes_des, total_words=len(all_lemmes_des), epochs=10)
+
+        # fname = os.path.join(args.data_dir,"ftext_lemme_des.model")
+        # model_lemme_ques.save(fname)
 
 
 
-        model_pos_des = FastText(size=args.emb_dim, window=3, min_count=3) 
+        # model_pos_des = FastText(size=args.emb_dim, window=3, min_count=3) 
 
-        model_pos_des.build_vocab(sentences=all_postags_des)
+        # model_pos_des.build_vocab(sentences=all_postags_des)
         
-        model_pos_des.train(sentences=all_postags_des, total_words=len(all_postags_des), epochs=10)
+        # model_pos_des.train(sentences=all_postags_des, total_words=len(all_postags_des), epochs=10)
 
-        fname = os.path.join(args.data_dir,"ftext_pos_des.model")
-        model_pos_des.save(fname)
+        # fname = os.path.join(args.data_dir,"ftext_pos_des.model")
+        # model_pos_des.save(fname)
 
 
         print("Done !")

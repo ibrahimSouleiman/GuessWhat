@@ -18,19 +18,19 @@ class OracleNetwork(ResnetModel):
             if config['inputs']['question']:
      
                 self._is_training = tf.placeholder(tf.bool, name="is_training")
-                # self._question = tf.placeholder(tf.int32, [self.batch_size, None], name='question')
+                self._question = tf.placeholder(tf.int32, [self.batch_size, None], name='question')
                 self.seq_length_question = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question')
 
-                # word_emb = utils.get_embedding(self._question,
-                #                             n_words=num_words_question,
-                #                             n_dim=100,
-                #                             scope="word_embedding")
+                word_emb = utils.get_embedding(self._question,
+                                            n_words=num_words_question,
+                                            n_dim=int(config["model"]["word_embedding_dim"]),
+                                            scope="word_embedding")
 
-                if config['embedding'] != "None":
-                    self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['question']["embedding_dim"])], name="embedding_vector_ques")
-                    word_emb = self._glove
+                if config["model"]["glove"] == True or config["model"]["fasttext"] == True:
+                    self._embWord = tf.placeholder(tf.float32, [None, None, int(config["model"]["word_embedding_dim"])], name="embedding_vector_ques")
+                    # word_emb = self._glove
 
-                    # word_emb = tf.concat([ word_emb,self._glove], axis=2)
+                    word_emb = tf.concat([ word_emb,self._embWord], axis=2)
                 else:
                     print("None -------------------------- None")
 		  
@@ -62,8 +62,8 @@ class OracleNetwork(ResnetModel):
                                                 n_dim=300,
                                                 scope="word_embedding_pos")
 
-                    if config['embedding'] != "None":
-                        self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['question']["embedding_dim_pos"])], name="embedding_vector_ques_pos")
+                    if config["model"]["glove"] == True or config["model"]["fasttext"] == True:
+                        self._glove = tf.placeholder(tf.float32, [None, None,int(config["model"]["word_embedding_dim"])], name="embedding_vector_ques_pos")
                         word_emb = tf.concat([word_emb, self._glove], axis=2)
                     else:
                         print("None ****************")
@@ -87,8 +87,8 @@ class OracleNetwork(ResnetModel):
                 #                             n_dim=300,
                 #                             scope="word_embedding_description")
                 
-                if config['embedding'] != "None":
-                    self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['description']["embedding_dim"])], name="embedding_vector_des")
+                if config["model"]["glove"] == True or config["model"]["fasttext"] == True:
+                    self._glove = tf.placeholder(tf.float32, [None, None,int(config["model"]["word_embedding_dim"])], name="embedding_vector_des")
                     word_emb =  self._glove
                 else:
                     print("None ****************")
@@ -119,8 +119,8 @@ class OracleNetwork(ResnetModel):
                                                 n_dim=300,
                                                 scope="word_embedding_pos")
 
-                    if config['embedding'] != "None":
-                        self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['question']["embedding_dim_pos"])], name="embedding_vector_des_pos")
+                    if config["model"]["glove"] == True or config["model"]["fasttext"] == True:
+                        self._glove = tf.placeholder(tf.float32, [None, None, int(config["model"]["word_embedding_dim"])], name="embedding_vector_des_pos")
                         word_emb = tf.concat([word_emb, self._glove], axis=2)
                     else:
                         print("None ****************")
@@ -142,7 +142,7 @@ class OracleNetwork(ResnetModel):
 
                 cat_emb = utils.get_embedding(self._category,
                                               int(config['model']['category']["n_categories"]) + 1,  # we add the unkwon category
-                                              int(config['model']['category']["embedding_dim"]),
+                                              int(config["model"]["word_embedding_dim"]),
                                               scope="cat_embedding")
 
                 

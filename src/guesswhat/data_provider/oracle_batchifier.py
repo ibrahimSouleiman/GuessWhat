@@ -34,12 +34,14 @@ class OracleBatchifier(AbstractBatchifier):
         self.config = config
 
         if self.config["model"]["fasttext"] : 
+        
             self.model_worddl = FastText.load(os.path.join("data","ftext_lemme_des.model"))
             self.model_wordd = FastText.load(os.path.join("data","ftext_word_des.model"))        
             self.model_posd = FastText.load(os.path.join("data","ftext_pos_des.model"))
             self.model_wordl = FastText.load(os.path.join("data","ftext_lemme_ques.model"))
             self.model_word = FastText.load(os.path.join("data","ftext_word_ques.model"))
             self.model_pos = FastText.load(os.path.join("data","ftext_pos_ques.model"))
+        
         elif self.config["model"]["glove"]:
             self.glove = glove
 
@@ -73,7 +75,8 @@ class OracleBatchifier(AbstractBatchifier):
             #print("question =____",game.questions[0])
             # print("tokenize = ___",self.tokenizer_question.apply(game.questions[0]))
             # print(question)
-            # batch['question'].append(question)
+            # exit()
+            batch['question'].append(question)
             # print("---------------- FINISH QUESTION=",question)
         
 
@@ -114,13 +117,12 @@ class OracleBatchifier(AbstractBatchifier):
                     #print("taille = {} ".format(embedding_vectors))
                     # exit()=
                     # print("////////// embedding_vectors=",len(embedding_vectors[0]))
+
                     batch['embedding_vector_ques'].append(embedding_vectors)
 
                 # print(" Oracle_batchifier | embedding_vector= {}".format(embedding_vectors))
-
                 # print("---- Embedding = ",len(embedding_vectors))
                 # print("----  =",len(embedding_vectors[0]))
-
                 #print("---------------- FINISH QUESTION_Emb =",np.asarray(embedding_vectors).shape)
 
 
@@ -188,6 +190,7 @@ class OracleBatchifier(AbstractBatchifier):
                 batch['crop'].append(game.object.get_crop())
                 # batch['image_id'].append(image.get_idimage())
                 # batch['crop_id'].append(game.object_id)
+                # print("crop_id=",game.object_id)
                 
             if 'image' in sources:
                 batch['image'].append(image.get_image())
@@ -209,9 +212,11 @@ class OracleBatchifier(AbstractBatchifier):
         
         
         
-        # if "question" in sources:
-        #     batch['question'] , batch['seq_length_question'] = padder(batch['question'],
-        #                                                 padding_symbol=self.tokenizer_question.padding_token)
+        if "question" in sources:
+            batch['question'] , batch['seq_length_question'] = padder(batch['question'],
+                                                        padding_symbol=self.tokenizer_question.padding_token)
+
+
 
         if "question_pos" in sources:
             batch['question_pos'], batch['seq_length_ques_pos'] = padder(batch['question_pos'],
@@ -225,7 +230,8 @@ class OracleBatchifier(AbstractBatchifier):
         # batch['embedding_vector_pos'], _ = padder_3d(batch['embedding_vector_pos'])
         if 'embedding_vector_ques' in sources:
                         batch['embedding_vector_ques'], batch['seq_length_question'] = padder_3d(batch['embedding_vector_ques'])
-       # print("+++++ Batch = ",batch['seq_length_question'])
+                        # print("+++++ Batch = ",batch['seq_length_question'])
+                        # print("Len=",len(batch['seq_length_question']))
 
 
         if 'embedding_vector_ques_pos' in sources:

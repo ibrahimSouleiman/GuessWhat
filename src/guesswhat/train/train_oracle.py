@@ -93,7 +93,6 @@ if __name__ == '__main__':
     validset = OracleDataset.load(args.data_dir, "valid", image_builder= image_builder, crop_builder = crop_builder,all_img_bbox = all_img_bbox,all_img_describtion=all_img_describtion)
     testset = OracleDataset.load(args.data_dir, "test",image_builder= image_builder, crop_builder = crop_builder,all_img_bbox = all_img_bbox,all_img_describtion=all_img_describtion)
     
-    
     # np.save("all_img_bbox.npy",all_img_bbox)
     # print(len(all_img_bbox))
     print("load data Done ! ")
@@ -152,7 +151,7 @@ if __name__ == '__main__':
     glove = None
     if use_glove:
         logger.info('Loading glove..')
-        glove = GloveEmbeddings(os.path.join(args.data_dir, config["glove_name"]))
+        glove = GloveEmbeddings(os.path.join(args.data_dir, config["glove_name"]),glove_dim=300)
 
     # embedding = None
     # if use_embedding:
@@ -265,7 +264,7 @@ if __name__ == '__main__':
 
         print("Output = {}".format(outputs[1]))
         print("Best_param = {}".format(best_param))
-        [test_loss, test_accuracy] = evaluator.process(sess, test_iterator,  outputs=outputs ,out_net=best_param,inference=True)
+        [test_loss, test_accuracy] = evaluator.process(sess, test_iterator,  outputs=outputs ,out_net=best_param,inference=False)
         t2 = time.time()
         
         

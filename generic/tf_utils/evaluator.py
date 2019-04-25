@@ -196,8 +196,12 @@ class Evaluator(object):
     def execute(self, sess, output, batch):
         #print("+++++++++++++++++++++",batch.items())
         feed_dict = {self.scope +key + ":0": value for key, value in batch.items() if key in self.provided_sources}
-        #print("-- Feed_Dict = {}--".format(feed_dict.keys()))
+        # print("-- Feed_Dict = {}--".format(feed_dict.keys()))
+        # print("-- Dict = {}--".format(feed_dict))
+        # print("========================================================================")
+
         # print("------Output----- ===",output)
+    
         # exit()
 
         
@@ -206,7 +210,8 @@ class Evaluator(object):
 
 
 class MultiGPUEvaluator(object):
-    """Wrapper for evaluating on multiple GPUOptions
+    """
+    Wrapper for evaluating on multiple GPUOptions
 
     parameters
     ----------
@@ -217,6 +222,7 @@ class MultiGPUEvaluator(object):
             Variable scope of the model
         name_scopes: list of str
             List that defines name_scope for each GPU
+
     """
 
     def __init__(self, provided_sources, name_scopes, writer=None,

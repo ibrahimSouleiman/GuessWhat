@@ -23,16 +23,51 @@ import time
 
 class GloveEmbeddings(object):
 
-    def __init__(self, file, glove_dim=100,input_file = 'glove.6B.100d.txt' ):
+    def __init__(self, file, glove_dim=100,input_file = 'glove.6B.100d.txt',type="wikipedia" ):
+
+        if glove_dim == 300:
+            input_file = 'glove.6B.300d.txt'
+        
+
+
         self.glove_dim = glove_dim
         self.glove_input_file = os.path.join("data",input_file)
         self.word2vec_output_file = input_file + ".word2vec"
         self.file_word2vec = Path(os.path.join("data",self.word2vec_output_file))
         self.filename = os.path.join("data",self.word2vec_output_file)
 
+        ## Extraction only_word used in guessWhat
+
+
+        self.glove_Wonly = Path(os.path.join("data","glove_onlyWord_GuessWhat_{}_{}.txt".format(glove_dim,"wikipedia")))
+
+        if self.glove_Wonly.is_file() == False:
+            self.all_word = Path(os.path.join("data","all_word.npy"))
+            dict_all_word_values = np.load(self.all_word)
+            dict_glove_words = {}
+
+            dict_all_word = dict_all_word_values.item().keys()
+            print(len(dict_all_word))
+           
+            # read all_word and write new_file only word in the guessWhat
+            with open(self.glove_input_file,"r") as file_glove:
+                with open(self.glove_Wonly,"a") as file_out:
+                    for line in file_glove:
+                            one_line = line.split(" ")
+                            word = one_line[0]
+                            embedding = one_line[1:]
+                            if word in dict_all_word:
+                                file_out.write(line)
+
+          
+            
+
+
+
         if self.file_word2vec.is_file() == False:
-            glove2word2vec(self.glove_input_file, self.filename)
+            glove2word2vec(self.glove_Wonly, self.filename)
         self.glove = KeyedVectors.load_word2vec_format(self.filename, binary=False)
+       
         self.unk = "<unk>"
   
 

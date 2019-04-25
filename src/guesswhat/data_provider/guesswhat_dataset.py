@@ -61,9 +61,9 @@ class Game:
 
             if o['id'] == object_id:
                 self.object = new_obj  # Keep ref on the object to find
-                all_img_bbox[image["id"] ]= o['bbox']         
+                # all_img_bbox[image["id"] ]= o['bbox']         
 
-        all_img_describtion[image["id"]] = image["description"]
+        # all_img_describtion[image["id"]] = image["description"]
 
         self.question_ids = [qa['id'] for qa in qas]
         
@@ -72,6 +72,12 @@ class Game:
         self.answers = [qa['answer'] for qa in qas]
 
         self.status = status
+
+
+        self.last_question = ["unk" for i in range(1)]
+        
+        self.all_last_question = [self.last_question for i in range(6)]
+
 
     def show(self, img_raw_dir, display_index=False, display_mask=False):
             image_path = os.path.join(img_raw_dir, self.image.filename)
@@ -275,8 +281,8 @@ class Dataset(AbstractDataset):
 
                 # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass)               
                
-                if len(games) > 10: break
-                #if  len(games) > 5000: 
+                # if len(games) > 10: break
+                # if  len(games) > 5000: 
                 #  break
 
 
@@ -329,8 +335,9 @@ class OracleDataset(AbstractDataset):
         games = []
         for i, q, a in zip(game.question_ids, game.questions, game.answers):
             # print("****** GuessWhat | oracleDataSet q={}".format(q))
-            # if( i == 10):
+            # if( self.compteur == 10):
             #     exit()
+
             wpt = TweetTokenizer(preserve_case=False)
             # tokens = [ token for token in wpt.tokenize(q)]
             # lemme = [self.lemmas.lemmatize(token) for token in tokens]
@@ -344,13 +351,47 @@ class OracleDataset(AbstractDataset):
             # print(q)
             self.compteur += 1 
 
-            games.append(new_game)
             for category in game.all_category:
                 self.all_category.append(category)
 
+            
+            last_question =  self.add_question(game.all_last_question,q,a)
+            new_game.all_last_question = last_question
+            # print("Image_id={}, dialogue_id,={}, question_id={}, question={},last_question={}".format(new_game.image.id,new_game.dialogue_id,i,q,last_question))
+
+            games.append(new_game)
 
         
         return games
+
+
+    def add_question(self,last_questions,question,answer):
+
+
+        before = ""
+        # print("In = {} ",last_questions)
+
+        i = 0
+        nb_question = [i+1 for s in last_questions if s[0]!="unk"]
+
+        list_copy = last_questions.copy()
+
+        nb_question = int(np.sum(nb_question)) + 1
+        # print("Nb_question = {},question={}".format(nb_question,question))
+        for i in  reversed(range(6)):
+            if i == 5:
+                last_questions[i] = [ question+" "+answer ]
+                # print("i={},{}".format(i,last_questions[i]))
+
+            elif  nb_question > 0 and i > 0:
+                # print("i={},{}".format(i,list_copy[i+1]))
+                last_questions[i] =  list_copy[i+1]
+
+            nb_question -= 1
+
+
+        return last_questions
+
 
 
 class CropDataset(AbstractDataset):
