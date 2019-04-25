@@ -23,16 +23,17 @@ import time
 
 class GloveEmbeddings(object):
 
-    def __init__(self, file, glove_dim=100,input_file = 'glove.6B.100d.txt',type="wikipedia" ):
+    def __init__(self, file, glove_dim=100,input_file = 'glove.6B.100d.txt',type_data="wikipedia" ):
 
         if glove_dim == 300:
-            input_file = 'glove.6B.300d.txt'
+            input_file = 'glove.42B.300d.txt'
         
 
 
         self.glove_dim = glove_dim
         self.glove_input_file = os.path.join("data",input_file)
-        self.word2vec_output_file = input_file + ".word2vec"
+        self.word2vec_output_file = input_file + "{}_.word2vec".format(type_data)
+
         self.file_word2vec = Path(os.path.join("data",self.word2vec_output_file))
         self.filename = os.path.join("data",self.word2vec_output_file)
 

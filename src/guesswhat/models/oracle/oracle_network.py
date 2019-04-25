@@ -39,14 +39,19 @@ class OracleNetwork(ResnetModel):
                 # word_emb = tf.concat([word_emb, self._glove], axis=2)
                     
 
+                # print("*+*+*+*+* **+*+*+**Length=",self.seq_length_question)
 
 
-                self.lstm_states, _ = rnn.variable_length_LSTM(word_emb,
+                self.lstm_states, self.lstm_all_state_ques = rnn.variable_length_LSTM(word_emb,
                                                     num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
                                                     seq_length=self.seq_length_question)
                 
+                if config["model"]["attention"]["co-attention"]:
+                    embeddings.append(self.lstm_all_state_ques)
+                else:
+                    embeddings.append(self.lstm_states)
 
-                embeddings.append(self.lstm_states)
+
 
                 # QUESTION-Pos
 
@@ -76,10 +81,13 @@ class OracleNetwork(ResnetModel):
                     embeddings.append(lstm_states)
 
             # DESCRIPTION
+
+        
+
             if config['inputs']['description']:
                 print("****  Oracle_network |  inpurt = Description ")
 
-                #self._description = tf.placeholder(tf.int32, [self.batch_size, None], name='description')
+                self._description = tf.placeholder(tf.int32, [self.batch_size, None], name='description')
                 self.seq_length_description = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_description')
 
                 # word_emb = utils.get_embedding(self._description,
@@ -100,9 +108,43 @@ class OracleNetwork(ResnetModel):
                                                     num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
                                                     seq_length=self.seq_length_description,scope="lstm3")
 
+                if config["model"]["attention"]["co-attention"]:
+                    history = []
+                    history.append(lstm_states_description)
+                    self._question_history = tf.placeholder(tf.int32, [self.batch_size, None], name='question_history')
+                    self.seq_length_question_history = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question_history')
+
+                    if config["model"]["glove"] == True or config["model"]["fasttext"] == True:
+                        self._embWord = tf.placeholder(tf.float32, [None, None, int(config["model"]["word_embedding_dim"])], name="embedding_vector_ques_hist")
+
+                        word_emb = self._embWord
+
+                    else:
+                         print("None -------------------------- None")
+		  
+              
+
+
+                    print("*+*+*+*+* **+*+*+**Length=",self.seq_length_question_history)
+                    self.lstm_states, self.lstm_all_state_ques_hist = rnn.variable_length_LSTM(word_emb,
+                                                    num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
+                                                    seq_length=self.seq_length_question_history,scope="lstm4")
+
+                    
+
+                        
+                if config["model"]["attention"]["co-attention"]:
+                    history.append(self.lstm_all_state_ques_hist)
+                    print("History = {}".format(history))
+                    embeddings.append(lstm_states_description)
+
+                    embeddings.append(self.lstm_all_state_ques_hist)
+
+                else:
+                    embeddings.append(lstm_states_description)
 
                 
-                embeddings.append(lstm_states_description )
+                # embeddings.append(lstm_states_description )
 
 
              # Description-Pos
@@ -127,7 +169,7 @@ class OracleNetwork(ResnetModel):
                     
                     lstm_states, _ = rnn.variable_length_LSTM(word_emb,
                                                         num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
-                                                        seq_length=self.seq_length_pos,scope="lstm4")
+                                                        seq_length=self.seq_length_pos,scope="lstm5")
                     
 
                     embeddings.append(lstm_states)
@@ -222,6 +264,7 @@ class OracleNetwork(ResnetModel):
 
 
             # Compute the final embedding
+            print("---------- Embeddings=",embeddings)
             self.emb = tf.concat(embeddings, axis=1)
         
             # OUTPUT

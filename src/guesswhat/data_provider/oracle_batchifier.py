@@ -132,6 +132,60 @@ class OracleBatchifier(AbstractBatchifier):
                 # games.question = ['am I a person?'],            
                 # batch['question'].append(self.tokenizer_question.apply(game.questions[0]))
 
+
+
+
+
+            if 'embedding_vector_ques_hist' in sources:
+                
+                assert  len(game.questions) == 1
+                # Add glove vectors (NB even <unk> may have a specific glove)
+                # print("oracle_batchifier | question = {}".format(game.questions))
+                print("history=",game.all_last_question)
+
+                exit()
+                words = self.tokenizer_question.apply(game.all_last_question[0],tokent_int=False)
+                # print(" End ................... ,",words)
+                # print(len(words[0]))
+                # print(words)
+                # print("/////////// embedding_vector=")
+                if type(words) == int:
+                    exit()
+                
+            
+
+                if self.config["model"]["fasttext"] : 
+                    #print("++++++----- ++++++++ Dans fasttext ")
+                    embedding_vectors,_ = get_embeddings(words,pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos)
+                elif self.config["model"]["glove"] : 
+                    #print("++++++----- ++++++++ Dans glove ")
+                    embedding_vectors = self.glove.get_embeddings(words)
+                
+                # print("************ Embedding_vector = ",embedding_vectors)
+                
+                #print("taille = {} ".format(embedding_vectors))
+                # exit()=
+                # print("////////// embedding_vectors=",len(embedding_vectors[0]))
+
+                    batch['embedding_vector_ques'].append(embedding_vectors)
+
+                # print(" Oracle_batchifier | embedding_vector= {}".format(embedding_vectors))
+                # print("---- Embedding = ",len(embedding_vectors))
+                # print("----  =",len(embedding_vectors[0]))
+                #print("---------------- FINISH QUESTION_Emb =",np.asarray(embedding_vectors).shape)
+
+
+
+
+
+                # games.question = ['am I a person?'],            
+                # batch['question'].append(self.tokenizer_question.apply(game.questions[0]))
+
+
+
+
+
+
             if 'embedding_vector_des'in sources:
                 
 
