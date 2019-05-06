@@ -37,7 +37,9 @@
       "num_hiddens": 512
     },
     "attention" : {
-      "co-attention":true
+      "co-attention":true,
+      "no_attention_mlp": 256
+
     },
     "image":
     {
@@ -49,7 +51,7 @@
       "finetune" : [],
 
       "attention" : {
-        "mode": "none",
+        "mode": "classic",
         "co-attention":true,
         "no_attention_mlp": 256
       },

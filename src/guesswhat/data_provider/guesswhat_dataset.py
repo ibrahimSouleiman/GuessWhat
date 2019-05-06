@@ -305,6 +305,8 @@ class OracleDataset(AbstractDataset):
         self.compteur = 0
         self.all_category = []
         self.categories_questions = {0:0,1:0,2:0,3:0}
+
+        self.length_question = {}
         
         for i,g in enumerate(old_games):
             new_games += self.split(g)   
@@ -320,6 +322,9 @@ class OracleDataset(AbstractDataset):
         # print(Counter(self.all_category))
         # print("len=",len(self.unique_category))
         # print("Conteur = ",self.compteur)
+
+        # print(self.length_question)
+        # exit()
         
         super(OracleDataset, self).__init__(new_games)
 
@@ -346,6 +351,14 @@ class OracleDataset(AbstractDataset):
             
             new_game = copy.copy(game)
             new_game.questions = [q]
+            # print("question = {} ,taille = {} ".format(q,len(q.split(" "))))
+
+            # try:
+            #     self.length_question[len(q.split(" "))] += 1
+            # except KeyError:
+            #     self.length_question[len(q.split(" "))] = 0
+
+
             new_game.question_ids = [i]
             new_game.answers = [a]
             # print(q)
@@ -380,7 +393,7 @@ class OracleDataset(AbstractDataset):
         # print("Nb_question = {},question={}".format(nb_question,question))
         for i in  reversed(range(6)):
             if i == 5:
-                last_questions[i] = [ question+" "+answer ]
+                last_questions[i] = [ [answer],[question]]
                 # print("i={},{}".format(i,last_questions[i]))
 
             elif  nb_question > 0 and i > 0:

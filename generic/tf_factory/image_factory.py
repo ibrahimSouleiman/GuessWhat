@@ -57,10 +57,11 @@ def get_image_features(image, question, is_training, scope_name, config, dropout
         print("-------- image_feature_maps = ",image_feature_maps)
 
         # apply attention
-        image_out = get_attention(image_feature_maps, question,
-                                  config=config["attention"],
-                                  dropout_keep=dropout_keep,
-                                  reuse=reuse)
+        image_out = image_feature_maps
+        # image_out = get_attention(image_feature_maps, question,
+        #                           config=config["attention"],
+        #                           dropout_keep=dropout_keep,
+        #                           reuse=reuse)
 
     else:
         assert False, "Wrong input type for image"

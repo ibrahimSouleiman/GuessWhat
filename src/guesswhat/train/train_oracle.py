@@ -151,7 +151,7 @@ if __name__ == '__main__':
     glove = None
     if use_glove:
         logger.info('Loading glove..')
-        glove = GloveEmbeddings(os.path.join(args.data_dir, config["glove_name"]),glove_dim=300,type="common_crow")
+        glove = GloveEmbeddings(os.path.join(args.data_dir, config["glove_name"]),glove_dim=300,type_data="common_crow")
 
     # embedding = None
     # if use_embedding:

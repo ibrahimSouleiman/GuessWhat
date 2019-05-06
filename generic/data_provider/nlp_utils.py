@@ -386,12 +386,13 @@ def padder(list_of_tokens, seq_length=None, padding_symbol=0, max_seq_length=0):
 
     return padded_tokens, seq_length
 
-def padder_3d(list_of_tokens, max_seq_length=0):
+def padder_3d(list_of_tokens, max_seq_length=0,type_input=None):
     seq_length = np.array([len(q) for q in list_of_tokens], dtype=np.int32)
 
     if max_seq_length == 0:
         max_seq_length = seq_length.max()
-
+    if type_input == "question":
+        max_seq_length = 10
     batch_size = len(list_of_tokens)
     feature_size = list_of_tokens[0][0].shape[0]
 
@@ -403,6 +404,41 @@ def padder_3d(list_of_tokens, max_seq_length=0):
 
     # max_seq_length
     return padded_tokens, seq_length
+
+
+def padder_4d(list_of_tokens,max_seq_length=0):
+    seq_length = np.array([[len(s) for s in q] for q in list_of_tokens], dtype=np.int32)
+    
+    memory_length = np.array([len(q) for q in list_of_tokens], dtype=np.int32)
+    memory_length = memory_length.max()
+
+    # seq_length = np.array([ q.max() for q in seq_length    ], dtype=np.int32)
+    if max_seq_length == 0:
+        max_seq_length = seq_length.max()
+
+    batch_size = len(list_of_tokens)
+    # print("Batch = ",batch_size)
+
+    feature_size = list_of_tokens[0][0][0].shape[0]
+    
+   
+
+
+    padded_tokens = np.zeros(shape=(batch_size,memory_length, max_seq_length, feature_size))
+    
+    for i, hist in enumerate(list_of_tokens):
+        for j,h in enumerate(hist):
+            # print("Shape = ",np.asarray(h).shape)
+            
+            seq = h[:max_seq_length]
+            # print("Seq = {}".format(np.asarray(seq).shape ))
+            # if j == 5:
+            #    exit()
+            padded_tokens[i,j, :len(seq), :] = seq
+
+    # max_seq_length
+
+    return padded_tokens, seq_length,max_seq_length
 
 
 class DummyTokenizer(object):

@@ -6,6 +6,9 @@ from neural_toolbox.attention import compute_attention, compute_glimpse
 def get_attention(feature_map, lstm, config, dropout_keep=1, reuse=False):
     attention_mode = config.get("mode", None)
 
+    # print("feature_map = {} ",feature_map)
+    
+
     if attention_mode == "none":
         image_out = feature_map
 

@@ -18,15 +18,63 @@ def get_embedding(lookup_indices, n_words, n_dim,
 
 def fully_connected(inp, n_out, activation=None, scope="fully_connected",
                     weight_initializer=UniformUnitScaling(),
-                    init_bias=0.0, use_bias=True, reuse=False):
+                    init_bias=0.0, use_bias=True, reuse=False,co_attention=False,g1=None,g2=None):
     with tf.variable_scope(scope, reuse=reuse):
-        print("Input fully_connected = {}".format(inp))
-        inp_size = int(inp.get_shape()[1])
-        shape = [inp_size, n_out]
-        weight = tf.get_variable(
+       
+        if co_attention:
+            inp_size = inp.get_shape()[1:3]
+            shape = [inp_size[0],inp_size[1], n_out]
+            weight = tf.get_variable(
             "W", shape,
             initializer=weight_initializer)
-        out = tf.matmul(inp, weight)
+            out = tf.matmul(inp, weight)
+            print(" Input = {}".format(inp))
+            print("input_size = {},weigth = {} ,out = {} ".format(inp_size,weight,out))
+        
+
+
+            if g1 != None and g2 != None:
+                shape = [g1, n_out]
+
+                weight_g1 = tf.get_variable(
+                "W2", shape,
+                initializer=weight_initializer)
+
+                shape = [g2, n_out]
+                weight_g2 = tf.get_variable(
+                "W3", shape,
+                initializer=weight_initializer)
+
+                out_1 = tf.matmul(g1, weight_g1)
+                out_2 = tf.matmul(g2, weight_g2)
+
+            if g1!= None and g2==None:
+                inp_size = g1.get_shape()[1:3]
+                print(" g1 = {}".format(g1))
+                print("input_size = {} ".format(inp_size))
+
+
+                shape = [inp_size[0],inp_size[1], n_out]
+
+                weight_g1 = tf.get_variable(
+                "W2", shape,
+                initializer=weight_initializer)
+
+                out_1 = tf.matmul(g1, weight_g1)
+
+        else:
+            inp_size = int(inp.get_shape()[1])
+            shape = [inp_size, n_out]
+            weight = tf.get_variable(
+            "W", shape,
+            initializer=weight_initializer)
+            out = tf.matmul(inp, weight)
+
+            print("**** input = {} , inp_size = {} ,shape = {}, weigth = {} ,out = {} ".format(inp,inp_size,shape,weight,out))
+
+
+
+
 
         if use_bias:
              bias = tf.get_variable(
@@ -37,13 +85,82 @@ def fully_connected(inp, n_out, activation=None, scope="fully_connected",
     if activation == 'relu':
         return tf.nn.relu(out)
     if activation == 'softmax':
+        # shape = [inp,n_out]
+        weight = tf.get_variable(
+            "W_softmax", shape,
+            initializer=weight_initializer)
+
+        print("**** weigth = {} ,weigth_transpose = {} ".format(weight,tf.transpose(weight)))
+        out = tf.matmul(tf.transpose(weight),inp)
+
+        return tf.nn.softmax(out)
+
         # print("out fully_connected= {}".format(out))
         # print(tf.nn.softmax(out))
-        return tf.nn.softmax(out)
-    if activation == 'tanh':
-        return tf.tanh(out)
-    return out
+        # pass
+       
 
+       
+    if activation == 'tanh':
+        out_tanh = tf.tanh(out)
+
+        if co_attention:
+            if g1!=None and g2!=None:
+                out_1Dim = out.get_shape()[0]
+                out_2Dim = out.get_shape()[1]
+                out_last_dim = out.get_shape()[2]
+
+                out1_1Dim = out_1.get_shape()[0]
+                out1_2Dim = out_1.get_shape()[1]
+                out1_last_dim = out.get_shape()[2]
+
+
+                out2_1Dim = out_2.get_shape()[0]
+                out2_2Dim = out_2.get_shape()[1]
+                out2_last_dim = out.get_shape()[2]
+
+                out = tf.reshape(out,[out_1Dim*out_2Dim,out_last_dim])
+                out_1 = tf.reshape(out_1,[out1_1Dim*out1_2Dim,out1_last_dim])
+                out_2 = tf.reshape(out_2,[out1_2Dim*out2_2Dim,out2_last_dim])
+
+
+
+                all_ouput = tf.concat([out,out_1,out_2],axis=1)
+                print("------ all_ouput = {} ".format(all_ouput))
+
+                sum_ouput = tf.reduce_sum(all_ouput)
+                out_tanh = tf.tanh(sum_ouput)
+
+            if g1!=None and g2==None:
+                out_1Dim = out.get_shape()[0]
+                out_2Dim = out.get_shape()[1]
+                out_last_dim = out.get_shape()[2]
+
+                out1_1Dim = out_1.get_shape()[0]
+                out1_2Dim = out_1.get_shape()[1]
+
+                out1_last_dim = out.get_shape()[2]
+
+                out = tf.reshape(out,[out_1Dim*out_2Dim,out_last_dim])
+                out_1 = tf.reshape(out_1,[out1_1Dim*out1_2Dim,out1_last_dim])
+
+                print("------ out = {} , out_1 = {}".format(out,out_1))
+
+                all_ouput = tf.concat([out,out_1],axis=0) # Tensor("oracle/coattention/concat_1:0", shape=(2501, 256), dtype=float32)
+                print("------ all_ouput = {} ".format(all_ouput))
+
+                sum_ouput = tf.reduce_sum(all_ouput,0)
+                print("------ sum_ouput = {} ".format(sum_ouput))
+            
+                out_tanh = tf.tanh(all_ouput)
+                print("------ out_tanh = {} ".format(out_tanh))
+                
+
+
+
+
+        return out_tanh,weight
+    return out
 
 def rank(inp):
     return len(inp.get_shape())
