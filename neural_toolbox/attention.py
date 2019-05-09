@@ -3,14 +3,84 @@ import tensorflow as tf
 from neural_toolbox import utils
 
 
-def co_attention (question_states,description,history_states,image_feature,no_mlp_units,reuse=False):
+img = None
+question = None
+history = None
+
+
+def get_img():
+    global img
+    return img
+
+def get_question():
+    global question
+    return question
+
+def get_history():
+    global history
+    return history
+
+
+def set_img(new_img):
+    global img
+    img = new_img
+    return img
+
+def set_question(new_question):
+    global question 
+    question = new_question
+    return question
+
+def set_history(new_history):
+    global history
+    history = new_history
+    return history
+
+
+
+
+def co_attention (question_states,caption,history_states,image_feature,no_mlp_units,reuse=False):
     pass
 
-def compute_all_attention(question_states,description,history_states,image_feature,no_mlp_units,reuse=False):
+def get_input_g1_g2(num_data,num_g1,num_g2):
+
+    input_data = g1 = g2 = None
+
+    print("*** get_input_g1_g2 = {},{},{} ".format(num_data,num_g1,num_g2))
+    if num_data == 0:
+        input_data = get_img()
+    elif num_data == 1:
+        input_data = get_question()
+    elif num_data == 3:
+        input_data = get_history()
+
+    if num_g1 == 0:
+        g1 = get_img()
+    elif num_g1 == 1:
+        g1 = get_question()
+    elif num_g1 == 3:
+        g1 = get_history()
+
+    if num_g2 == 0:
+        g2 = get_img()
+    elif num_g2 == 1:
+        g2 = get_question()
+    elif num_g2 == 3:
+        g2 = get_history()
+
+
+
+    return input_data,g1,g2
+
+
+def compute_all_attention(question_states,caption,history_states,image_feature,no_mlp_units,reuse=False):
+    
+    
     print("image_feature = {}",image_feature)
     print("Question = {}",question_states)
-    print("description = {}",description)
+    print("caption = {}",caption)
     print("history_sta = {}",history_states)
+
 
     ##### 1 ####
     # recupere les données
@@ -22,6 +92,8 @@ def compute_all_attention(question_states,description,history_states,image_featu
     # feature_input = mlp(x,g1,g2) [1.. feature_shape]
     # soft_feature = softmax(feature_input) [1.. feature_input_shape]
     # x = soft_feature * x [1.. feature_input_shape]
+
+
     with tf.variable_scope("coattention"):
 
         if len(image_feature.get_shape()) == 3:
@@ -35,193 +107,126 @@ def compute_all_attention(question_states,description,history_states,image_featu
      
         s = int(question_states.get_shape()[2])
 
+    
+        caption = tf.expand_dims(caption,axis=1)
+
+
         image_feature = tf.reshape(image_feature, shape=[-1, h * w, c]) # input image_feature ?,7,7,2048 => ?,49,2048
-        question_states = tf.reshape(question_states,[-1,10,1024])
+        question_states = tf.reshape(question_states,shape=[-1,10,1024])
+
+        # question_states = tf.concat([caption,question_states],axis=1)
+        # print("--- image_feature = {} ".format(image_feature))
+        # print("--- question_states = {} ".format(question_states))
 
         ques = question_states
         img  = image_feature
         hist = tf.reshape(history_states,[-1,6,1024])
 
-        description = tf.expand_dims(description,axis=1)
-        hist = tf.concat([description,hist],axis=1)
+        hist = tf.concat([caption,hist],axis=1)
+        print("--- hist = {} ".format(hist))
 
-        step_attention = {0:[img,ques,None],1:[hist,img,ques],2:[ques,img,hist],3:[img,hist,ques]}
+        # img = tf.reshape(img, shape=[-1,img_shape[1] *img_shape[2]]) 
+        # question = tf.reshape(get_question(), shape=[-1,question_shape[1] * question_shape[2]]) 
+        # history = tf.reshape(get_history(), shape=[-1,history_shape[1] * history_shape[2] ]) 
+
+       
+
+        
+
+        set_img(img)
+        set_question(ques)
+        set_history(hist)
+
+        dict_step = {0:"img",1:"question",3:"hist"}
+
+        #step_attention = {0:[img,ques,None],1:[hist,img,ques],2:[ques,img,hist],3:[img,hist,ques]}
+
+        step_attention = {0:[0,1,None],1:[3,0,1],2:[1,0,3],3:[0,3,1]}
+
 
 
         for key,value in step_attention.items():
-            hidden_mlp,weight = utils.fully_connected(value[0], no_mlp_units, scope='hidden_layer', activation="tanh", reuse=reuse,
-                                      co_attention=True,g1=value[1],g2=value[2])
-
-            print("... Input_data = {} ".format(value[0]))
-            print("... G1 = {} ".format(value[1]))
-            print("... G2 = {} ".format(value[2]))
-            exit()
-            hidden_mlp = utils.fully_connected(hidden_mlp, 1, scope='out-onelayer', reuse=reuse,co_attention=False)
             
-            print("img = {} ,hidden_mlp = {} ".format(value[0],hidden_mlp))
+            input_data , g1 , g2 = get_input_g1_g2(value[0],value[1],value[2])
+            print("input = {} ".format([value[0],value[1],value[2]]))
+            print("... Input_data = {} ".format(input_data))
+            print("... G1 = {} ".format(g1))
+            print("... G2 = {} ".format(g2))
+
+            dimension_two = input_data.get_shape()[1]
+
+
+            # print("Dimension Two =",dimension_two)
+            if g1 != None:
+                dimension_tile_1 = g1.get_shape()[1]
+                dimension_tile_2 = g1.get_shape()[2]
+
+                g1 = tf.tile(g1,[1,dimension_two,1])
+                g1 = tf.reshape(g1,[-1,dimension_two,dimension_tile_1*dimension_tile_2])
+                
+            
+            if g2 != None:
+                dimension_tile_1 = g2.get_shape()[1]
+                dimension_tile_2 = g2.get_shape()[2]
+                
+                g2 = tf.tile(g2,[1,dimension_two,1])
+                g2 = tf.reshape(g2,[-1,dimension_two,dimension_tile_1*dimension_tile_2])
+                
+
+            print("-- {} -- RESHAPE g1_tile ={} , g2_tile = {} ".format(key,g1,g2))
+
+
+            hidden_mlp,weight = utils.fully_connected(input_data, no_mlp_units, scope='hidden_layer_256_{}'.format(key), activation="tanh", reuse=reuse,
+                                      co_attention=True,g1=g1,g2=g2,key_input=key)
+
+            # print("First_hidden img = {} ,hidden_mlp = {} ".format(input_data,hidden_mlp))
+
+
+            hidden_mlp = utils.fully_connected(hidden_mlp, 1, scope='hidden_layer_1_{}'.format(key), reuse=reuse,co_attention=False)
+            
+            # print("Second_hidden img = {} ,hidden_mlp = {} ".format(input_data,hidden_mlp))
             # hidden_mlp = tf.reshape(hidden_mlp, shape=[-1, h * w, 2048])
 
-            print("Input_softmax = ",hidden_mlp)
-            
+             
+
             # out = tf.matmul(hidden_mlp, weight)
+            # print(" alpha = ",alpha)
 
-            alpha = utils.fully_connected(hidden_mlp, no_mlp_units, scope='out-softmax', activation="softmax", reuse=reuse,co_attention=False)
-            print(" alpha = ",alpha)
+
+            alpha = tf.nn.softmax(hidden_mlp,dim=1)
+            input_data = input_data * alpha
+            if value[0] == 0:set_img(input_data)
+            elif value[0] == 1:set_question(input_data)
+            elif value[0] == 2:set_history(input_data)
+
+
+
+            # print("-- {} -- hidden = {} ,ALPHA= {} ,INPUT_DATA = {}".format(key,hidden_mlp,alpha,input_data))
+            print("Data_ouput = ",get_img(),get_question(),get_history())
             
-            value[0] = value[0] * alpha
+            # if key == 2:
+            #     exit()
+        
+        img_shape = get_img().get_shape()
+        question_shape = get_question().get_shape()
+        history_shape = get_history().get_shape()
 
-            print("hidden = {} ,ALPHA= {} ,INPUT_DATA = {}".format(hidden_mlp,alpha,value[0]))
 
-            exit()            
+        img = tf.reshape(get_img(), shape=[-1,img_shape[1] *img_shape[2]]) 
+        question = tf.reshape(get_question(), shape=[-1,question_shape[1] * question_shape[2]]) 
+        history = tf.reshape(get_history(), shape=[-1,history_shape[1] * history_shape[2] ]) 
 
+        print("---- Img = {} ,question = {} ,history = {} ".format(img,question,history))
 
         
 
-
-        print("Done ::")
-        exit()
-        
-        
-        # embedding = tf.concat([image_feature, question_states], axis=2) # shape=(?, 49, 3072)
-        # embedding = tf.reshape(embedding, shape=[-1, s + c]) # shape=(?, 3072)
-
-
-
-
-        # compute the evidence from the embedding
-        with tf.variable_scope("mlp_1"):
-            e = utils.fully_connected(embedding, no_mlp_units, scope='hidden_layer', activation="relu", reuse=reuse)
-            print(" before ** e = {}".format(e))
-            e = utils.fully_connected(e, 1, scope='out', reuse=reuse)
-
-        print(" After ** e = {}".format(e))
-
-        exit()
-
-
-        e = tf.reshape(e, shape=[-1, h * w, 1])
-        alpha = tf.nn.softmax(e,dim=1) # shape=(?, 49, 1)
-        soft_attention = image_feature * alpha # shape=(?, 49, 2048)
-
-        i_feature = tf.reduce_sum(soft_attention, axis=1) # shape=(?, 2048)
-
-        #-------------------------------------- 2 -----------------------------------------
-        q_feature = None
-        h_feature = None
-
-
-
-       
         
 
-        all_history_res = tf.reshape(history_states,[6,1024])
-        all_history = tf.concat([description,history_states],axis=1)
+    return img,question,history
+
+                     
 
 
-
-
-        with tf.variable_scope("mlp_1"):
-            e = utils.fully_connected(embedding, no_mlp_units, scope='hidden_layer', activation="relu", reuse=reuse)
-            e = utils.fully_connected(e, 1, scope='out', reuse=reuse,co_attention=True,g1=i_feature)
-        
-        e = tf.reshape(e, shape=[-1, h * w, 1])
-        alpha = tf.nn.softmax(e,dim=1) # shape=(?, 49, 1)
-        h_feature = all_history * alpha # shape=(?, 49, 2048)
-
-
-
-
-
-
-
-        
-
-    return soft_attention
-
-    # def compute_all_attention(question_states,description,history_states,image_feature,no_mlp_units,reuse=False):
-    # # print("image_feature = {}",image_feature)
-    # # print("question = {}",question_states)
-    # # print("description = {}",description)
-    # # print("history_sta = {}",history_states)
-
-
-    # with tf.variable_scope("coattention"):
-
-    #     if len(image_feature.get_shape()) == 3:
-    #         h = tf.shape(image_feature)[1]  # when the shape is dynamic (attention over lstm)
-    #         w = 1
-    #         c = int(image_feature.get_shape()[2])
-
-    #     else:
-    #         h = int(image_feature.get_shape()[1])
-    #         w = int(image_feature.get_shape()[2])
-    #         c = int(image_feature.get_shape()[3])
-        
-    #     # print("h={},w={},c={}".format(h,w,c))
-    #     # exit()
-
-    #     # print("shape = ",question_states.get_shape()[2])
-    #     s = int(question_states.get_shape()[2])
-
-    #     image_feature = tf.reshape(image_feature, shape=[-1, h * w, c]) # input image_feature ?,7,7,2048 => ?,49,2048
-
-    #     # print("Reshape Feature_maps ={}".format(image_feature))
-        
-
-    #     # print("Reshape context ={}".format(contattention_mode2]) => [a,b,c,a,b,c]
-    #     # print("Reshape context ={}".format(context))s=2)
-
-    #     embedding = tf.concat([image_feature, question_states], axis=2)
-    #     print(" +++ embedding = {} ".format(embedding))
-        
-
-    #     embedding = tf.reshape(embedding, shape=[-1, s + c])
-
-    #     print("------- embedding = ",embedding)
-    #     # exit()
-
-
-
-    #     # compute the evidence from the embedding
-    #     with tf.variable_scope("mlp"):
-    #         e = utils.fully_connected(embedding, no_mlp_units, scope='hidden_layer', activation="relu", reuse=reuse)
-    #         e = utils.fully_connected(e, 1, scope='out', reuse=reuse)
-
-    #     print(" before ** e = {}".format(e))
-
-
-    #     e = tf.reshape(e, shape=[-1, h * w, 1])
-    #     print(" after ** e = {}".format(e))
-        
-
-    #     # compute the softmax over the evidenceprint(" image = {} ".format(self._crop))
-    #             # print(" Crop = {} ".format(self.crop_out))
-    #             # print(" co_attention = {} ".format(co_attention))
-                
-    #             # exit()
-    #     # print(e)
-    #     alpha = tf.nn.softmax(e,dim=1) # shape=(?, 49, 1)
-        
-    #     print(" Alpha ** = {} ".format(alpha))
-
-
-    #     # first_attention = 
-
-
-
-    #     # apply soft attention
-    #     soft_attention = image_feature * alpha # shape=(?, 49, 2048)
-    #     print(" soft_attention *B* = {} ".format(soft_attention))
-
-    #     soft_attention = tf.reduce_sum(soft_attention, axis=1) # shape=(?, 2048)
-    #     print(" soft_attention *AF* = {} ".format(soft_attention))
-
-    #     # print(soft_attention)
-
-    #     # print(soft_attention)
-    #     exit()
-
-    # return soft_attention
 
 
 

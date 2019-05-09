@@ -121,7 +121,8 @@ if __name__ == '__main__':
     
     if tokenizer_description != None:
         network = OracleNetwork(config, num_words_question=tokenizer.no_words,num_words_description=tokenizer_description.no_words)
-    else:        network = OracleNetwork(config, num_words_question=tokenizer.no_words,num_words_description=None)
+    else: 
+        network = OracleNetwork(config, num_words_question=tokenizer.no_words,num_words_description=None)
 
 
 
@@ -132,6 +133,7 @@ if __name__ == '__main__':
     ###############################
     #  START  TRAINING
     #############################
+    print("Start training .......")
 
     # create a saver to store/load checkpoint
     saver = tf.train.Saver()

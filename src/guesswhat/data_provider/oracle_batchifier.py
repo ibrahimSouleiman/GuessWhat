@@ -106,10 +106,10 @@ class OracleBatchifier(AbstractBatchifier):
                     # print("/////////// question_pos NOT EXIST")
 
                     if self.config["model"]["fasttext"] : 
-                        #print("++++++----- ++++++++ Dans fasttext ")
+                        print("++++++----- ++++++++ Dans fasttext ")
                         embedding_vectors,_ = get_embeddings(words,pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos)
                     elif self.config["model"]["glove"] : 
-                        #print("++++++----- ++++++++ Dans glove ")
+                        # print("++++++----- ++++++++ Dans glove ")
                        
                         embedding_vectors = self.glove.get_embeddings(words)
                     
@@ -284,7 +284,7 @@ class OracleBatchifier(AbstractBatchifier):
         
         if "question" in sources:
             batch['question'] , batch['seq_length_question'] = padder(batch['question'],
-                                                        padding_symbol=self.tokenizer_question.padding_token)
+                                                        padding_symbol=self.tokenizer_question.padding_token,max_seq_length=10)
 
 
 
@@ -303,7 +303,10 @@ class OracleBatchifier(AbstractBatchifier):
                         # print("Shape=",np.asarray(batch['embedding_vector_ques'] ).shape)
                         batch['embedding_vector_ques'],s = padder_3d(batch['embedding_vector_ques'],type_input="question")
                         # print("+++++ Batch = ",batch['seq_length_question'])
-                        # print("Len=",len(batch['seq_length_question']))
+
+                        # print("++++ data = ",np.asarray(batch['embedding_vector_ques']))
+
+                        # print("--- Len=",len(batch['seq_length_question']))
 
         if 'embedding_vector_ques_hist' in sources:
                         # print("Shape=",np.asarray(batch['embedding_vector_ques_hist'] ).shape)
@@ -313,9 +316,7 @@ class OracleBatchifier(AbstractBatchifier):
                         size_sentences = np.asarray(size_sentences)
 
                         # print("All before = ",batch_hist.shape)
-
-                        # batch_hist = np.reshape(batch_hist,(-1,6*max_seq,300))
-                        
+                        # batch_hist = np.reshape(batch_hist,(-1,6*max_seq,300))                     
                         # print("All after = ",batch_hist.shape)
                         # print("+++++ Batch = ",np.asarray(size_sentences).shape)
 
@@ -323,7 +324,6 @@ class OracleBatchifier(AbstractBatchifier):
 
                         for i in range(6):
                             # print("size = {} , {} ,{}".format(size_sentences.shape , size_sentences[:,i].shape ,batch_hist[:,i,:,:].shape )) 
-                            
                             # print(size_sentences[:,i])
 
                             batch['embedding_vector_ques_hist_H{}'.format(i)] = batch_hist[:,i,:,:]

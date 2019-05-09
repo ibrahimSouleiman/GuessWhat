@@ -15,7 +15,6 @@ def create_optimizer(network, config, finetune=list(), optim_cst=tf.train.AdamOp
     # Extract trainable variables if not provided
     if var_list is None:
         var_list = network.get_parameters(finetune=finetune)
-
     # Apply weight decay
     if loss is None:
         loss = network.get_loss()
@@ -25,6 +24,8 @@ def create_optimizer(network, config, finetune=list(), optim_cst=tf.train.AdamOp
     if weight_decay > 0:
         training_loss = loss + l2_regularization(var_list, weight_decay=weight_decay)
 
+    print("training_loss = {} ".format(training_loss))
+    # print("var_list = {} ".format(var_list))
     # compute gradient
     grad = optimizer.compute_gradients(training_loss, var_list=var_list)
 

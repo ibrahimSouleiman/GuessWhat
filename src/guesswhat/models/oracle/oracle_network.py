@@ -41,19 +41,22 @@ class OracleNetwork(ResnetModel):
                 # self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['question']["embedding_dim"])], name="glove")
                 # word_emb = tf.concat([word_emb, self._glove], axis=2)
                     
-
-                # print("*+*+*+*+* **+*+*+**Length=",self.seq_length_question)
-
-
                 self.lstm_states, self.lstm_all_state_ques = rnn.variable_length_LSTM(word_emb,
                                                     num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
                                                     seq_length=self.seq_length_question)
                 
                 if config["model"]["attention"]["co-attention"]:
                     co_attention.append(self.lstm_all_state_ques)
-                    embeddings.append(self.lstm_all_state_ques)
+                    # embeddings.append(self.lstm_all_state_ques)
                 else:
                     embeddings.append(self.lstm_states)
+
+
+                # print("*+*+*+*+* **+*+*+**Length=",self.seq_length_question)
+                # print("word_emb = {}".format(word_emb))
+                # print("question = {}".format(self._question))
+                # print("lstm_all_state_ques = {} ".format(self.lstm_all_state_ques))
+                # exit()
 
 
 
@@ -84,7 +87,7 @@ class OracleNetwork(ResnetModel):
                     
 
 
-                    embeddings.append(lstm_states)
+                    # embeddings.append(lstm_states)
 
             # DESCRIPTION
 
@@ -166,8 +169,8 @@ class OracleNetwork(ResnetModel):
                     co_attention.append(self.lstm_states)
 
 
-                    embeddings.append(lstm_states_description)
-                    embeddings.append(self.lstm_states)
+                    # embeddings.append(lstm_states_description)
+                    # embeddings.append(self.lstm_states)
 
                 else:
                     embeddings.append(lstm_states_description)
@@ -201,7 +204,7 @@ class OracleNetwork(ResnetModel):
                                                         seq_length=self.seq_length_pos,scope="lstm5")
                     
 
-                    embeddings.append(lstm_states)
+                    # embeddings.append(lstm_states)
 
             # CATEGORY
             if config['inputs']['category']:
@@ -218,7 +221,7 @@ class OracleNetwork(ResnetModel):
 
                 
 
-
+                # cat_emb = tf.expand_dims(cat_emb,1)
                 embeddings.append(cat_emb)
                 print("Input: Category")
 
@@ -267,12 +270,12 @@ class OracleNetwork(ResnetModel):
 
                 self._image = tf.placeholder(tf.float32, [self.batch_size] + config['model']['image']["dim"], name='image')
                 self.image_out = get_image_features(
-                    image=self._image, question=lstm_states,
+                    image=self._image, question=self.lstm_states,
                     is_training=self._is_training,
                     scope_name=scope.name,
                     config=config['model']['image']
                 )
-                embeddings.append(self.image_out)
+                # embeddings.append(self.image_out)
                 print("Input: Image")
                 co_attention.append(self.image_out)
 
@@ -290,7 +293,7 @@ class OracleNetwork(ResnetModel):
                     scope_name=scope.name,
                     config=config["model"]['crop'])
 
-                embeddings.append(self.crop_out)
+                # embeddings.append(self.crop_out)
                 co_attention.append(self.crop_out)
 
 
@@ -303,12 +306,27 @@ class OracleNetwork(ResnetModel):
             print("*-*-*-*-*-*-*-*  Co_attention = {}".format(co_attention))
 
             # exit()
-            compute_all_attention(question_states=co_attention[0],description=co_attention[1],history_states=co_attention[2],image_feature=co_attention[3],no_mlp_units=config['model']['attention']['no_attention_mlp'])
-            exit()
+            image_feature,question_feature,history_feature = compute_all_attention(question_states=co_attention[0],
+                                                                                caption=co_attention[1],
+                                                                                history_states=co_attention[2],
+                                                                                image_feature=co_attention[3],
+                                                                                no_mlp_units=config['model']['attention']['no_attention_mlp'])
+
+            embeddings.append(image_feature)
+            embeddings.append(history_feature)
+            embeddings.append(question_feature)
+            
+            print("All Embedding = ",embeddings)
+            # exit()
+            self.emb = tf.concat(embeddings, axis=1)
+
+            
+
+
             # Compute the final embedding
-            print("---------- Embeddings=",embeddings)
+            # print("---------- Embeddings=",embeddings)
             # self.emb = tf.concat(embeddings, axis=1)
-            self.emb = embeddings [-1]
+            
         
 
             # OUTPUT
@@ -325,10 +343,15 @@ class OracleNetwork(ResnetModel):
                 self.best_pred = tf.argmax(self.pred, axis=1)
             # self.best_pred = tf.reduce_mean(self.best_pred)
 
-
+            print("--- predict = {} ,answer = {} ".format(self.pred,self._answer))
+            
+            # self.loss = None
             self.loss = tf.reduce_mean(utils.cross_entropy(self.pred, self._answer))
             self.error = tf.reduce_mean(utils.error(self.pred, self._answer))
 
+            print("loss = {} ,error = {} ".format(self.loss,self.error))
+
+            
 
             print('Model... Oracle build!')
             # print(" Summary = ",tf.summary())
