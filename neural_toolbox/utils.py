@@ -25,7 +25,7 @@ def fully_connected(inp, n_out, activation=None, scope="fully_connected",
        
         if co_attention:
             inp_size = inp.get_shape()[1:3]
-            shape = [inp_size[0],inp_size[1], n_out]
+            shape = [int(inp_size[0]),int(inp_size[1]), n_out]
             weight = tf.get_variable(
             "W", shape,
             initializer=weight_initializer)
@@ -50,7 +50,7 @@ def fully_connected(inp, n_out, activation=None, scope="fully_connected",
 
             if g1 != None and g2 != None:
                 inp_size = g1.get_shape()[1:3]
-                shape = [inp_size[0],inp_size[1], n_out]
+                shape = [int(inp_size[0]),int(inp_size[1]), n_out]
 
                 print("shape = {}".format(shape))
                 weight_g1 = tf.get_variable(
@@ -58,7 +58,7 @@ def fully_connected(inp, n_out, activation=None, scope="fully_connected",
                 initializer=weight_initializer)
 
                 inp_size = g2.get_shape()[1:3]
-                shape = [inp_size[0],inp_size[1], n_out]
+                shape = [int(inp_size[0]),int(inp_size[1]), n_out]
                 weight_g2 = tf.get_variable(
                 "W3", shape,
                 initializer=weight_initializer)
@@ -69,9 +69,9 @@ def fully_connected(inp, n_out, activation=None, scope="fully_connected",
 
             if g1!= None and g2==None:
                 inp_size = g1.get_shape()[1:3]
+                shape = [int(inp_size[0]),int(inp_size[1]), n_out]
                 # print(" g1 = {}".format(g1))
                 # print("input_size = {} ".format(inp_size))
-                shape = [inp_size[0],inp_size[1], n_out]
                 weight_g1 = tf.get_variable(
                 "W2", shape,
                 initializer=weight_initializer)
@@ -122,18 +122,7 @@ def fully_connected(inp, n_out, activation=None, scope="fully_connected",
 
         if co_attention:
             if g1!=None and g2!=None:
-                out_1Dim = out.get_shape()[0]
-                out_2Dim = out.get_shape()[1]
-                out_last_dim = out.get_shape()[2]
-
-                out1_1Dim = out_1.get_shape()[0]
-                out1_2Dim = out_1.get_shape()[1]
-                out1_last_dim = out.get_shape()[2]
-
-
-                out2_1Dim = out_2.get_shape()[0]
-                out2_2Dim = out_2.get_shape()[1]
-                out2_last_dim = out.get_shape()[2]
+          
 
                 # out = tf.reshape(out,[out_1Dim*out_2Dim,out_last_dim])
                 # out_1 = tf.reshape(out_1,[out1_1Dim*out1_2Dim,out1_last_dim])
@@ -153,18 +142,10 @@ def fully_connected(inp, n_out, activation=None, scope="fully_connected",
                 # print("------ out_tanh = {} ".format(out_tanh))
 
             if g1!=None and g2==None:
-                out_1Dim = out.get_shape()[0]
-                out_2Dim = out.get_shape()[1]
-                out_last_dim = out.get_shape()[2]
-
-                out1_1Dim = out_1.get_shape()[0]
-                out1_2Dim = out_1.get_shape()[1]
-
-                out1_last_dim = out.get_shape()[2]
+            
 
                 # out = tf.reshape(out,[out_1Dim*out_2Dim,out_last_dim])
                 # out_1 = tf.reshape(out_1,[out1_1Dim*out1_2Dim,out1_last_dim])
-
                 # print("------ out = {} , out_1 = {}".format(out,out_1))
 
                 all_ouput = tf.concat([out,out_1],axis=1) # Tensor("oracle/coattention/concat_1:0", shape=(2501, 256), dtype=float32)

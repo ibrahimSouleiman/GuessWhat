@@ -153,21 +153,21 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
             print("... G1 = {} ".format(g1))
             print("... G2 = {} ".format(g2))
 
-            dimension_two = input_data.get_shape()[1]
+            dimension_two = int(input_data.get_shape()[1])
 
 
             # print("Dimension Two =",dimension_two)
             if g1 != None:
-                dimension_tile_1 = g1.get_shape()[1]
-                dimension_tile_2 = g1.get_shape()[2]
+                dimension_tile_1 = int(g1.get_shape()[1])
+                dimension_tile_2 = int(g1.get_shape()[2])
 
                 g1 = tf.tile(g1,[1,dimension_two,1])
                 g1 = tf.reshape(g1,[-1,dimension_two,dimension_tile_1*dimension_tile_2])
                 
             
             if g2 != None:
-                dimension_tile_1 = g2.get_shape()[1]
-                dimension_tile_2 = g2.get_shape()[2]
+                dimension_tile_1 = int(g2.get_shape()[1])
+                dimension_tile_2 = int(g2.get_shape()[2])
                 
                 g2 = tf.tile(g2,[1,dimension_two,1])
                 g2 = tf.reshape(g2,[-1,dimension_two,dimension_tile_1*dimension_tile_2])
@@ -212,9 +212,9 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
         history_shape = get_history().get_shape()
 
 
-        img = tf.reshape(get_img(), shape=[-1,img_shape[1] *img_shape[2]]) 
-        question = tf.reshape(get_question(), shape=[-1,question_shape[1] * question_shape[2]]) 
-        history = tf.reshape(get_history(), shape=[-1,history_shape[1] * history_shape[2] ]) 
+        img = tf.reshape(get_img(), shape=[-1,int(img_shape[1]) * int(img_shape[2]) ]) 
+        question = tf.reshape(get_question(), shape=[-1, int(question_shape[1]) * int(question_shape[2]) ]) 
+        history = tf.reshape(get_history(), shape=[-1,int(history_shape[1]) * int(history_shape[2]) ]) 
 
         print("---- Img = {} ,question = {} ,history = {} ".format(img,question,history))
 
