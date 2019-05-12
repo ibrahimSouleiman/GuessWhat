@@ -22,43 +22,47 @@ def fully_connected(inp, n_out, activation=None, scope="fully_connected",
                     init_bias=0.0, use_bias=True, reuse=False,co_attention=False,g1=None,g2=None,key_input=None):
     logger = logging.getLogger()
     with tf.variable_scope(scope, reuse=reuse):
+        
+        # print("--- inp_size = {} ".format(inp))
+
+        inp_size = int(inp.get_shape()[1])
+
+        shape = [inp_size, n_out]
+
+        weight = tf.get_variable(
+        "W", shape,
+        initializer=weight_initializer)
+
+        out = tf.matmul(inp, weight)
        
         if co_attention:
-            inp_size = inp.get_shape()[1:3]
-            shape = [int(inp_size[0]),int(inp_size[1]), n_out]
-            weight = tf.get_variable(
-            "W", shape,
-            initializer=weight_initializer)
+            # inp_size = inp.get_shape()[1:3]
+            # shape = [int(inp_size[0]),int(inp_size[1]), n_out]
+            # weight = tf.get_variable(
+            # "W", shape,
+            # initializer=weight_initializer)
 
-            print(" Input = {}".format(inp))
-            print("input_size = {},weigth = {} ".format(inp_size,weight))
+            # print(" Input = {}".format(inp))
+            # print("input_size = {},weigth = {} ".format(inp_size,weight))
             
 
-
-            if key_input == 0:
-                logger.info('')
-                out = tf.matmul(inp, weight)
-            elif key_input == 1:
-                out = tf.matmul(inp, weight)
-            elif key_input == 2:
-                out = tf.matmul(inp, weight)
-            elif key_input == 3:
-                out = tf.matmul(inp, weight)
+            out = tf.matmul(inp, weight)
+            
 
             
 
 
             if g1 != None and g2 != None:
-                inp_size = g1.get_shape()[1:3]
-                shape = [int(inp_size[0]),int(inp_size[1]), n_out]
+                inp_size = int(g1.get_shape()[1])
+                shape = [inp_size, n_out]
 
                 print("shape = {}".format(shape))
                 weight_g1 = tf.get_variable(
                 "W2", shape,
                 initializer=weight_initializer)
 
-                inp_size = g2.get_shape()[1:3]
-                shape = [int(inp_size[0]),int(inp_size[1]), n_out]
+                inp_size = int(g2.get_shape()[1])
+                shape = [inp_size, n_out]
                 weight_g2 = tf.get_variable(
                 "W3", shape,
                 initializer=weight_initializer)
@@ -68,23 +72,23 @@ def fully_connected(inp, n_out, activation=None, scope="fully_connected",
                 # print(" out_put_1 = {} ,out_put_2 = {} ".format(out_1,out_2))
 
             if g1!= None and g2==None:
-                inp_size = g1.get_shape()[1:3]
-                shape = [int(inp_size[0]),int(inp_size[1]), n_out]
-                # print(" g1 = {}".format(g1))
-                # print("input_size = {} ".format(inp_size))
-                weight_g1 = tf.get_variable(
-                "W2", shape,
-                initializer=weight_initializer)
+                # inp_size = g1.get_shape()[1:3]
+                # shape = [int(inp_size[0]),int(inp_size[1]), n_out]
+                # # print(" g1 = {}".format(g1))
+                # # print("input_size = {} ".format(inp_size))
+                # weight_g1 = tf.get_variable(
+                # "W2", shape,
+                # initializer=weight_initializer)
 
+                inp_size = int(g1.get_shape()[1])
+                shape = [inp_size, n_out]
+                weight_g1 = tf.get_variable(
+                "W1", shape,
+                initializer=weight_initializer)
+                # out = tf.matmul(inp, weight)
                 out_1 = tf.matmul(g1, weight_g1)
 
-        else:
-            inp_size = int(inp.get_shape()[1])
-            shape = [inp_size, n_out]
-            weight = tf.get_variable(
-            "W-1", shape,
-            initializer=weight_initializer)
-            out = tf.matmul(inp, weight)
+           
 
             # print("**** input = {} , inp_size = {} ,shape = {}, weigth = {} ,out = {} ".format(inp,inp_size,shape,weight,out))
 
@@ -132,10 +136,10 @@ def fully_connected(inp, n_out, activation=None, scope="fully_connected",
 
                 # print("-----3out- out = {} , out_1 = {},out_2 = {}".format(out,out_1,out_2))
 
-                all_ouput = tf.concat([out,out_1,out_2],axis=1) # Tensor("oracle/coattention/concat_1:0", shape=(2501, 256), dtype=float32)
+                all_ouput = [out,out_1,out_2] # Tensor("oracle/coattention/concat_1:0", shape=(2501, 256), dtype=float32)
                 # print("------ all_ouput = {} ".format(all_ouput))
 
-                sum_ouput = tf.reduce_sum(all_ouput,1)
+                sum_ouput = tf.add_n(all_ouput)
                 # print("------ sum_ouput = {} ".format(sum_ouput))
             
                 out_tanh = tf.tanh(sum_ouput)
@@ -148,10 +152,10 @@ def fully_connected(inp, n_out, activation=None, scope="fully_connected",
                 # out_1 = tf.reshape(out_1,[out1_1Dim*out1_2Dim,out1_last_dim])
                 # print("------ out = {} , out_1 = {}".format(out,out_1))
 
-                all_ouput = tf.concat([out,out_1],axis=1) # Tensor("oracle/coattention/concat_1:0", shape=(2501, 256), dtype=float32)
+                all_ouput = [out,out_1] # Tensor("oracle/coattention/concat_1:0", shape=(2501, 256), dtype=float32)
                 # print("------ all_ouput = {} ".format(all_ouput))
 
-                sum_ouput = tf.reduce_sum(all_ouput,1)
+                sum_ouput = tf.add_n(all_ouput)
                 # print("------ sum_ouput = {} ".format(sum_ouput))
             
                 out_tanh = tf.tanh(sum_ouput)

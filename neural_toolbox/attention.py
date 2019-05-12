@@ -110,9 +110,8 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
     
         caption = tf.expand_dims(caption,axis=1)
 
-
-        image_feature = tf.reshape(image_feature, shape=[-1, h * w, c]) # input image_feature ?,7,7,2048 => ?,49,2048
-        question_states = tf.reshape(question_states,shape=[-1,10,1024])
+        image_feature = tf.reshape(image_feature, shape=[-1, (h * w) * c]) # input image_feature ?,7,7,2048 => ?,49,2048
+        question_states = tf.reshape(question_states,shape=[-1,10*1024])
 
         # question_states = tf.concat([caption,question_states],axis=1)
         # print("--- image_feature = {} ".format(image_feature))
@@ -121,17 +120,18 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
         ques = question_states
         img  = image_feature
         hist = tf.reshape(history_states,[-1,6,1024])
-
         hist = tf.concat([caption,hist],axis=1)
-        print("--- hist = {} ".format(hist))
+        hist = tf.reshape(hist,[-1,7*1024])        
+        # print("--- hist = {} ".format(hist))
+
+        # print("--- Img = {}".format(img))
+        # print("--- question = {}".format(ques))
+
+        # exit()    
 
         # img = tf.reshape(img, shape=[-1,img_shape[1] *img_shape[2]]) 
         # question = tf.reshape(get_question(), shape=[-1,question_shape[1] * question_shape[2]]) 
         # history = tf.reshape(get_history(), shape=[-1,history_shape[1] * history_shape[2] ]) 
-
-       
-
-        
 
         set_img(img)
         set_question(ques)
@@ -142,35 +142,34 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
         #step_attention = {0:[img,ques,None],1:[hist,img,ques],2:[ques,img,hist],3:[img,hist,ques]}
 
         step_attention = {0:[0,1,None],1:[3,0,1],2:[1,0,3],3:[0,3,1]}
-
-
+        # step_attention = {0:[0,1,None]}
 
         for key,value in step_attention.items():
             
             input_data , g1 , g2 = get_input_g1_g2(value[0],value[1],value[2])
-            print("input = {} ".format([value[0],value[1],value[2]]))
-            print("... Input_data = {} ".format(input_data))
-            print("... G1 = {} ".format(g1))
-            print("... G2 = {} ".format(g2))
+            # print("input = {} ".format([value[0],value[1],value[2]]))
+            # print("... Input_data = {} ".format(input_data))
+            # print("... G1 = {} ".format(g1))
+            # print("... G2 = {} ".format(g2))
 
             dimension_two = int(input_data.get_shape()[1])
 
 
             # print("Dimension Two =",dimension_two)
-            if g1 != None:
-                dimension_tile_1 = int(g1.get_shape()[1])
-                dimension_tile_2 = int(g1.get_shape()[2])
+            # if g1 != None:
+            #     dimension_tile_1 = int(g1.get_shape()[1])
+            #     dimension_tile_2 = int(g1.get_shape()[2])
 
-                g1 = tf.tile(g1,[1,dimension_two,1])
-                g1 = tf.reshape(g1,[-1,dimension_two,dimension_tile_1*dimension_tile_2])
+            #     g1 = tf.tile(g1,[1,dimension_two,1])
+            #     g1 = tf.reshape(g1,[-1,dimension_two,dimension_tile_1*dimension_tile_2])
                 
             
-            if g2 != None:
-                dimension_tile_1 = int(g2.get_shape()[1])
-                dimension_tile_2 = int(g2.get_shape()[2])
+            # if g2 != None:
+            #     dimension_tile_1 = int(g2.get_shape()[1])
+            #     dimension_tile_2 = int(g2.get_shape()[2])
                 
-                g2 = tf.tile(g2,[1,dimension_two,1])
-                g2 = tf.reshape(g2,[-1,dimension_two,dimension_tile_1*dimension_tile_2])
+            #     g2 = tf.tile(g2,[1,dimension_two,1])
+            #     g2 = tf.reshape(g2,[-1,dimension_two,dimension_tile_1*dimension_tile_2])
                 
 
             print("-- {} -- RESHAPE g1_tile ={} , g2_tile = {} ".format(key,g1,g2))
@@ -180,11 +179,12 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
                                       co_attention=True,g1=g1,g2=g2,key_input=key)
 
             # print("First_hidden img = {} ,hidden_mlp = {} ".format(input_data,hidden_mlp))
-
+               
 
             hidden_mlp = utils.fully_connected(hidden_mlp, 1, scope='hidden_layer_1_{}'.format(key), reuse=reuse,co_attention=False)
             
             # print("Second_hidden img = {} ,hidden_mlp = {} ".format(input_data,hidden_mlp))
+            
             # hidden_mlp = tf.reshape(hidden_mlp, shape=[-1, h * w, 2048])
 
              
@@ -202,21 +202,19 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
 
 
             # print("-- {} -- hidden = {} ,ALPHA= {} ,INPUT_DATA = {}".format(key,hidden_mlp,alpha,input_data))
-            print("Data_ouput = ",get_img(),get_question(),get_history())
-            
+            # print("Data_ouput = ",get_img(),get_question(),get_history())
             # if key == 2:
             #     exit()
         
-        img_shape = get_img().get_shape()
-        question_shape = get_question().get_shape()
-        history_shape = get_history().get_shape()
+        # img_shape = get_img().get_shape()
+        # question_shape = get_question().get_shape()
+        # history_shape = get_history().get_shape()
 
+        # img = tf.reshape(get_img(), shape=[-1,int(img_shape[1]) * int(img_shape[2]) ]) 
+        # question = tf.reshape(get_question(), shape=[-1, int(question_shape[1]) * int(question_shape[2]) ]) 
+        # history = tf.reshape(get_history(), shape=[-1,int(history_shape[1]) * int(history_shape[2]) ]) 
 
-        img = tf.reshape(get_img(), shape=[-1,int(img_shape[1]) * int(img_shape[2]) ]) 
-        question = tf.reshape(get_question(), shape=[-1, int(question_shape[1]) * int(question_shape[2]) ]) 
-        history = tf.reshape(get_history(), shape=[-1,int(history_shape[1]) * int(history_shape[2]) ]) 
-
-        print("---- Img = {} ,question = {} ,history = {} ".format(img,question,history))
+        print("---- Img = {} ,question = {} ,history = {} ".format(get_img(),get_question(),get_history()))
 
         
 
