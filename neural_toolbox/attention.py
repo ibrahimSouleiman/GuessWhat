@@ -81,7 +81,6 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
     print("caption = {}",caption)
     print("history_sta = {}",history_states)
 
-
     ##### 1 ####
     # recupere les données
 
@@ -112,9 +111,13 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
 
         image_feature = tf.reshape(image_feature, shape=[-1, (h * w) * c]) # input image_feature ?,7,7,2048 => ?,49,2048
         question_states = tf.reshape(question_states,shape=[-1,10*1024])
+        # print("***** quesetion_states = ",question_states)
+
+        # return question_states
 
         # question_states = tf.concat([caption,question_states],axis=1)
         # print("--- image_feature = {} ".format(image_feature))
+        # exit()
         # print("--- question_states = {} ".format(question_states))
 
         ques = question_states

@@ -32,7 +32,9 @@ class Game:
     def __init__(self, id, object_id, image, objects, qas , status, which_set, image_builder, crop_builder,lemmatizer,all_img_bbox,all_img_describtion):
         self.dialogue_id = id
         self.object_id = object_id
-       
+        
+        compteur = 0
+
         self.image = Image(id=image["id"],
                            width=image["width"],
                            height=image["height"],
@@ -57,11 +59,23 @@ class Game:
                              which_set=which_set,
                              image=self.image)
 
+            
+
             self.objects.append(new_obj)
 
             if o['id'] == object_id:
                 self.object = new_obj  # Keep ref on the object to find
-                # all_img_bbox[image["id"] ]= o['bbox']         
+                # all_img_bbox[image["id"] ]= o['bbox']    
+                # print("Select=",o['category'])
+            else:
+                pass
+                # print(o['category'])     
+
+        # print("-----------------------")
+        compteur += 1
+        if compteur == 15:
+            exit()
+
 
         # all_img_describtion[image["id"]] = image["description"]
 

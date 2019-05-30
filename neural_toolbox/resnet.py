@@ -54,7 +54,8 @@ def create_resnet(image_input, is_training, scope="", resnet_out="logits", resne
         raise ValueError("Unsupported resnet version")
 
     resnet_scope = os.path.join('resnet_v1_{}/'.format(resnet_version), resnet_out)
-    # print(" resnet_out = {} , resnet_scope = {}".format(resnet_out,resnet_scope))
+    print(" resnet_out = {} , resnet_scope = {}".format(resnet_out,resnet_scope))
+    # exit()
     with slim.arg_scope(arg_sc):
         net, end_points = current_resnet(image_input, 1000)  # 1000 is the number of softmax class
 
@@ -65,13 +66,16 @@ def create_resnet(image_input, is_training, scope="", resnet_out="logits", resne
     # print(end_points)
     # print(" Batch ",resnet_scope)
 
-    out = end_points[scope + resnet_scope]
+    out = end_points[scope + resnet_scope] # Tensor("oracle/resnet_v1_50/block4/unit_3/bottleneck_v1/Relu:0", shape=(32, 7, 7, 2048), dtype=float32) 
+
+
     # print("------------------------- out Use: {},output = {}".format(resnet_scope,out))
     # out = tf.reshape(
     # out,
     # [-1,out.shape[3]],
     # )
-    # print("-- out Use: {},output = {}".format(resnet_scope,out))
 
+    # print("-- net = {}, end_points={},out={} ".format(net,end_points,out))
+    # exit()
 
     return out,end_points

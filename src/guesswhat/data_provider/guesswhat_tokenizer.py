@@ -50,7 +50,7 @@ class GWTokenizer:
                 if token not in self.word2i:
                     token = '<unk>'
                 if tokent_int:
-                     tokens.append(self.word2i[token][0])
+                    tokens.append(self.word2i[token][0])
                 else:tokens.append(token)
 
         return tokens

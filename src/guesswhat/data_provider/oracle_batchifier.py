@@ -115,8 +115,8 @@ class OracleBatchifier(AbstractBatchifier):
                     
                     # print("************ Embedding_vector = ",embedding_vectors)
                     
-                    #print("taille = {} ".format(embedding_vectors))
-                    # exit()=
+                    # print("taille = {} ".format(embedding_vectors))
+                    # exit()
                     # print("////////// embedding_vectors=",len(embedding_vectors[0]))
 
                     batch['embedding_vector_ques'].append(embedding_vectors)
@@ -150,9 +150,6 @@ class OracleBatchifier(AbstractBatchifier):
                     if len(question_answer) > 1: 
                         # print("QUESTION=",game.all_last_question[i])
                         word = self.tokenizer_question.apply(game.all_last_question[i][1][0],tokent_int=False)
-                        # print(" End ................... ,",word,game.all_last_question[i][0])
-                        # word = word.extend("Yes")
-                        # print("Word = ",word)
                         words.append(word)
                     else:
                         word = self.tokenizer_question.apply(game.all_last_question[i][0],tokent_int=False)
@@ -200,6 +197,8 @@ class OracleBatchifier(AbstractBatchifier):
 
 
 
+            # print('embedding_vector_des'in sources)
+
 
             if 'embedding_vector_des'in sources:
                 
@@ -225,7 +224,8 @@ class OracleBatchifier(AbstractBatchifier):
                         #print("++++++----- ++++++++ Dans glove ")
                         embedding_vectors = self.glove.get_embeddings(description)
 
-
+                    # print("------ ELSE".format(embedding_vectors))
+                    # exit()
 
                     batch['embedding_vector_des'].append(embedding_vectors)
 
@@ -304,7 +304,8 @@ class OracleBatchifier(AbstractBatchifier):
                         batch['embedding_vector_ques'],s = padder_3d(batch['embedding_vector_ques'],type_input="question")
                         # print("+++++ Batch = ",batch['seq_length_question'])
 
-                        # print("++++ data = ",np.asarray(batch['embedding_vector_ques']))
+                        # print("++++ data = ",np.asarray(batch['embedding_vector_ques']).shape)
+                        # exit()
 
                         # print("--- Len=",len(batch['seq_length_question']))
 
@@ -318,6 +319,7 @@ class OracleBatchifier(AbstractBatchifier):
                         # print("All before = ",batch_hist.shape)
                         # batch_hist = np.reshape(batch_hist,(-1,6*max_seq,300))                     
                         # print("All after = ",batch_hist.shape)
+                        # exit()
                         # print("+++++ Batch = ",np.asarray(size_sentences).shape)
 
                         batch['embedding_vector_ques_hist'] = batch_hist
@@ -329,22 +331,20 @@ class OracleBatchifier(AbstractBatchifier):
                             batch['embedding_vector_ques_hist_H{}'.format(i)] = batch_hist[:,i,:,:]
                             batch['seq_length_question_history_H{}'.format(i)] = size_sentences[:,i]
 
-                        print("Finish .........")
-
-                            
 
                         #print("Len=",len(batch['seq_length_question']))
 
 
         if 'embedding_vector_ques_pos' in sources:
-                        batch['embedding_vector_ques_pos'], _ = padder_3d(batch['embedding_vector_ques_pos'])
+                    batch['embedding_vector_ques_pos'], _ = padder_3d(batch['embedding_vector_ques_pos'])
 
+        
         if 'embedding_vector_des' in sources:
-                        #print("++++++++++++++ EMbedding_vector_Des ",batch['embedding_vector_des'])
-                        batch['embedding_vector_des'], batch['seq_length_description'] = padder_3d(batch['embedding_vector_des'])
+                    batch['embedding_vector_des'], batch['seq_length_description'] = padder_3d(batch['embedding_vector_des'])
+
 
         if 'embedding_vector_des_pos' in sources:
-                        batch['embedding_vector_des_pos'], _ = padder_3d(batch['embedding_vector_des_pos'])
+                    batch['embedding_vector_des_pos'], _ = padder_3d(batch['embedding_vector_des_pos'])
 
 
 
@@ -364,8 +364,9 @@ class OracleBatchifier(AbstractBatchifier):
 
 
         
+        # print(" Bath = {} ".format(batch.keys()))
 
-
+        # exit()
         # print("finish oracle_bachifier .... time=",total)
 
         # print("TotalBatch=",total)

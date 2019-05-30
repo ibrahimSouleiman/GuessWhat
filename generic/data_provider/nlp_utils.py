@@ -1,21 +1,20 @@
 import numpy as np
 import json
-from generic.utils.file_handlers import pickle_loader
 
-from gensim.models import word2vec,FastText,KeyedVectors
 # from pyfasttext import FastText
 
 #import glove
-from guesswhat.data_provider.guesswhat_dataset import OracleDataset
+
 from nltk.tokenize import TweetTokenizer
+from gensim.scripts.glove2word2vec import glove2word2vec
+from pathlib import Path
+from generic.utils.file_handlers import pickle_loader
+from gensim.models import word2vec,FastText,KeyedVectors
 
 #from guesswhat.data_provider.lemmatize import lemmatize
 import os
-from pathlib import Path
 
-from guesswhat.data_provider.guesswhat_dataset import OracleDataset
-from nltk.tokenize import TweetTokenizer
-from gensim.scripts.glove2word2vec import glove2word2vec
+
 
 
 

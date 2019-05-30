@@ -21,7 +21,7 @@ class OracleNetwork(ResnetModel):
             if config['inputs']['question']:
      
                 self._is_training = tf.placeholder(tf.bool, name="is_training")
-                self._question = tf.placeholder(tf.int32, [self.batch_size, None], name='question')
+                self._question = tf.placeholder(tf.int32, [self.batch_size, 6], name='question')
                 self.seq_length_question = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question')
 
                 word_emb = utils.get_embedding(self._question,
@@ -30,10 +30,10 @@ class OracleNetwork(ResnetModel):
                                             scope="word_embedding")
 
                 if config["model"]["glove"] == True or config["model"]["fasttext"] == True:
-                    self._embWord = tf.placeholder(tf.float32, [None, None, int(config["model"]["word_embedding_dim"])], name="embedding_vector_ques")
-                    # word_emb = self._glove
+                    self._embWord = tf.placeholder(tf.float32, [self.batch_size, 10, int(config["model"]["word_embedding_dim"])], name="embedding_vector_ques")
+                    word_emb = self._embWord
 
-                    word_emb = tf.concat([ word_emb,self._embWord], axis=2)
+                    # word_emb = tf.concat([ word_emb,self._embWord], axis=2)
                 else:
                     print("None -------------------------- None")
 		  
@@ -108,6 +108,10 @@ class OracleNetwork(ResnetModel):
                     self._glove = tf.placeholder(tf.float32, [None, None,int(config["model"]["word_embedding_dim"])], name="embedding_vector_des")
                     word_emb =  self._glove
 
+                    # print("Word_emb",word_emb)
+                    # exit()
+
+
                 else:
                     print("None ****************")
 
@@ -154,6 +158,8 @@ class OracleNetwork(ResnetModel):
                     self.lstm_states, self.lstm_all_state_ques_hist = rnn.variable_length_LSTM(placeholders_lstmQuestion,
                                                     num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
                                                     seq_length=placeholders_lstmLength,scope="lstm4",dim_4=True)
+
+
 
 
 
@@ -211,6 +217,7 @@ class OracleNetwork(ResnetModel):
                 print("****  Oracle_network |  input = category ")
 
                 self._category = tf.placeholder(tf.int32, [self.batch_size], name='category')
+
 
                 print(".... ORACLE =",self._category)
 
@@ -275,6 +282,7 @@ class OracleNetwork(ResnetModel):
                     scope_name=scope.name,
                     config=config['model']['image']
                 )
+
                 # embeddings.append(self.image_out)
                 print("Input: Image")
                 co_attention.append(self.image_out)
@@ -306,20 +314,30 @@ class OracleNetwork(ResnetModel):
             print("*-*-*-*-*-*-*-*  Co_attention = {}".format(co_attention))
 
             # exit()
+            
             image_feature,question_feature,history_feature = compute_all_attention(question_states=co_attention[0],
                                                                                 caption=co_attention[1],
                                                                                 history_states=co_attention[2],
                                                                                 image_feature=co_attention[3],
                                                                                 no_mlp_units=config['model']['attention']['no_attention_mlp'])
 
+            print("question_feature = ",question_feature)
+
+            # exit()
+
+           
+
+
             embeddings.append(image_feature)
             embeddings.append(history_feature)
             embeddings.append(question_feature)
             
-            print("All Embedding = ",embeddings)
+            print("*** All Embedding = ",embeddings)
             # exit()
-            self.emb = tf.concat(embeddings, axis=1)
 
+            self.emb = tf.concat(embeddings, axis=1)
+            
+            print("*** self.emb = ",self.emb)
             
 
 

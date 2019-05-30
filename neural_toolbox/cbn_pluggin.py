@@ -62,6 +62,7 @@ class CBNfromLSTM(CBNAbtract):
                                             weight_initializer=RandomUniform(-1e-4, 1e-4),
                                             scope="hidden_betas",
                                             activation='relu')
+                                            
             delta_betas = utils.fully_connected(h_betas, no_features, scope="delta_beta",
                                                 weight_initializer=RandomUniform(-1e-4, 1e-4), use_bias=False)
         else:

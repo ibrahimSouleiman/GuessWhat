@@ -34,7 +34,13 @@ def get_image_features(image, question, is_training, scope_name, config, dropout
                 excluded_scopes = config["cbn"].get('excluded_scope_names', [])
                 cbn = ConditionalBatchNorm(cbn_factory, excluded_scope_names=excluded_scopes,
                                            is_training=is_training)
-            print("---------------------------------- Before resnet_version")
+
+                # print("Image = {} ".format(image))         
+                # print("cbn_factory = {} ".format(cbn_factory))
+                # print("excluded_scopes = {} ".format(excluded_scopes))
+                # print("cbn = {} ".format(cbn))    
+                # exit()            
+            # print("---------------------------------- Before resnet_version")
             # Create ResNet
             resnet_version = config['resnet_version']
             image_feature_maps,_ = create_resnet(image,

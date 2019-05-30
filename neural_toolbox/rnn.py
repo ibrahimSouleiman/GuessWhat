@@ -18,8 +18,6 @@ def variable_length_LSTM(inp, num_hidden, seq_length,
                          dropout_keep_prob=1.0, scope="lstm", depth=1,
                          layer_norm=False, reuse=False,dim_4=False):
 
-
-
     with tf.variable_scope(scope, reuse=reuse):
         states = []
         last_states = []
@@ -76,6 +74,12 @@ def variable_length_LSTM(inp, num_hidden, seq_length,
                         dtype=tf.float32,
                         sequence_length=seq_length,
                     )
+
+                    # print("All param inp = {} , num_hidden = {} , seq_length = {} ".format(inp,num_hidden,seq_length))
+
+
+
+
                     # print("rnn_states = {} ,last_states = {} , .h= {} ".format(rnn_states,
                     #                                                     rnn_last_states,rnn_last_states.h))
 
