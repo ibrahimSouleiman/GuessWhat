@@ -115,27 +115,32 @@ class Evaluator(object):
 
                 results = self.execute(sess, outputs,batch )
 
-                # print("--- result ---")
-
+                print("--- result = {} ".format(results))
+                # exit()
 
 
             if inference:
 
-                # print("--- out_net = {} ".format(out_net))
-                # print("--- batch = {} ".format(batch.keys()))
+                print("--- out_net = {},outputs={} ".format(out_net,outputs))
+                print("--- batch = {} ".format(batch.keys()))
 
                 old_batch = batch
+                # print("question   = {} ".format(batch["question"]))
                 batch = {key:value for key,value in batch.items() if key!="question" and key!="image_id" and key!="crop_id"}
                 prediction = self.execute(sess,out_net, batch)
                 
 
-                batch = {key:value for key,value in batch.items() if key!="question" and key!="image_id" and key!="crop_id"}
-                
+                # print("prediction = {}".format(prediction))
+                # exit()
                 # print("batch... === ",batch.keys())
                 # print("old_batch = {} ".format(old_batch.keys()))
                 # exit()
 
                 results = self.execute(sess, outputs,batch )
+
+                print("results = {} ".format(results))
+                
+
                 # old_batch["image_id"],old_batch["crop_id"]
                 # image_id,crop_id,categories_object
                 for question,gold,prediction in zip(old_batch["question"],old_batch["answer"],prediction):
@@ -243,7 +248,7 @@ class Evaluator(object):
     def execute(self, sess, output, batch):
         #print("+++++++++++++++++++++",batch.items())
         feed_dict = {self.scope +key + ":0": value for key, value in batch.items() if key in self.provided_sources}
-        # print("-- Feed_Dict = {}--".format(feed_dict.keys()))
+        print("-- Feed_Dict = {}--".format(feed_dict.keys()))
         # print("-- Dict = {}--".format(feed_dict))
         # print("========================================================================")
 

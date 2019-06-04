@@ -68,12 +68,12 @@ if __name__ == '__main__':
     # Inference True if want to test the dataset_test of the pre-trained Weigth
 
 
-    inference = True
+    inference = False
 
 
 
-    ###############################
-    #  LOAD DATA
+    #############################
+    #  LOAD DATA                
     #############################
 
     # Load image
@@ -134,6 +134,13 @@ if __name__ == '__main__':
     # Build Optimizer
     logger.info('Building optimizer..')
     optimizer, outputs = create_optimizer(network, config, finetune=finetune)
+
+    # print("optimizer = {} , outputs = {}".format(optimizer,outputs))
+
+    # print("outpus = {}".format(outputs+[optimizer]))
+
+    # exit()
+
     best_param = network.get_predict()
     ##############################
     #  START  TRAINING           
@@ -184,7 +191,6 @@ if __name__ == '__main__':
         if use_resnet:
             resnet_saver.restore(sess, os.path.join(args.data_dir, 'resnet_v1_{}.ckpt'.format(resnet_version)))
 
-        # save_path = "out/oracle/744c6a7dd4d2549ef32f2cfcba5c03cd/{}"
 
         start_epoch = load_checkpoint(sess, saver, args, save_path)
 
@@ -199,6 +205,7 @@ if __name__ == '__main__':
         # #train_evaluator = MultiGPUEvaluator(sources, scope_names, networks=networks, tokenizer=tokenizer)
         # #train_evaluator = Evaluator(sources, scope_names[0], network=networks[0], tokenizer=tokenizer)
         # #eval_evaluator = Evaluator(sources, scope_names[0], network=networks[0], tokenizer=tokenizer)
+        
         batchifier =  OracleBatchifier(tokenizer, sources, status=config['status'],glove=glove,tokenizer_description=tokenizer_description,args = args,config=config)
 
         if inference == False:
@@ -215,8 +222,6 @@ if __name__ == '__main__':
                                         batchifier=batchifier,
                                         shuffle=True)
                 t2 = time.time()
-
-                print(" train_oracle | Iterator  trainset...Total=",t2-t1)
 
                 t1 = time.time()
 
@@ -236,7 +241,7 @@ if __name__ == '__main__':
 
 
                 t1 = time.time()
-                valid_loss, valid_accuracy = evaluator.process(sess, valid_iterator, outputs=outputs)
+                valid_loss, valid_accuracy = evaluator.process(sess, valid_iterator, outputs=outputs + [optimizer])
                 t2 = time.time()
 
                 print(" train_oracle | evaluator ...Total=",t2-t1)
@@ -271,18 +276,22 @@ if __name__ == '__main__':
 
         t1 = time.time()
         if inference:
-            save_path = "out/oracle/46499510c2ab980278d91eeff89aa06f/{}"
+            # save_path = "out/oracle/46499510c2ab980278d91eeff89aa06f/{}" # 
+            # save_path = "out/oracle/9efb52e0bd872e1f4e64f66b35a2f092/{}" # question
+            # save_path = "out/oracle/a9cc5b30b2024399c79b6997086c5265/{}" # question,category,spatial
+            # save_path = "out/oracle/89570bad275ddde7b69a5c37659bd40e/{}" # question,category,spaticial,crop
+            # save_path = "out/oracle/b158b76a46173ff33e4aec021e267e5a/{}" # question,category,spaticial,history
+            #save_path = "out/oracle/30ef7335e38c93632b58e91fa732cf2d/{}" # question,category,spaticial,history,Images
+            save_path = "out/oracle/d9f1951536bbd147a3ea605bb3cbdde7/{}"   # question,category,spaticial,history,Crop                                                             # question,category,spaticial,history,Crop 
+       
             # out/oracle/ce02141129f6d87172cafc817c6d0b59/params.ckpt
             # save_path = save_path.format('params.ckpt')
 
             print("***** save_path = ",save_path)
-            # exit()
-            # cb9f4ef9b53f30d092a697920383bb7a
             
-        
+
         save_path = save_path.format('params.ckpt')
 
-        # print("Save_path = {}".format(save_path))
 
         saver.restore(sess, save_path)
 
@@ -294,15 +303,11 @@ if __name__ == '__main__':
 
         print("Output = {}".format(outputs[1]))
         print("Best_param = {}".format(best_param))
-        [test_loss, test_accuracy] = evaluator.process(sess, test_iterator,  outputs=outputs ,out_net=best_param,inference=inference)
+        test_loss, test_accuracy = evaluator.process(sess, test_iterator,  outputs=outputs+ [optimizer] ,out_net=best_param,inference=inference)
         t2 = time.time()
         
-        
-
         print(" train_oracle | Iterator testset  ...Total=",t2-t1)
-        # print("Testing loss: {}".format(test_loss))
-        # print("Testing error: {}".format(1-test_accuracy))
-        
+       
         try:
             logger.info("Testing loss: {}".format(test_loss))
         except Exception:

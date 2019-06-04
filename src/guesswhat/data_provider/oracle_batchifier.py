@@ -260,12 +260,11 @@ class OracleBatchifier(AbstractBatchifier):
                 batch['crop'].append(game.object.get_crop())
                 # batch['image_id'].append(image.get_idimage())
                 # batch['crop_id'].append(game.object_id)
-                # print("crop_id=",game.object_id)
+                # print("crop_id=",game.object.get_crop().shape)
+                # exit()
                 
             if 'image' in sources:
                 batch['image'].append(image.get_image())
-
-                #print("---------------- FINISH IMAGE=",image.get_image().shape)
 
             if 'mask' in sources:
                 assert "image" in batch['image'], "mask input require the image source"

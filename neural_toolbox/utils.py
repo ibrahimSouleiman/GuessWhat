@@ -174,15 +174,16 @@ def rank(inp):
 
 def cross_entropy(y_hat, y):
     if rank(y) == 2:
-        
+        # print("cross_entropy -------- y_glod = {} y_predict = {} ".format(y_hat,y))
         return -tf.reduce_mean(y * tf.log(y_hat))
+
     if rank(y) == 1:
         ind = tf.range(tf.shape(y_hat)[0]) * tf.shape(y_hat)[1] + y
         flat_prob = tf.reshape(y_hat, [-1])
 
-        
-
         return -tf.log(tf.gather(flat_prob, ind))
+
+
     raise ValueError('Rank of target vector must be 1 or 2')
 
 

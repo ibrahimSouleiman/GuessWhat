@@ -258,9 +258,6 @@ class OracleNetwork(ResnetModel):
                 print("Input: allcategory")
 
                 
-
-
-
             # SPATIAL
             if config['inputs']['spatial']:
                 print("****  Oracle_network |  input = spatial ")
@@ -287,6 +284,8 @@ class OracleNetwork(ResnetModel):
                 print("Input: Image")
                 co_attention.append(self.image_out)
 
+                print("... Image Features = {}".format(self.image_out))
+
             # CROP
             if config['inputs']['crop']:
                 print("****  Oracle_network |  input = crop ")
@@ -301,29 +300,21 @@ class OracleNetwork(ResnetModel):
                     scope_name=scope.name,
                     config=config["model"]['crop'])
 
-                # embeddings.append(self.crop_out)
                 co_attention.append(self.crop_out)
 
-
-                # print(" image = {} ".format(self._crop))
-                # print(" Crop = {} ".format(self.crop_out))
-                # print(" co_attention = {} ".format(co_attention))
-                
-                # exit()
-
-            print("*-*-*-*-*-*-*-*  Co_attention = {}".format(co_attention))
-
-            # exit()
-            
-            image_feature,question_feature,history_feature = compute_all_attention(question_states=co_attention[0],
+      
+            question_feature,history_feature,image_feature = compute_all_attention(question_states=co_attention[0],
                                                                                 caption=co_attention[1],
                                                                                 history_states=co_attention[2],
                                                                                 image_feature=co_attention[3],
                                                                                 no_mlp_units=config['model']['attention']['no_attention_mlp'])
 
-            print("question_feature = ",question_feature)
 
-            # exit()
+            print("image_feature = ",image_feature)
+            print("question_feature = ",question_feature)
+            print("history_feature = ",history_feature)
+
+          
 
            
 
@@ -331,8 +322,8 @@ class OracleNetwork(ResnetModel):
             embeddings.append(image_feature)
             embeddings.append(history_feature)
             embeddings.append(question_feature)
-            
-            print("*** All Embedding = ",embeddings)
+            # embeddings.append(question_feature)
+            # print("*** All Embedding = ",embeddings)
             # exit()
 
             self.emb = tf.concat(embeddings, axis=1)

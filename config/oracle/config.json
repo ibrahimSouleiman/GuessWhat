@@ -93,6 +93,7 @@
     "batch_size":64,
     "clip_val": 5
   },
+  
   "glove_name" : "glove_dict.pkl",
   "status": ["success"],
   "seed": -1

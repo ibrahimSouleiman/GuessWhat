@@ -9,10 +9,13 @@ def load_config(config_file, exp_dir):
     with open(config_file, 'rb') as f_config:
         config_str = f_config.read()
         exp_identifier = hashlib.md5(config_str).hexdigest()
+        # print("config_str = {} , exp_identifier = {} ".format(config_str,exp_identifier))
+        # exit()
         config = json.loads(config_str.decode('utf-8'))
 
     save_path = '{}/{{}}'.format(os.path.join(exp_dir, exp_identifier))
-    print("save_path = ",save_path)
+    # print("save_path = {} ,exist = {}".format(save_path,os.path.isdir(save_path.format(''))))
+    # exit()
     if not os.path.isdir(save_path.format('')):
         os.makedirs(save_path.format(''))
 
