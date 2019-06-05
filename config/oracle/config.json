@@ -88,7 +88,7 @@
   },
 
   "optimizer": {
-    "no_epoch": 2,
+    "no_epoch": 40,
     "learning_rate": 1e-4,
     "batch_size":64,
     "clip_val": 5

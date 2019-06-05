@@ -115,7 +115,7 @@ class Evaluator(object):
 
                 results = self.execute(sess, outputs,batch )
 
-                print("--- result = {} ".format(results))
+                #print("--- result = {} ".format(results))
                 # exit()
 
 
@@ -248,12 +248,10 @@ class Evaluator(object):
     def execute(self, sess, output, batch):
         #print("+++++++++++++++++++++",batch.items())
         feed_dict = {self.scope +key + ":0": value for key, value in batch.items() if key in self.provided_sources}
-        print("-- Feed_Dict = {}--".format(feed_dict.keys()))
+        # print("-- Feed_Dict = {}--".format(feed_dict.keys()))
         # print("-- Dict = {}--".format(feed_dict))
         # print("========================================================================")
-
         # print("------Output----- ===",output)
-    
         # exit()
 
         

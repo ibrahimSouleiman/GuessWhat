@@ -69,6 +69,7 @@ if __name__ == '__main__':
 
 
     inference = False
+    wait_inference = 2
 
 
 
@@ -208,9 +209,16 @@ if __name__ == '__main__':
         
         batchifier =  OracleBatchifier(tokenizer, sources, status=config['status'],glove=glove,tokenizer_description=tokenizer_description,args = args,config=config)
 
+        stop_learning = False
+        progress_compteur = 0
+        t = 0
+
         if inference == False:
 
-            for t in range(start_epoch, no_epoch):
+            while start_epoch < no_epoch and stop_learning == False:
+
+            # for t in range(start_epoch, no_epoch):
+
                 logger.info('Epoch {}..'.format(t + 1))
                 # print('Epoch {}..'.format(t + 1))
 
@@ -221,6 +229,7 @@ if __name__ == '__main__':
                                         batch_size=batch_size, pool=cpu_pool,
                                         batchifier=batchifier,
                                         shuffle=True)
+                
                 t2 = time.time()
 
                 t1 = time.time()
@@ -264,13 +273,23 @@ if __name__ == '__main__':
                     best_train_err = train_accuracy
                     best_val_err = valid_accuracy
                     saver.save(sess, save_path.format('params.ckpt'))
+                    progress_compteur = 0
                     logger.info("Oracle checkpoint saved...")
 
                     pickle_dump({'epoch': t}, save_path.format('status.pkl'))
+                else:
+                    progress_compteur += 1 
+
+                if progress_compteur == wait_inference:
+                    stop_learning == True
 
 
                 t2 = time.time()
                 print(" train_oracle | Condition ...Total=",t2-t1)
+
+                t += 1
+                start_epoch += 1
+
 
         # Load early stopping
 

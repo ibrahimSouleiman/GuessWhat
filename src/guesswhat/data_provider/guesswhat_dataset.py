@@ -128,7 +128,6 @@ class Word:
                 self.lemme = self.lemmetizer.lemmatize(word)
             
         if pos:
-
             self.pos = nltk.pos_tag([word])
 
     def get_word(self):
@@ -295,7 +294,7 @@ class Dataset(AbstractDataset):
 
                 # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass)               
                
-                if len(games) > 10: break
+                if len(games) > 50: break
                 # if  len(games) > 5000: 
                 #  break
 
