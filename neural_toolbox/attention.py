@@ -73,7 +73,7 @@ def get_input_g1_g2(num_data,num_g1,num_g2):
     return input_data,g1,g2
 
 
-def compute_all_attention(question_states,caption,history_states,image_feature,no_mlp_units,reuse=False):
+def compute_all_attention(question_states,caption,history_states,image_feature,no_mlp_units,reuse=False,config=None):
     
     
     print("image_feature = {}",image_feature)
@@ -94,54 +94,46 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
 
 
     with tf.variable_scope("coattention"):
+        if image_feature != None:
+            if len(image_feature.get_shape()) == 3:
+                h = tf.shape(image_feature)[1]  # when the shape is dynamic (attention over lstm)
+                w = 1
+                c = int(image_feature.get_shape()[2])
+            else:
+                h = int(image_feature.get_shape()[1])
+                w = int(image_feature.get_shape()[2])
+                c = int(image_feature.get_shape()[3])
+        
+            s = int(question_states.get_shape()[2])
+            image_feature = tf.reshape(image_feature, shape=[-1, (h * w) , c]) # input image_feature ?,7,7,2048 => ?,49,2048
+            image_feature = tf.reduce_sum(image_feature, axis=1)
+            set_img(image_feature)
 
-        if len(image_feature.get_shape()) == 3:
-            h = tf.shape(image_feature)[1]  # when the shape is dynamic (attention over lstm)
-            w = 1
-            c = int(image_feature.get_shape()[2])
-        else:
-            h = int(image_feature.get_shape()[1])
-            w = int(image_feature.get_shape()[2])
-            c = int(image_feature.get_shape()[3])
-     
-        s = int(question_states.get_shape()[2])
+        
+           
 
-    
-        caption = tf.expand_dims(caption,axis=1)
-
-        image_feature = tf.reshape(image_feature, shape=[-1, (h * w) , c]) # input image_feature ?,7,7,2048 => ?,49,2048
-        image_feature = tf.reduce_sum(image_feature, axis=1)
+        
        
+        print("question_states = ",question_states)
+        question_shape = question_states.get_shape()
 
-        question_states = tf.reshape(question_states,shape=[-1,10*1024])
+        question_states = tf.reshape(question_states,shape=[-1,question_shape[1]*question_shape[2]])
+
+        set_question(question_states)
+       
+        if history_states!= None:
+            if caption != None:
+                caption = tf.expand_dims(caption,axis=1)
+                
+            hist = tf.reshape(history_states,[-1,6,1024])
+            hist = tf.concat([caption,hist],axis=1)
+            hist = tf.reshape(hist,[-1,7*1024])
+
+            set_history(hist)
+       
         
-        # print("***** quesetion_states = ",question_states)
-
-
-        # question_states = tf.concat([caption,question_states],axis=1)
-        # print("--- image_feature = {} ".format(image_feature))
-        # exit()
-        # print("--- question_states = {} ".format(question_states))
-
-        ques = question_states
-        img  = image_feature
         
-        hist = tf.reshape(history_states,[-1,6,1024])
-        hist = tf.concat([caption,hist],axis=1)
-        hist = tf.reshape(hist,[-1,7*1024])    
-
-        # print("img=",img)
-        # exit()
-        
-        return question_states,hist,img
-
-        # img = tf.reshape(img, shape=[-1,img_shape[1] *img_shape[2]]) 
-        # question = tf.reshape(get_question(), shape=[-1,question_shape[1] * question_shape[2]]) 
-        # history = tf.reshape(get_history(), shape=[-1,history_shape[1] * history_shape[2] ]) 
-
-        set_img(img)
-        set_question(ques)
-        set_history(hist)
+        # return question_states,hist,image_feature
 
         dict_step = {0:"img",1:"question",3:"hist"}
 
@@ -152,7 +144,8 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
             
             input_data , g1 , g2 = get_input_g1_g2(value[0],value[1],value[2])
           
-
+           
+         
             dimension_two = int(input_data.get_shape()[1])
 
 
@@ -206,9 +199,14 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
         # question = tf.reshape(get_question(), shape=[-1, int(question_shape[1]) * int(question_shape[2]) ]) 
         # history = tf.reshape(get_history(), shape=[-1,int(history_shape[1]) * int(history_shape[2]) ]) 
 
+        # print(" history = {} , image_feature = {} , question = {}".format(history,image_feature,question_states))
+        # exit()
+        question_states = get_question()
+        history = get_history()
+        image_feature = get_img()        
 
 
-    return question,history,img
+    return question_states,history,image_feature
 
                      
 

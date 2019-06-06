@@ -15,7 +15,8 @@
       "no_LSTM_hiddens": 1024,
       "embedding_window":3,
       "pos":false,
-      "lemme":false
+      "lemme":false,
+      "lstm" : false
     },
     "word_embedding_dim": 300,
     "description": {

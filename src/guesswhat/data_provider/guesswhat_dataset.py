@@ -7,6 +7,7 @@ import time
 import numpy as np
 
 from collections import Counter
+from matplotlib import pyplot as plt
 
 from PIL import ImageFont, ImageDraw
 from PIL import Image as PImage
@@ -253,6 +254,8 @@ class Dataset(AbstractDataset):
 
         t1 = time.time()
 
+        all_size = []
+
         with gzip.open(filegues) as f:
             for i,line in enumerate(f):
                 line = line.decode("utf-8")
@@ -276,8 +279,17 @@ class Dataset(AbstractDataset):
                         all_img_describtion = all_img_describtion
                         )
                 question_length = len(g.questions)
+                
+
                 self.count_questions[len(self.count_questions)] = question_length
                 self.total += question_length 
+                
+                for question in g.questions:
+                    words = question.split()
+                 
+                    all_size.append(len(words))
+
+            
 
                 if self.maxlength_question < question_length: self.maxlength_question = question_length
 
@@ -296,6 +308,8 @@ class Dataset(AbstractDataset):
                
                 if len(games) > 50: break
                 # if  len(games) > 5000: 
+
+           
                 #  break
 
 
@@ -382,6 +396,11 @@ class OracleDataset(AbstractDataset):
 
             
             last_question =  self.add_question(game.all_last_question,q,a)
+
+            # print("All question = {} ".format(game.all_last_question))
+
+            # exit()
+
             new_game.all_last_question = last_question
             # print("Image_id={}, dialogue_id,={}, question_id={}, question={},last_question={}".format(new_game.image.id,new_game.dialogue_id,i,q,last_question))
 
