@@ -38,7 +38,7 @@ class Evaluator(object):
         self.network=network
         self.tokenizer = tokenizer
 
-    def process(self, sess, iterator, outputs, out_net=None,inference=False, listener=None):
+    def process(self, sess, iterator, outputs, out_net=None,inference=False, listener=None,type_data="train"):
 
         assert isinstance(outputs, list), "outputs must be a list"
 
@@ -83,8 +83,6 @@ class Evaluator(object):
                 # images_id = batch["image_id"]
                 # crops_id = batch["crop_id"]
 
-
-
                 for key,values in batch.items():
                     if key=="question" or key=="image_id" or key=="crop_id" :
                         pass
@@ -94,6 +92,7 @@ class Evaluator(object):
                     else:
                         batch_1[key] = values
                         batch_2[key] = values
+
 
             #     print("batch 1 === ",batch_1.keys())
 
@@ -108,16 +107,14 @@ class Evaluator(object):
                 
                 # print("Batch = {} , outputs = {} ".format(batch,outputs))
                 
-                
                 # print("out = {} ".format(outputs))
 
                 # print("Batch = {}".format(batch.keys()))
 
-                results = self.execute(sess, outputs,batch )
+                results = self.execute(sess, outputs,batch,type_data )
 
-                #print("--- result = {} ".format(results))
+                # print("--- result = {} ".format(results))
                 # exit()
-
 
             if inference:
 
@@ -127,18 +124,18 @@ class Evaluator(object):
                 old_batch = batch
                 # print("question   = {} ".format(batch["question"]))
                 batch = {key:value for key,value in batch.items() if key!="question" and key!="image_id" and key!="crop_id"}
-                prediction = self.execute(sess,out_net, batch)
+                prediction = self.execute(sess,out_net,batch, type_data)
                 
-
                 # print("prediction = {}".format(prediction))
                 # exit()
                 # print("batch... === ",batch.keys())
                 # print("old_batch = {} ".format(old_batch.keys()))
                 # exit()
 
-                results = self.execute(sess, outputs,batch )
+                results = self.execute(sess, outputs,batch, type_data )
 
-                print("results = {} ".format(results))
+                # print("results = {} ".format(results))
+                # exit()
                 
 
                 # old_batch["image_id"],old_batch["crop_id"]
@@ -178,6 +175,7 @@ class Evaluator(object):
                 if is_scalar(var) and var in original_outputs:
                     # moving average
                     aggregated_outputs[i] = ((n_iter - 1.) / n_iter) * aggregated_outputs[i] + result / n_iter
+                   
                     i += 1
                 elif is_summary(var):  # move into listener?
                     self.writer.add_summary(result)
@@ -192,66 +190,26 @@ class Evaluator(object):
         if listener is not None:
             listener.after_epoch(is_training)
         
-        # aggregated_outputs=[None,None]
 
         print(" Result good_predict = {} , bad_predict={}".format(self.good_predict,self.bad_predict))
 
         return aggregated_outputs
             
-    # def process(self, sess, iterator, outputs, listener=None):
 
-    #     assert isinstance(outputs, list), "outputs must be a list"
 
-    #     original_outputs = list(outputs)
-
-    #     is_training = any([is_optimizer(x) for x in outputs])
-
-    #     if listener is not None:
-    #         outputs += [listener.require()]  # add require outputs
-    #         # outputs = flatten(outputs) # flatten list (when multiple requirement)
-    #         outputs = list(OrderedDict.fromkeys(outputs))  # remove duplicate while preserving ordering
-    #         listener.before_epoch(is_training)
-
-    #     n_iter = 1.
-    #     aggregated_outputs = [0.0 for v in outputs if is_scalar(v) and v in original_outputs]
-
-    #     #print(" Evaluator | iterator =",iterator)
-
-    #     for batch in tqdm(iterator):
-
-            
-    #         # Appending is_training flag to the feed_dict
-    #         batch["is_training"] = is_training
-
-    #         # evaluate the network on the batch
-    #         results = self.execute(sess, outputs, batch)
-    #         # process the results
-    #         i = 0
-    #         for var, result in zip(outputs, results):
-    #             if is_scalar(var) and var in original_outputs:
-    #                 # moving average
-    #                 aggregated_outputs[i] = ((n_iter - 1.) / n_iter) * aggregated_outputs[i] + result / n_iter
-    #                 i += 1
-    #             elif is_summary(var):  # move into listener?
-    #                 self.writer.add_summary(result)
-
-    #             if listener is not None and listener.valid(var):
-    #                 listener.after_batch(result, batch, is_training)
-
-    #         n_iter += 1
-
-    #     if listener is not None:
-    #         listener.after_epoch(is_training)
-
-    #     return aggregated_outputs
-
-    def execute(self, sess, output, batch):
+    def execute(self, sess, output, batch,type_data = "Train"):
         #print("+++++++++++++++++++++",batch.items())
         feed_dict = {self.scope +key + ":0": value for key, value in batch.items() if key in self.provided_sources}
-        # print("-- Feed_Dict = {}--".format(feed_dict.keys()))
-        # print("-- Dict = {}--".format(feed_dict))
+        print("-- [{}]  Feed_Dict = {}--".format(type_data, feed_dict.keys()))
+        print("answer = {}".format(feed_dict["oracle/answer:0"]))
+        
+        # print("-- [{}]  image_values = {}--".format(type_data, feed_dict["oracle/image:0"]))
         # print("========================================================================")
-        # print("------Output----- ===",output)
+        print("-- [{}] Output = {} ".format(type_data, output))
+        print("-- [{}] result = {} ".format(type_data,sess.run(output, feed_dict=feed_dict)))
+        # print("result_prediction = {}".format(sess.run(tf.get_variable("oracle/mlp/Softmax_1:0"), feed_dict=feed_dict)))
+        
+        
         # exit()
 
         

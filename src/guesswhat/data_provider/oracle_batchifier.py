@@ -12,7 +12,8 @@ import time
 from generic.data_provider.nlp_utils import Embeddings,get_embeddings
 from gensim.models import word2vec,FastText,KeyedVectors
 
-
+from matplotlib import pyplot as plt
+from PIL import Image
 
 
 import os
@@ -264,6 +265,19 @@ class OracleBatchifier(AbstractBatchifier):
                 # exit()
                 
             if 'image' in sources:
+                # print("----  Image = {} ".format(image.get_image()))
+                # print("---   shape = {}".format(image.get_image().shape))
+                # print("--- path = {} ".format(image.id))
+                
+                # img = Image.open("data/img/raw/{}.jpg".format(image.id)).convert('RGB')
+                # img = resize_image(img, 224 , 224)
+                
+                # plt.imshow(img)
+                # plt.axis('off')
+                # plt.show()
+
+
+
                 batch['image'].append(image.get_image())
 
             if 'mask' in sources:

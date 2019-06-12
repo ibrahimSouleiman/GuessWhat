@@ -246,7 +246,7 @@ class OracleNetwork(ResnetModel):
                 
 
                 # cat_emb = tf.expand_dims(cat_emb,1)
-                embeddings.append(cat_emb)
+                # embeddings.append(cat_emb)
                 print("Input: Category")
 
 
@@ -279,7 +279,7 @@ class OracleNetwork(ResnetModel):
             if config['inputs']['spatial']:
                 print("****  Oracle_network |  input = spatial ")
                 self._spatial = tf.placeholder(tf.float32, [self.batch_size, 8], name='spatial')
-                embeddings.append(self._spatial)
+                # embeddings.append(self._spatial)
                 print("Input: Spatial")
 
 
@@ -290,6 +290,9 @@ class OracleNetwork(ResnetModel):
                 # self._image_id = tf.placeholder(tf.float32, [self.batch_size], name='image_id')
 
                 self._image = tf.placeholder(tf.float32, [self.batch_size] + config['model']['image']["dim"], name='image')
+             
+
+                # self.image_out = tf.reshape(self._image,shpe=[224*224*3])
                 self.image_out = get_image_features(
                     image=self._image, question=self.lstm_states,
                     is_training=self._is_training,
@@ -300,6 +303,8 @@ class OracleNetwork(ResnetModel):
                 # embeddings.append(self.image_out)
                 print("Input: Image")
                 co_attention[3]  = self.image_out
+                # image_feature = tf.reshape(self.image_out, shape=[-1, (7 * 7) * 2048]) # input image_feature ?,7,7,2048 => ?,49,2048
+                # embeddings.append(image_feature)
 
                 print("... Image Features = {}".format(self.image_out))
 
@@ -318,9 +323,11 @@ class OracleNetwork(ResnetModel):
                     config=config["model"]['crop'])
 
                 co_attention[3] = self.crop_out
-
+                
+                # print("-- crop = {},image_features = {} ".format(self.crop_out, image_feature))
+                # exit()
       
-            question_feature,history_feature,image_feature = compute_all_attention(question_states=co_attention[0],
+            question_feature,history_feature , image_feature = compute_all_attention(question_states=co_attention[0],
                                                                                 caption=co_attention[1],
                                                                                 history_states=co_attention[2],
                                                                                 image_feature=co_attention[3],
@@ -332,24 +339,20 @@ class OracleNetwork(ResnetModel):
             print("image_feature = ",image_feature)
             print("question_feature = ",question_feature)
             print("history_feature = ",history_feature)
+            
+            question_feature = tf.concat([question_feature,image_feature], axis=1)
 
-          
-
-           
-
-
-            embeddings.append(image_feature)
             embeddings.append(history_feature)
             embeddings.append(question_feature)
-
+            # embeddings.append(image_feature)
 
             # embeddings.append(question_feature)
-            # print("*** All Embedding = ",embeddings)
-            # exit()
+            print("*** All Embedding = ",embeddings)
 
             self.emb = tf.concat(embeddings, axis=1)
             
             print("*** self.emb = ",self.emb)
+            # exit()
             
 
 
@@ -374,16 +377,15 @@ class OracleNetwork(ResnetModel):
             # self.best_pred = tf.reduce_mean(self.best_pred)
 
             print("--- predict = {} ,answer = {} ".format(self.pred,self._answer))
-            
+            # exit()
             # self.loss = None
+        
             self.loss = tf.reduce_mean(utils.cross_entropy(self.pred, self._answer))
             self.error = tf.reduce_mean(utils.error(self.pred, self._answer))
 
             print("loss = {} ,error = {} ".format(self.loss,self.error))
-
-            
-
             print('Model... Oracle build!')
+
             # print(" Summary = ",tf.summary())
 
     def get_loss(self):

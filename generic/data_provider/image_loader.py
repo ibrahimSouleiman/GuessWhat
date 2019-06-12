@@ -165,11 +165,19 @@ class RawImageLoader(AbstractImgLoader):
     def get_image(self, **kwargs):
         img = Image.open(self.img_path).convert('RGB')
         img = resize_image(img, self.width , self.height)
+        
         # print("/*/*/*/*/******* Image ********/*/*/*/*/*/*/*/ {}".format(self.img_path))
+        
+        
+        # print("img_shape = {} {} ".format(self.width,self.height))
+
         # imgplot = plt.imshow(img)
         # plt.show()
 
+        # exit()
         img = np.array(img, dtype=np.float32)
+
+      
 
         if self.channel is not None:
             img -= self.channel[None, None, :]

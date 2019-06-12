@@ -5,8 +5,8 @@
     "allcategory":false,
     "category": true,
     "spatial": true,
-    "crop": true,
-    "image": false
+    "crop": false,
+    "image": true
   },
   "model": {
     "glove":true,
@@ -16,7 +16,7 @@
       "embedding_window":3,
       "pos":false,
       "lemme":false,
-      "lstm" : false
+      "lstm" : true
     },
     "word_embedding_dim": 300,
     "description": {
@@ -89,7 +89,7 @@
   },
 
   "optimizer": {
-    "no_epoch": 40,
+    "no_epoch": 2,
     "learning_rate": 1e-4,
     "batch_size":64,
     "clip_val": 5

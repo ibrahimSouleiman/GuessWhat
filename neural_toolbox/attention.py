@@ -106,19 +106,16 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
         
             s = int(question_states.get_shape()[2])
             image_feature = tf.reshape(image_feature, shape=[-1, (h * w) , c]) # input image_feature ?,7,7,2048 => ?,49,2048
+            print("******************** B Image_feature = {} ".format(image_feature))
             image_feature = tf.reduce_sum(image_feature, axis=1)
+            print("******************** A Image_feature = {} ".format(image_feature))
+
+
             set_img(image_feature)
-
         
-           
-
-        
-       
-        print("question_states = ",question_states)
         question_shape = question_states.get_shape()
-
-        question_states = tf.reshape(question_states,shape=[-1,question_shape[1]*question_shape[2]])
-
+        
+        question_states = tf.reshape(question_states,shape=[-1,int(question_shape[1])*int(question_shape[2])])
         set_question(question_states)
        
         if history_states!= None:
@@ -133,7 +130,7 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
        
         
         
-        # return question_states,hist,image_feature
+        return question_states,hist,image_feature
 
         dict_step = {0:"img",1:"question",3:"hist"}
 
@@ -143,9 +140,6 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
         for key,value in step_attention.items():
             
             input_data , g1 , g2 = get_input_g1_g2(value[0],value[1],value[2])
-          
-           
-         
             dimension_two = int(input_data.get_shape()[1])
 
 
@@ -238,7 +232,7 @@ def compute_attention(feature_maps, context, no_mlp_units, reuse=False):
         feature_maps = tf.reshape(feature_maps, shape=[-1, h * w, c])#Tensor("oracle/attention/Reshape:0", shape=(?, 49, 2048), dtype=float32)
 
 
-        context = tf.expand_dims(context, axis=1)#Tensor("oracle/attention/ExpandDims:0", shape=(?, 1, 6144), dtype=float32)
+        context = tf.expand_dims(context, axis=1) # Tensor("oracle/attention/ExpandDims:0", shape=(?, 1, 6144), dtype=float32)
 
         context = tf.tile(context, [1, h * w, 1]) # tf.tile([a,b,c],dimension=[2]) => [a,b,c,a,b,c]
                                                   # Tensor("oracle/attention/Tile:0", shape=(?, 49, 6144), dtype=float32)

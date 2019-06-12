@@ -26,8 +26,10 @@ def create_optimizer(network, config, finetune=list(), optim_cst=tf.train.AdamOp
 
     print("training_loss = {} ".format(training_loss))
     # print("var_list = {} ".format(var_list))
+   
     # compute gradient
     grad = optimizer.compute_gradients(training_loss, var_list=var_list)
+  
 
     # apply gradient clipping
     if clip_val > 0:

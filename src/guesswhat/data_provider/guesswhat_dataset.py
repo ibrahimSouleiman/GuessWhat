@@ -306,7 +306,7 @@ class Dataset(AbstractDataset):
 
                 # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass)               
                
-                if len(games) > 50: break
+                if len(games) > 5: break
                 # if  len(games) > 5000: 
 
            
