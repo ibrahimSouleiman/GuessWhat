@@ -266,8 +266,13 @@ if __name__ == '__main__':
                     progress_compteur += 1 
                 
                 print("progress_compteur = {} , wait_inference = {}".format(progress_compteur,wait_inference))
+                print(" type_progress_compteur = {} ,wait_inference = {} , variable = {} ".format(progress_compteur,wait_inference,(int(progress_compteur) == int(wait_inference))))
+
                 if int(progress_compteur) == int(wait_inference):
-                    stop_learning == True
+                    print("stop_learning b = {} ".format(stop_learning))
+                    stop_learning = True
+                    print("stop_learning A = {} ".format(stop_learning))
+
                 print("stop_learning = {} ".format(stop_learning))
                 t2 = time.time()
                 print(" train_oracle | Condition ...Total=",t2-t1)
