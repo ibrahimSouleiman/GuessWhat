@@ -14,7 +14,7 @@ from gensim.models import word2vec,FastText,KeyedVectors
 
 from matplotlib import pyplot as plt
 from PIL import Image
-
+import numpy
 
 import os
 
@@ -70,16 +70,19 @@ class OracleBatchifier(AbstractBatchifier):
 
         for i, game in enumerate(games):
             batch['raw'].append(game)
-
             image = game.image
             question = self.tokenizer_question.apply(game.questions[0])
-            #print("question =____",game.questions[0])
+            # print("question =____",game.questions[0])
             # print("tokenize = ___",self.tokenizer_question.apply(game.questions[0]))
             # print(question)
             # exit()
+            batch['question_word'].append(game.questions[0])
             batch['question'].append(question)
+
+
             # print("---------------- FINISH QUESTION=",question)
-        
+
+            # exit()
 
             if 'embedding_vector_ques' in sources:
                 
@@ -111,7 +114,6 @@ class OracleBatchifier(AbstractBatchifier):
                         embedding_vectors,_ = get_embeddings(words,pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos)
                     elif self.config["model"]["glove"] : 
                         # print("++++++----- ++++++++ Dans glove ")
-                       
                         embedding_vectors = self.glove.get_embeddings(words)
                     
                     # print("************ Embedding_vector = ",embedding_vectors)
@@ -146,8 +148,8 @@ class OracleBatchifier(AbstractBatchifier):
                 # print("history=",game.all_last_question)
                 words = []
                 for i in range(6):
-                    question_answer = game.all_last_question[i]
 
+                    question_answer = game.all_last_question[i]
                     if len(question_answer) > 1: 
                         # print("QUESTION=",game.all_last_question[i])
                         word = self.tokenizer_question.apply(game.all_last_question[i][1][0],tokent_int=False)
@@ -259,7 +261,7 @@ class OracleBatchifier(AbstractBatchifier):
 
             if 'crop' in sources:
                 batch['crop'].append(game.object.get_crop())
-                # batch['image_id'].append(image.get_idimage())
+                batch['image_id'].append(image.get_idimage())
                 # batch['crop_id'].append(game.object_id)
                 # print("crop_id=",game.object.get_crop().shape)
                 # exit()
@@ -277,8 +279,15 @@ class OracleBatchifier(AbstractBatchifier):
                 # plt.show()
 
 
+                features_image = image.get_image()
+                # features_image = features_image.astype(numpy.int64)
+                batch['image'].append(features_image)
+                batch['image_id'].append(image.get_idimage())
+                # print("-- Image = {} ".format(features_image))
+                # print("-- type = {}".format(type(features_image[0][0])))
+                # print("-- type_int = {}".format(type(features_image[0][0][0])))
 
-                batch['image'].append(image.get_image())
+                # exit()
 
             if 'mask' in sources:
                 assert "image" in batch['image'], "mask input require the image source"
@@ -297,8 +306,9 @@ class OracleBatchifier(AbstractBatchifier):
         
         if "question" in sources:
             batch['question'] , batch['seq_length_question'] = padder(batch['question'],
-                                                        padding_symbol=self.tokenizer_question.padding_token,max_seq_length=10)
+                                                        padding_symbol=self.tokenizer_question.padding_token)
 
+         
 
 
         if "question_pos" in sources:

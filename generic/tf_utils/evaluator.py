@@ -50,10 +50,8 @@ class Evaluator(object):
 
         # if listener is not None:
         #     outputs += [listener.require()]  # add require outputs
-        #     # outputs = flatten(outputs) # flatten list (when multiple requirement)
+        #     # outputs = flatten(outputs)     # flatten list (when multiple requirement)
         #     outputs = list(OrderedDict.fromkeys(outputs))  # remove duplicate while preserving ordering
-
-
         # listener.before_epoch(is_training)
 
         n_iter = 1.
@@ -61,6 +59,7 @@ class Evaluator(object):
 
         good_predict = {}
         bad_predict = {}
+        image_id = None
 
         self.good_predict = 0
         self.bad_predict = 0
@@ -70,21 +69,18 @@ class Evaluator(object):
             batch["is_training"] = is_training
 
             if inference:
-                # print(batch,".............. batch")
-                # evaluate the network on the batch
-                # print("Batch_Length=",len(batch["embedding_vector_ques"]))
-                # print("Dict_keys=",batch.keys())
-                id_images = batch["image_id"]
+                
+                image_id = batch["image_id"]
               
                 batch_1 = {}
                 batch_2 = {}
 
-                question= batch["question"]
-                # images_id = batch["image_id"]
+                question= batch["question_word"]
+                images_id = batch["image_id"]
                 # crops_id = batch["crop_id"]
 
                 for key,values in batch.items():
-                    if key=="question" or key=="image_id" or key=="crop_id" :
+                    if key!="question" and key!="question_word" and key!= "image_id":
                         pass
                     elif type(values) != bool :
                         batch_1[key] = [values[0]]
@@ -93,79 +89,56 @@ class Evaluator(object):
                         batch_1[key] = values
                         batch_2[key] = values
 
-
-            #     print("batch 1 === ",batch_1.keys())
-
-            # print("batch ={} , inference = {} ".format(batch.keys(),inference ))
             
             if inference == False:
 
-                # print("Raw = {} ".format(batch["raw"]))
-                # print("-- Batch = {} ".format(batch.keys()))
-
-                batch = {key:value for key,value in batch.items() if key!="question" }
-                
-                # print("Batch = {} , outputs = {} ".format(batch,outputs))
-                
-                # print("out = {} ".format(outputs))
-
-                # print("Batch = {}".format(batch.keys()))
+                batch = {key:value for key,value in batch.items() if key!="question" and key!="question_word" and key!= "image_id"}
+       
 
                 results = self.execute(sess, outputs,batch,type_data )
 
-                # print("--- result = {} ".format(results))
-                # exit()
+                
 
             if inference:
 
-                print("--- out_net = {},outputs={} ".format(out_net,outputs))
-                print("--- batch = {} ".format(batch.keys()))
+                
 
                 old_batch = batch
-                # print("question   = {} ".format(batch["question"]))
-                batch = {key:value for key,value in batch.items() if key!="question" and key!="image_id" and key!="crop_id"}
+                batch = {key:value for key,value in batch.items() if key!="question" and key!="question_word" and key!= "image_id"}
                 prediction = self.execute(sess,out_net,batch, type_data)
-                
-                # print("prediction = {}".format(prediction))
-                # exit()
-                # print("batch... === ",batch.keys())
-                # print("old_batch = {} ".format(old_batch.keys()))
-                # exit()
-
                 results = self.execute(sess, outputs,batch, type_data )
 
-                # print("results = {} ".format(results))
-                # exit()
-                
-
-                # old_batch["image_id"],old_batch["crop_id"]
-                # image_id,crop_id,categories_object
-                for question,gold,prediction in zip(old_batch["question"],old_batch["answer"],prediction):
-                    gold_argmax = np.argmax(gold)
-                    predict_argmax = np.argmax(prediction)
-                    self.good_predict += 1
-
-                    if gold_argmax == predict_argmax:
-                        self.good_predict += 1
-                        # print("GOOD | Image_id ={}, Crop_id={}, Question= {}, Categorie_object={}, gold={}, prediction={}, proba_predict = {}".format(image_id,crop_id,question,categories_object,gold_argmax,predict_argmax,prediction) )
-                        print("GOOD |  Question= {},  gold={}, prediction={}, proba_predict = {}".format(question,gold_argmax,predict_argmax,prediction) )
-
-                    else:
-                        self.bad_predict += 1
-                        # print("BAD | Image_id ={}, Crop_id={}, Question= {}, Categorie_object={}, gold={}, prediction={}, proba_predict = {}".format(image_id,crop_id,question,categories_object,gold_argmax,predict_argmax,prediction) )
-                        print("BAD |  Question= {},  gold={}, prediction={}, proba_predict = {}".format(question,gold_argmax,predict_argmax,prediction) )
-
-                # exit()
-                # for image_id,crop_id,question,categories_object,gold,prediction in zip(old_batch["image_id"],old_batch["crop_id"],old_batch["question"],old_batch["category"],old_batch["answer"],prediction):
+            
+                # for question,gold,prediction in zip(old_batch["question"],old_batch["answer"],prediction):
                 #     gold_argmax = np.argmax(gold)
                 #     predict_argmax = np.argmax(prediction)
                 #     self.good_predict += 1
+
                 #     if gold_argmax == predict_argmax:
                 #         self.good_predict += 1
-                #         print("GOOD | Image_id ={}, Crop_id={}, Question= {}, Categorie_object={}, gold={}, prediction={}, proba_predict = {}".format(image_id,crop_id,question,categories_object,gold_argmax,predict_argmax,prediction) )
+                #         print("GOOD | Image_id ={}, Question= {}, Categorie_object={}, gold={}, prediction={}, proba_predict = {}".format(image_id,question,categories_object,gold_argmax,predict_argmax,prediction) )
+                #         # print("GOOD |  Question= {},  gold={}, prediction={}, proba_predict = {}".format(question,gold_argmax,predict_argmax,prediction) )
+
                 #     else:
                 #         self.bad_predict += 1
-                #         print("BAD | Image_id ={}, Crop_id={}, Question= {}, Categorie_object={}, gold={}, prediction={}, proba_predict = {}".format(image_id,crop_id,question,categories_object,gold_argmax,predict_argmax,prediction) )
+                #         print("BAD | Image_id ={}, Question= {}, Categorie_object={}, gold={}, prediction={}, proba_predict = {}".format(image_id,question,categories_object,gold_argmax,predict_argmax,prediction) )
+                #         # print("BAD |  Question= {},  gold={}, prediction={}, proba_predict = {}".format(question,gold_argmax,predict_argmax,prediction) )
+
+                # exit()
+                print(".... old__batch={} ".format(old_batch))
+
+                for image_id,question,categories_object,gold,prediction in zip(old_batch["image_id"],old_batch["question_word"],old_batch["category"],old_batch["answer"],prediction):
+                    print("....... image ..............")
+
+                    gold_argmax = np.argmax(gold)
+                    predict_argmax = np.argmax(prediction)
+                    self.good_predict += 1
+                    if gold_argmax == predict_argmax:
+                        self.good_predict += 1
+                        print("GOOD | Image_id ={}, Question= {}, Categorie_object={}, gold={}, prediction={}, proba_predict = {}".format(image_id,question,categories_object,gold_argmax,predict_argmax,prediction) )
+                    else:
+                        self.bad_predict += 1
+                        print("BAD | Image_id ={}, Question= {}, Categorie_object={}, gold={}, prediction={}, proba_predict = {}".format(image_id,question,categories_object,gold_argmax,predict_argmax,prediction) )
 
 
 
@@ -200,13 +173,24 @@ class Evaluator(object):
     def execute(self, sess, output, batch,type_data = "Train"):
         #print("+++++++++++++++++++++",batch.items())
         feed_dict = {self.scope +key + ":0": value for key, value in batch.items() if key in self.provided_sources}
-        print("-- [{}]  Feed_Dict = {}--".format(type_data, feed_dict.keys()))
-        print("answer = {}".format(feed_dict["oracle/answer:0"]))
+        # print("-- [{}]  Feed_Dict = {}--".format(type_data, feed_dict.keys()))
+        # print("answer = {}".format(feed_dict["oracle/answer:0"]))
         
         # print("-- [{}]  image_values = {}--".format(type_data, feed_dict["oracle/image:0"]))
         # print("========================================================================")
-        print("-- [{}] Output = {} ".format(type_data, output))
-        print("-- [{}] result = {} ".format(type_data,sess.run(output, feed_dict=feed_dict)))
+        # print("-- [{}] Output = {} ".format(type_data, output))
+        # print("-- [{}] result = {} ".format(type_data,sess.run(output, feed_dict=feed_dict)))
+        # print("")
+        
+
+        if type_data == "Valid":
+            # out = output[0].eval(feed_dict = feed_dict)
+            # print("Sess_emb = {}".format(out))
+            # print("Shape = {}".format(out.shape))
+            # print("Other = {}".format(tf.get_variable("oracle/l2_normalize:0").eval(feed_dict = feed_dict)))
+            # print("ouput = {}".format(sess.run(output[1], feed_dict=feed_dict)))
+            # exit()
+            pass
         # print("result_prediction = {}".format(sess.run(tf.get_variable("oracle/mlp/Softmax_1:0"), feed_dict=feed_dict)))
         
         

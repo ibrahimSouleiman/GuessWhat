@@ -77,6 +77,10 @@ class Iterator(object):
         it_batch = sem_iterator(l=batch, sem=self.semaphores)
         self.process_iterator = pool.imap(batchifier.apply, it_batch)
 
+
+
+        
+
     def __len__(self):
         return self.n_batches
 

@@ -178,8 +178,10 @@ def cross_entropy(y_hat, y):
         # -tf.reduce_sum(y_*tf.log(tf.clip_by_value(y_conv,1e-10,1.0)))
         # print("cross_entropy = {}",-tf.reduce_sum(y*tf.log(tf.clip_by_value(y_hat,1e-10,1.0))))
         # exit()
-        y_pred = tf.constant([0.3,0.7,0.0],dtype=tf.float32)
-        return -tf.reduce_mean(y*tf.log(tf.clip_by_value(y_hat,1e-10,1.0)))
+        # y_pred = tf.constant([0.3,0.7,0.0],dtype=tf.float32)
+        # tf.reduce_mean(y*tf.log(tf.clip_by_value(y_hat,1e-10,1.0)))
+
+        return -tf.reduce_mean(y*tf.log(y_hat))
 
     if rank(y) == 1:
         ind = tf.range(tf.shape(y_hat)[0]) * tf.shape(y_hat)[1] + y

@@ -130,7 +130,7 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
        
         
         
-        return question_states,hist,image_feature
+        # return question_states,hist,image_feature
 
         dict_step = {0:"img",1:"question",3:"hist"}
 

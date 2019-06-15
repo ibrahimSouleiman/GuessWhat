@@ -215,6 +215,7 @@ class RawCropLoader(AbstractImgLoader):
         img = Image.open(self.img_path).convert('RGB')
        
         # plt.imshow(img)
+        # plt.title("Image en entier")
         # plt.show()
         
         crop = scaled_crop_and_pad(raw_img=img, bbox=self.bbox, scale=self.scale)
@@ -222,7 +223,10 @@ class RawCropLoader(AbstractImgLoader):
         # print("/*/*/*/*/******* Image ********/*/*/*/*/*/*/*/ {}".format(self.img_path))
         
         # plt.imshow(crop)
+        # plt.title("Crop")
         # plt.show()
+        # print("image_loader ..")
+        # exit()
 
         crop = np.array(crop, dtype=np.float32)
 

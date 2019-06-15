@@ -55,6 +55,7 @@ def create_resnet(image_input, is_training, scope="", resnet_out="logits", resne
 
     resnet_scope = os.path.join('resnet_v1_{}/'.format(resnet_version), resnet_out)
     print(" resnet_out = {} , resnet_scope = {}".format(resnet_out,resnet_scope))
+
     # exit()
     with slim.arg_scope(arg_sc):
         net, end_points = current_resnet(image_input, 1000)  # 1000 is the number of softmax class

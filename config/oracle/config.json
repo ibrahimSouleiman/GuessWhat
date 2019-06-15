@@ -5,8 +5,8 @@
     "allcategory":false,
     "category": true,
     "spatial": true,
-    "crop": false,
-    "image": true
+    "crop": true,
+    "image": false
   },
   "model": {
     "glove":true,
@@ -58,7 +58,7 @@
       },
 
       "cbn": {
-        "use_cbn": true,
+        "use_cbn": false,
         "cbn_embedding_size": 512,
         "excluded_scope_names": ["*"]
       }

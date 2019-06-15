@@ -8,13 +8,13 @@ import tensorflow as tf
 
 import numpy as np
 import json
+
 from generic.data_provider.iterator import Iterator
 from generic.tf_utils.evaluator import Evaluator
 from generic.tf_utils.optimizer import create_optimizer
 from generic.tf_utils.ckpt_loader import load_checkpoint, create_resnet_saver
 from generic.utils.config import load_config
 from generic.utils.file_handlers import pickle_dump
-
 from generic.data_provider.image_loader import get_img_builder
 from generic.data_provider.nlp_utils import Embeddings
 from generic.data_provider.nlp_utils import GloveEmbeddings
@@ -100,13 +100,15 @@ if __name__ == '__main__':
     testset = OracleDataset.load(args.data_dir, "test",image_builder= image_builder, crop_builder = crop_builder,all_img_bbox = all_img_bbox,all_img_describtion=all_img_describtion)
     
     # np.save("all_img_bbox.npy",all_img_bbox)
-    # print(len(all_img_bbox))
+    # print("Image_crop legnth= {}".format(len(all_img_describtion)))
+    # print("Image_crop = {}".format(all_img_describtion))
     print("load data Done ! ")
     # with open('all_img_bbox.json', 'a') as file:
     #         file.write(json.dumps(all_img_bbox,sort_keys=True, indent=4, separators=(',', ': ')))
 
-    # with open('id_categories.json', 'a') as file:
+    # with open('image-width_height.json', 'a') as file:
     #         file.write(json.dumps(all_img_describtion,sort_keys=True, indent=4, separators=(',', ': ')))
+
 
     # exit()
 
@@ -153,8 +155,9 @@ if __name__ == '__main__':
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=args.gpu_ratio)
 
     # Retrieve only resnet variabes
-    # if use_resnet:
-    #     resnet_saver = create_resnet_saver([network])
+    if use_resnet:
+        resnet_saver = create_resnet_saver([network])
+    
     # use_embedding = False
     # if config["embedding"] != "None":
     #      use_embedding = True
@@ -175,26 +178,15 @@ if __name__ == '__main__':
 
 
         sources = network.get_sources(sess)
-        
         out_net = network.get_parameters()[-1]
-   
         # logger.info("Sources: " + ', '.join(sources))
-
         sess.run(tf.global_variables_initializer())
-
-
-
-        # if use_resnet:
-        #     resnet_saver.restore(sess, os.path.join(args.data_dir, 'resnet_v1_{}.ckpt'.format(resnet_version)))
-
-
-        start_epoch = load_checkpoint(sess, saver, args, save_path)
-
+        if use_resnet:
+            resnet_saver.restore(sess, os.path.join(args.data_dir, 'resnet_v1_{}.ckpt'.format(resnet_version)))
         
-
+        start_epoch = load_checkpoint(sess, saver, args, save_path)
         best_val_err = 0
         # best_train_err = None
-
         # # create training tools
         evaluator = Evaluator(sources, network.scope_name,network=network,tokenizer=tokenizer)
 
@@ -232,8 +224,8 @@ if __name__ == '__main__':
                 train_loss, train_accuracy = evaluator.process(sess, train_iterator, outputs=outputs + [optimizer],out_net=best_param)
                 t2 = time.time()
 
-
                 print(" train_oracle | evaluatorator...Total=",t2-t1)
+
                 t1 = time.time()
 
 
@@ -248,6 +240,7 @@ if __name__ == '__main__':
 
 
                 t1 = time.time()
+                # [network.get_emb_concat()]
                 valid_loss, valid_accuracy = evaluator.process(sess, valid_iterator, outputs=outputs,type_data="Valid")
                 t2 = time.time()
 
@@ -295,26 +288,30 @@ if __name__ == '__main__':
             # save_path = "out/oracle/30ef7335e38c93632b58e91fa732cf2d/{}" # question,category,spaticial,history,Images
             # save_path = "out/oracle/d9f1951536bbd147a3ea605bb3cbdde7/{}" # question,category,spaticial,history,Crop                                                             # question,category,spaticial,history,Crop 
             # save_path = "out/oracle/4a9f62698e3304c4c2d733bff0b24ee2/{}"
-            save_path =   "out/oracle/750716c7c44b601539a65bff7eaaaf9c/{}"
+            save_path =   "out/oracle/a630385c990e5cc470c2488a244f18dc/{}"
+
             # out/oracle/ce02141129f6d87172cafc817c6d0b59/params.ckpt
             # save_path = save_path.format('params.ckpt')
 
             print("***** save_path = ",save_path)
             
 
+
+
+
         save_path = save_path.format('params.ckpt')
-
-
         saver.restore(sess, save_path)
-
 
         test_iterator = Iterator(testset, pool=cpu_pool,
                                  batch_size=batch_size*2,
                                  batchifier=batchifier,
                                  shuffle=True)
 
+
         print("Output = {}".format(outputs[1]))
         print("Best_param = {}".format(best_param))
+
+
         test_loss, test_accuracy = evaluator.process(sess, test_iterator,  outputs=outputs ,out_net=best_param,inference=inference,type_data="Test")
        
         t2 = time.time()

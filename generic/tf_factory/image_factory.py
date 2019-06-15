@@ -30,16 +30,16 @@ def get_image_features(image, question, is_training, scope_name, config, dropout
             if  config["cbn"].get("use_cbn", False):
                 print("--- In CBN ")
                 cbn_factory = CBNfromLSTM(question, no_units=config['cbn']["cbn_embedding_size"])
-
                 excluded_scopes = config["cbn"].get('excluded_scope_names', [])
                 cbn = ConditionalBatchNorm(cbn_factory, excluded_scope_names=excluded_scopes,
                                            is_training=is_training)
 
-                # print("Image = {} ".format(image))         
-                # print("cbn_factory = {} ".format(cbn_factory))
-                # print("excluded_scopes = {} ".format(excluded_scopes))
-                # print("cbn = {} ".format(cbn))    
+                print("Image = {} ".format(image))         
+                print("cbn_factory = {} ".format(cbn_factory))
+                print("excluded_scopes = {} ".format(excluded_scopes))
+                print("cbn = {} ".format(cbn))    
                 # exit()            
+
             # print("---------------------------------- Before resnet_version")
             # Create ResNet
             resnet_version = config['resnet_version']
@@ -50,6 +50,8 @@ def get_image_features(image, question, is_training, scope_name, config, dropout
                                                  resnet_version=resnet_version,
                                                  resnet_out=config.get('resnet_out', "block4"))
 
+
+            print("-- image_feature_maps = {}".format(image_feature_maps))
             print("---------------------------------- After resnet_version")
             image_feature_maps = image_feature_maps
             if config.get('normalize', False):
@@ -59,11 +61,13 @@ def get_image_features(image, question, is_training, scope_name, config, dropout
         else:
             image_feature_maps = image
         
-
-        
-
         # apply attention
         image_out = image_feature_maps
+        print("image_out 1= {}".format(image_out))
+
+        # exit()
+
+
         # print("before im")
         # image_out = get_attention(image_feature_maps, question,
         #                           config=config["attention"],

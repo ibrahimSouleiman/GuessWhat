@@ -9,8 +9,6 @@ def load_config(config_file, exp_dir):
     with open(config_file, 'rb') as f_config:
         config_str = f_config.read()
         exp_identifier = hashlib.md5(config_str).hexdigest()
-        # print("config_str = {} , exp_identifier = {} ".format(config_str,exp_identifier))
-        # exit()
         config = json.loads(config_str.decode('utf-8'))
 
     save_path = '{}/{{}}'.format(os.path.join(exp_dir, exp_identifier))
@@ -31,6 +29,15 @@ def load_config(config_file, exp_dir):
     shutil.copy(config_file, save_path.format('config.json'))
 
     return config, exp_identifier, save_path
+
+
+def load_json_config(config_file):
+    with open(config_file, 'rb') as f_config:
+        config_str = f_config.read()
+        exp_identifier = hashlib.md5(config_str).hexdigest()
+        config = json.loads(config_str.decode('utf-8'))
+
+    return config
 
 def get_config_from_xp(exp_dir, identifier):
     config_path = os.path.join(exp_dir, identifier, 'config.json')

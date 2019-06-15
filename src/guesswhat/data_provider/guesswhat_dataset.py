@@ -36,6 +36,8 @@ class Game:
         
         compteur = 0
 
+        # print("image_width = {},image_height = {}".format(image["width"],image["height"]))
+
         self.image = Image(id=image["id"],
                            width=image["width"],
                            height=image["height"],
@@ -48,6 +50,7 @@ class Game:
 
         self.objects = []
         self.all_category = []
+
         for o in objects:
             self.all_category.append(o['category'])
             new_obj = Object(id=o['id'],
@@ -60,12 +63,44 @@ class Game:
                              which_set=which_set,
                              image=self.image)
 
-            
+         
 
             self.objects.append(new_obj)
 
             if o['id'] == object_id:
                 self.object = new_obj  # Keep ref on the object to find
+                # print("image_id = {},{}".format(image["id"],type(image["id"])))
+
+                # if image["id"] == 632:
+                #     img = new_obj.get_crop()
+                #     img = [x / 255.0 for x in img] 
+                #     img = np.asarray(img)
+                #     # # print("Type = {} =".format(type(img)))
+                #     # # print("Type = {} =".format(img.shape))
+                #     # img = np.reshape(img,224*224*3)
+                #     # print("Img = {}".format(img.shape))
+                #     # img = np.reshape(img,(224,224,3))
+                #     plt.imshow(img,cmap='gray')
+                #     plt.show()
+                #     exit()
+
+
+
+
+                # all_img_describtion [image["id"]]  = img   
+
+                # print("object = {} ".format(self.object))
+
+
+                # all_img_describtion[image["id"]] = [new_obj]
+
+                # print("Img = {}".format(img))
+
+                # plt.imshow(img,cmap='gray')
+                # plt.show()
+
+                # print("shape = {}".format(img.shape))
+                # exit()
                 # all_img_bbox[image["id"] ]= o['bbox']    
                 # print("Select=",o['category'])
             else:
@@ -73,12 +108,12 @@ class Game:
                 # print(o['category'])     
 
         # print("-----------------------")
-        compteur += 1
-        if compteur == 15:
-            exit()
+        # compteur += 1
+        # if compteur == 15:
+        #     exit()
 
 
-        # all_img_describtion[image["id"]] = image["description"]
+        all_img_describtion[image["id"]] = [image["width"],image["height"]]
 
         self.question_ids = [qa['id'] for qa in qas]
         
@@ -87,7 +122,6 @@ class Game:
         self.answers = [qa['answer'] for qa in qas]
 
         self.status = status
-
 
         self.last_question = ["unk" for i in range(1)]
         
@@ -162,6 +196,8 @@ class Image:
             self.image_loader = image_builder.build(id, which_set=which_set, filename=self.filename, optional=False)
 
 
+
+
     def get_idimage(self):
         return self.id
 
@@ -177,6 +213,10 @@ class Image:
 class Bbox:
     def __init__(self, bbox, im_width, im_height):
         # Retrieve features (COCO format)
+        # print("bbox = {} ,im_width = {} ,im_height = {}".format(bbox,im_width,im_height))
+        # exit()
+
+
         self.x_width = bbox[2]
         self.y_height = bbox[3]
 
@@ -214,9 +254,15 @@ class Object:
 
         if crop_builder is not None:
             filename = "{}.jpg".format(image.id)
+            # print("id = {} ,filemane = {} ,which_set = {},bbox = {}".format(id,filename,which_set,bbox))
+            
+
+
             self.crop_loader = crop_builder.build(id, filename=filename, which_set=which_set, bbox=bbox)            # print("Image_id=",image.id)
-            # print("Bbox=",bbox)
+            # print("crop_loader = {} ".format(self.crop_loader))
             # exit()
+
+
     # def get_mask(self):
     #     assert self.rle_mask is not None, "Mask option are not available, please compile and link cocoapi (cf. cocoapi/PythonAPI/setup.py)"
     #     return cocoapi.decode(self.rle_mask)
@@ -234,13 +280,6 @@ class Object:
 class Dataset(AbstractDataset):
     """Loads the dataset."""
     def __init__(self, folder, which_set, image_builder=None, crop_builder=None,all_img_bbox=None,all_img_describtion=None):
-        filegues = '{}/guesswhat_{}2014.jsonl.gz'.format(folder,which_set)
-        file_description = '{}/captions_{}2014.json'.format(folder, which_set)
-
-        games = []
-        nb_pass = 0
-        nb_erreur = 0
-
         self.set = which_set
         self.lemmas = WordNetLemmatizer()
 
@@ -248,6 +287,14 @@ class Dataset(AbstractDataset):
         self.count_questions = {}
         self.indice = 0
         self.total = 0
+
+        filegues = '{}/guesswhat_{}2014.jsonl.gz'.format(folder,which_set)
+        file_description = '{}/captions_{}2014.json'.format(folder, which_set)
+        games = []
+        nb_pass = 0
+        nb_erreur = 0
+
+
 
         tokenizer = TweetTokenizer(preserve_case=True)
 
@@ -306,7 +353,7 @@ class Dataset(AbstractDataset):
 
                 # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass)               
                
-                if len(games) > 5: break
+                if len(games) > 50: break
                 # if  len(games) > 5000: 
 
            
@@ -321,6 +368,7 @@ class Dataset(AbstractDataset):
 
 
         super(Dataset, self).__init__(games)
+
 
 class OracleDataset(AbstractDataset):
     """
@@ -361,6 +409,9 @@ class OracleDataset(AbstractDataset):
         print("#################### {} ##########################".format(which_set))
 
         return cls(Dataset(folder, which_set, image_builder, crop_builder,all_img_bbox,all_img_describtion))
+
+
+
 
     def split(self, game):
 

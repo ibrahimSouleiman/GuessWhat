@@ -21,7 +21,11 @@ class OracleNetwork(ResnetModel):
             if config['inputs']['question']:
      
                 self._is_training = tf.placeholder(tf.bool, name="is_training")
+                
+                self._question_word = tf.placeholder(tf.int32, [self.batch_size], name='question_word') # 
+
                 self._question = tf.placeholder(tf.int32, [self.batch_size, 6], name='question')
+                
                 self.seq_length_question = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question')
 
                 word_emb = utils.get_embedding(self._question,
@@ -48,7 +52,7 @@ class OracleNetwork(ResnetModel):
                 self.out_question = None
 
                 if config['model']['question']['lstm']:
-                    self.lstm_states, self.lstm_all_state_ques = rnn.variable_length_LSTM(word_emb,
+                    self.lstm_states_question, self.lstm_all_state_ques = rnn.variable_length_LSTM(word_emb,
                                                         num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
                                                         seq_length=self.seq_length_question)
                     self.out_question =  self.lstm_all_state_ques
@@ -271,7 +275,7 @@ class OracleNetwork(ResnetModel):
                 #                                     seq_length=self.seq_length_allcategory,scope="lstm3")
                 
                 print(" Oracle_network | embdedding all_cate=",word_emb)
-                embeddings.append(self._allcategory)
+                # embeddings.append(self._allcategory)
                 print("Input: allcategory")
 
                 
@@ -287,14 +291,16 @@ class OracleNetwork(ResnetModel):
             if config['inputs']['image']:
                 print("****  Oracle_network |  input = image ")
 
-                # self._image_id = tf.placeholder(tf.float32, [self.batch_size], name='image_id')
+                self._image_id = tf.placeholder(tf.float32, [self.batch_size], name='image_id')
 
                 self._image = tf.placeholder(tf.float32, [self.batch_size] + config['model']['image']["dim"], name='image')
              
 
                 # self.image_out = tf.reshape(self._image,shpe=[224*224*3])
+                # print("question = {} ".format(self.lstm_states_question))
+                # exit()
                 self.image_out = get_image_features(
-                    image=self._image, question=self.lstm_states,
+                    image=self._image, question=self.lstm_states_question,
                     is_training=self._is_training,
                     scope_name=scope.name,
                     config=config['model']['image']
@@ -302,16 +308,19 @@ class OracleNetwork(ResnetModel):
 
                 # embeddings.append(self.image_out)
                 print("Input: Image")
-                co_attention[3]  = self.image_out
+                # co_attention[3]  = self.image_out
+                print(" -- image_int ={}".format(self._image))
+                # exit()
                 # image_feature = tf.reshape(self.image_out, shape=[-1, (7 * 7) * 2048]) # input image_feature ?,7,7,2048 => ?,49,2048
-                # embeddings.append(image_feature)
+                embeddings.append(self.image_out)
 
-                print("... Image Features = {}".format(self.image_out))
+
+                # print("... Image Features = {}".format(self.image_out))
 
             # CROP
             if config['inputs']['crop']:
                 print("****  Oracle_network |  input = crop ")
-                # self._image_id = tf.placeholder(tf.float32, [self.batch_size], name='image_id')
+                self._image_id = tf.placeholder(tf.float32, [self.batch_size], name='image_id')
                 # self._crop_id = tf.placeholder(tf.float32, [self.batch_size], name='crop_id')
 
                 self._crop = tf.placeholder(tf.float32, [self.batch_size] + config['model']['crop']["dim"], name='crop')
@@ -340,7 +349,6 @@ class OracleNetwork(ResnetModel):
             print("question_feature = ",question_feature)
             print("history_feature = ",history_feature)
             
-            question_feature = tf.concat([question_feature,image_feature], axis=1)
 
             embeddings.append(history_feature)
             embeddings.append(question_feature)
@@ -390,6 +398,9 @@ class OracleNetwork(ResnetModel):
 
     def get_loss(self):
         return self.loss
+
+    def get_emb_concat(self):
+        return self.emb
 
     def get_accuracy(self):
         return 1. - self.error
