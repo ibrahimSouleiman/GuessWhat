@@ -171,8 +171,8 @@ class RawImageLoader(AbstractImgLoader):
         
         # print("img_shape = {} {} ".format(self.width,self.height))
 
-        # imgplot = plt.imshow(img)
-        # plt.show()
+        imgplot = plt.imshow(img)
+        plt.show()
 
         # exit()
         img = np.array(img, dtype=np.float32)
@@ -194,6 +194,7 @@ class RawCropBuilder(AbstractImgBuilder):
         self.scale = scale
 
     def build(self, object_id, filename, **kwargs):
+        
         bbox = kwargs["bbox"]
         img_path = os.path.join(self.img_dir, filename)
 

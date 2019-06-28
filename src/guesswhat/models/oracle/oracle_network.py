@@ -16,6 +16,8 @@ class OracleNetwork(ResnetModel):
             embeddings = []
             co_attention = [None,None,None,None]
             self.batch_size = None
+            max_seq_length = 12
+            
 
             # QUESTION
             if config['inputs']['question']:
@@ -33,8 +35,9 @@ class OracleNetwork(ResnetModel):
                                             n_dim=int(config["model"]["word_embedding_dim"]),
                                             scope="word_embedding")
 
+
                 if config["model"]["glove"] == True or config["model"]["fasttext"] == True:
-                    self._embWord = tf.placeholder(tf.float32, [self.batch_size, 10, int(config["model"]["word_embedding_dim"])], name="embedding_vector_ques")
+                    self._embWord = tf.placeholder(tf.float32, [self.batch_size, max_seq_length, int(config["model"]["word_embedding_dim"])], name="embedding_vector_ques")
                     word_emb = self._embWord
 
                     # word_emb = tf.concat([ word_emb,self._embWord], axis=2)
@@ -65,7 +68,7 @@ class OracleNetwork(ResnetModel):
                 if config["model"]["attention"]["co-attention"]:
                     co_attention[0] = self.out_question     # embeddings.append(self.lstm_all_state_ques)
                 else:
-                    embeddings.append(self.out_question)
+                    embeddings.append(self.lstm_states_question)
 
 
                 # print("*+*+*+*+* **+*+*+**Length=",self.seq_length_question)
@@ -91,6 +94,7 @@ class OracleNetwork(ResnetModel):
                                                 scope="word_embedding_pos")
 
                     if config["model"]["glove"] == True or config["model"]["fasttext"] == True:
+
                         self._glove = tf.placeholder(tf.float32, [None, None,int(config["model"]["word_embedding_dim"])], name="embedding_vector_ques_pos")
                         word_emb = tf.concat([word_emb, self._glove], axis=2)
 
@@ -250,7 +254,7 @@ class OracleNetwork(ResnetModel):
                 
 
                 # cat_emb = tf.expand_dims(cat_emb,1)
-                # embeddings.append(cat_emb)
+                embeddings.append(cat_emb)
                 print("Input: Category")
 
 
@@ -283,7 +287,7 @@ class OracleNetwork(ResnetModel):
             if config['inputs']['spatial']:
                 print("****  Oracle_network |  input = spatial ")
                 self._spatial = tf.placeholder(tf.float32, [self.batch_size, 8], name='spatial')
-                # embeddings.append(self._spatial)
+                embeddings.append(self._spatial)
                 print("Input: Spatial")
 
 
@@ -292,7 +296,6 @@ class OracleNetwork(ResnetModel):
                 print("****  Oracle_network |  input = image ")
 
                 self._image_id = tf.placeholder(tf.float32, [self.batch_size], name='image_id')
-
                 self._image = tf.placeholder(tf.float32, [self.batch_size] + config['model']['image']["dim"], name='image')
              
 
@@ -303,19 +306,20 @@ class OracleNetwork(ResnetModel):
                     image=self._image, question=self.lstm_states_question,
                     is_training=self._is_training,
                     scope_name=scope.name,
+                    scope_feature="Image/",
                     config=config['model']['image']
                 )
 
                 # embeddings.append(self.image_out)
                 print("Input: Image")
-                # co_attention[3]  = self.image_out
+                co_attention[3]  = self.image_out
                 print(" -- image_int ={}".format(self._image))
                 # exit()
                 # image_feature = tf.reshape(self.image_out, shape=[-1, (7 * 7) * 2048]) # input image_feature ?,7,7,2048 => ?,49,2048
-                embeddings.append(self.image_out)
-
-
+                # embeddings.append(self.image_out)
                 # print("... Image Features = {}".format(self.image_out))
+
+
 
             # CROP
             if config['inputs']['crop']:
@@ -324,34 +328,54 @@ class OracleNetwork(ResnetModel):
                 # self._crop_id = tf.placeholder(tf.float32, [self.batch_size], name='crop_id')
 
                 self._crop = tf.placeholder(tf.float32, [self.batch_size] + config['model']['crop']["dim"], name='crop')
-
+               
                 self.crop_out = get_image_features(
                     image=self._crop, question=self.lstm_states,
                     is_training=self._is_training,
                     scope_name=scope.name,
+                    scope_feature="Crop/",
                     config=config["model"]['crop'])
 
                 co_attention[3] = self.crop_out
+
+
+                if config["model"]["crop"]["segment_crop"]["use"]:
+                    all_segment_crop = []
+                    # for i in range(10):
+                    # self._segment_crop = tf.placeholder(tf.float32, [self.batch_size] + config['model']['crop']["dim"], name='image_segment_{}'.format(0))
+                    
+
+                    # self.crop_out = get_image_features(
+                    #                 image=self._segment_crop, question=self.lstm_states,
+                    #                 is_training=self._is_training,
+                    #                 scope_name="test",
+                    #                 config=config["model"]['crop'])
+
+
+                    print("self.crop_out = {} ".format(self.crop_out))
+
+                        # all_segment_crop.add(self.crop_out)
                 
                 # print("-- crop = {},image_features = {} ".format(self.crop_out, image_feature))
                 # exit()
-      
-            question_feature,history_feature , image_feature = compute_all_attention(question_states=co_attention[0],
-                                                                                caption=co_attention[1],
-                                                                                history_states=co_attention[2],
-                                                                                image_feature=co_attention[3],
-                                                                                no_mlp_units=config['model']['attention']['no_attention_mlp'],
-                                                                                config = config
-                                                                                )
+                # question_feature,history_feature , image_feature = compute_all_attention(question_states=co_attention[0],
+                #                                                                 caption=co_attention[1],
+                #                                                                 history_states=co_attention[2],
+                #                                                                 image_feature=co_attention[3],
+                #                                                                 no_mlp_units=config['model']['attention']['no_attention_mlp'],
+                #                                                                 config = config
+                #                                                                 )
 
 
-            print("image_feature = ",image_feature)
-            print("question_feature = ",question_feature)
-            print("history_feature = ",history_feature)
+
+
+            # print("image_feature = ",image_feature)
+            # print("question_feature = ",question_feature)
+            # print("history_feature = ",history_feature)
             
 
-            embeddings.append(history_feature)
-            embeddings.append(question_feature)
+            # embeddings.append(history_feature)
+            # embeddings.append(question_feature)
             # embeddings.append(image_feature)
 
             # embeddings.append(question_feature)

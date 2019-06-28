@@ -10,7 +10,7 @@ import io
 import json
 import os
 import nltk
-from guesswhat.data_provider.guesswhat_dataset import OracleDataset
+from src.guesswhat.data_provider.guesswhat_dataset import OracleDataset
 from nltk.tokenize import TweetTokenizer
 
 from nltk import WordNetLemmatizer

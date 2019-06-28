@@ -52,7 +52,9 @@ class Iterator(object):
 
     def __init__(self, dataset, batch_size, batchifier, pool,
                  shuffle= False, use_padding = False, no_semaphore= 20):
-        print(batch_size," ----------------- Iterator")
+                 
+        print("----------------- Iterator",batch_size)
+
         # Filtered games
         games = dataset.get_data()
         games = batchifier.filter(games)
@@ -68,7 +70,6 @@ class Iterator(object):
         
         print("++++ Iterator | n_examples = {},batch_size={},n_batches={}".format(self.n_examples,self.batch_size,self.n_batches))
         print("shape({},{})".format(len(batch),len(batch[0])))
-        
         # no proc
         # self.it = (batchifier.apply(b )for b in batch)
 

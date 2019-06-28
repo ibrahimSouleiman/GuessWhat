@@ -13,7 +13,7 @@ import nltk
 import numpy as np
 from gensim.models import word2vec,FastText,KeyedVectors
 
-from guesswhat.data_provider.guesswhat_dataset import OracleDataset
+from src.guesswhat.data_provider.guesswhat_dataset import OracleDataset
 from nltk.tokenize import TweetTokenizer
 
 from nltk import WordNetLemmatizer
@@ -180,7 +180,7 @@ if __name__ == '__main__':
                 
             #     all_pos_ques.append(pos)
 
-            # all_questions.append(tokens_question)
+            all_questions.append(tokens_question)
             # all_descriptions.append(tokens_description)
 
 
@@ -245,13 +245,12 @@ if __name__ == '__main__':
                 
             #     all_pos_des.append(pos)
 
-            # all_questions.append(tokens_question)
+            all_questions.append(tokens_question)
             # all_descriptions.append(tokens_description)
 
 
             # all_lemmes_ques.append(all_lemme_ques)
             # all_postags_ques.append(all_pos_ques)
-
             # all_lemmes_des.append(all_lemme_des)
             # all_postags_des.append(all_pos_des)
 
@@ -309,7 +308,7 @@ if __name__ == '__main__':
                 
             #     all_pos_des.append(pos)
 
-            # all_questions.append(tokens_question)
+            all_questions.append(tokens_question)
             # all_descriptions.append(tokens_description)
 
 
@@ -321,7 +320,7 @@ if __name__ == '__main__':
 
 
 
-        # np.save(os.path.join(args.data_dir,args.file_allquestion),all_questions)
+        np.save(os.path.join(args.data_dir,args.file_allquestion),all_questions)
         # np.save(os.path.join(args.data_dir,args.file_alldescription),all_descriptions)
 
         
@@ -332,22 +331,22 @@ if __name__ == '__main__':
         # np.save(os.path.join(args.data_dir,args.file_pos_ques),all_postags_ques)
         # np.save(os.path.join(args.data_dir,args.file_pos_des),all_postags_des)
 
-        print(len(all_word))
+        # print(len(all_word))
 
-        print(all_word.keys())
+        # print(all_word.keys())
 
         np.save(os.path.join(args.data_dir,"all_word"),all_word)
 
         print("Fasttext train ...............................")
 
 
-        # model_word_ques = FastText(size=args.emb_dim, window=3, min_count=3) 
-        # model_word_ques.build_vocab(sentences=all_questions)
-        # model_word_ques.train(sentences=all_questions, total_words=len(all_questions), epochs=10)
+        model_word_ques = FastText(size=args.emb_dim, window=3, min_count=3) 
+        model_word_ques.build_vocab(sentences=all_questions)
+        model_word_ques.train(sentences=all_questions, total_words=len(all_questions), epochs=10)
 
-        # fname = os.path.join(args.data_dir,"ftext_word_ques.model")
-        # model_word_ques.save(fname)
-        # # print(model_word_ques.wv[unk])
+        fname = os.path.join(args.data_dir,"ftext_word_ques.model")
+        model_word_ques.save(fname)
+        # print(model_word_ques.wv[unk])
 
 
         # model_lemme_ques = FastText(size=args.emb_dim, window=3, min_count=3) 

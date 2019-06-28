@@ -25,6 +25,8 @@ from src.guesswhat.data_provider.guesswhat_tokenizer import GWTokenizer
 from src.guesswhat.models.oracle.oracle_network import OracleNetwork
 import time
 
+
+
 if __name__ == '__main__':
 
     #############################
@@ -209,7 +211,7 @@ if __name__ == '__main__':
                 logger.info('Epoch {}..'.format(t + 1))
                 # print('Epoch {}..'.format(t + 1))
 
-                # print(" train_oracle | Iterator ...")
+                print(" train_oracle | Iterator ...")
                 
                 t1 = time.time()
                 train_iterator = Iterator(trainset,
@@ -219,8 +221,8 @@ if __name__ == '__main__':
                 
                 t2 = time.time()
 
+                print(" train_oracle | Iterator...Total=",t2-t1)
                 t1 = time.time()
-
                 train_loss, train_accuracy = evaluator.process(sess, train_iterator, outputs=outputs + [optimizer],out_net=best_param)
                 t2 = time.time()
 
@@ -265,15 +267,10 @@ if __name__ == '__main__':
                 elif valid_accuracy < best_val_err:
                     progress_compteur += 1 
                 
-                print("progress_compteur = {} , wait_inference = {}".format(progress_compteur,wait_inference))
-                print(" type_progress_compteur = {} ,wait_inference = {} , variable = {} ".format(progress_compteur,wait_inference,(int(progress_compteur) == int(wait_inference))))
 
                 if int(progress_compteur) == int(wait_inference):
-                    print("stop_learning b = {} ".format(stop_learning))
                     stop_learning = True
-                    print("stop_learning A = {} ".format(stop_learning))
 
-                print("stop_learning = {} ".format(stop_learning))
                 t2 = time.time()
                 print(" train_oracle | Condition ...Total=",t2-t1)
 

@@ -93,7 +93,7 @@ class Evaluator(object):
             if inference == False:
 
                 batch = {key:value for key,value in batch.items() if key!="question" and key!="question_word" and key!= "image_id"}
-       
+
 
                 results = self.execute(sess, outputs,batch,type_data )
 

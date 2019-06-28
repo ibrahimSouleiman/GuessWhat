@@ -198,6 +198,7 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
         question_states = get_question()
         history = get_history()
         image_feature = get_img()        
+        
 
 
     return question_states,history,image_feature

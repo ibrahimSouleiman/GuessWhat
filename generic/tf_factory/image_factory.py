@@ -6,7 +6,7 @@ from neural_toolbox.cbn import ConditionalBatchNorm
 
 from generic.tf_factory.attention_factory import get_attention
 
-def get_image_features(image, question, is_training, scope_name, config, dropout_keep=1., reuse=False):
+def get_image_features(image, question, is_training, scope_name,scope_feature, config, dropout_keep=1., reuse=False):
     image_input_type = config["image_input"]
 
     # Extract feature from 1D-image feature s
@@ -28,31 +28,39 @@ def get_image_features(image, question, is_training, scope_name, config, dropout
             # Create CBN
             cbn = None
             if  config["cbn"].get("use_cbn", False):
-                print("--- In CBN ")
                 cbn_factory = CBNfromLSTM(question, no_units=config['cbn']["cbn_embedding_size"])
                 excluded_scopes = config["cbn"].get('excluded_scope_names', [])
+
+
                 cbn = ConditionalBatchNorm(cbn_factory, excluded_scope_names=excluded_scopes,
                                            is_training=is_training)
+
+
 
                 print("Image = {} ".format(image))         
                 print("cbn_factory = {} ".format(cbn_factory))
                 print("excluded_scopes = {} ".format(excluded_scopes))
-                print("cbn = {} ".format(cbn))    
+                print("cbn = {} ".format(cbn))
+
                 # exit()            
 
             # print("---------------------------------- Before resnet_version")
             # Create ResNet
             resnet_version = config['resnet_version']
+
             image_feature_maps,_ = create_resnet(image,
                                                  is_training=is_training,
                                                  scope=scope_name,
+                                                 scope_feature=scope_feature,
                                                  cbn=cbn,
                                                  resnet_version=resnet_version,
                                                  resnet_out=config.get('resnet_out', "block4"))
 
 
             print("-- image_feature_maps = {}".format(image_feature_maps))
+
             print("---------------------------------- After resnet_version")
+
             image_feature_maps = image_feature_maps
             if config.get('normalize', False):
                 image_feature_maps = tf.nn.l2_normalize(image_feature_maps, dim=[1, 2, 3])

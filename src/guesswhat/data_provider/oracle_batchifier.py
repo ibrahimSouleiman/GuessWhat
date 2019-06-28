@@ -3,19 +3,16 @@ import collections
 from PIL import Image
 
 from generic.data_provider.batchifier import AbstractBatchifier
-
 from generic.data_provider.image_preprocessors import get_spatial_feat, resize_image
 from generic.data_provider.nlp_utils import padder,padder_3d,padder_4d
-
-import time
-
 from generic.data_provider.nlp_utils import Embeddings,get_embeddings
 from gensim.models import word2vec,FastText,KeyedVectors
-
+from src.guesswhat.data_provider.generate_categoryQuestion import Generate_Category
 from matplotlib import pyplot as plt
 from PIL import Image
-import numpy
 
+import numpy
+import time
 import os
 
 # TODO corriger erreur lié a embedding aleatoire des mot sans fasttext ou glove
@@ -33,25 +30,41 @@ class OracleBatchifier(AbstractBatchifier):
         self.sources = sources
         self.status = status
         self.config = config
+        embedding_name = ""
 
-        if self.config["model"]["fasttext"] : 
+        if config["model"]["fasttext"]:
+            embedding_name = "fasttext"
+
+        elif config["model"]["glove"]:
+            embedding_name = "glove"
+
+  
+        self.embedding = Embeddings(file_name="ted_en-20160408.zip",embedding_name=embedding_name,emb_dim=300,total_words=tokenizer_question.no_words,train=trainset,valid=None,test=None,dictionary_file_question=os.path.join(args.data_dir, args.dict_file_question),dictionary_file_description=os.path.join(args.data_dir, args.dict_file_description),description=config["inputs"]["description"])
+        self.model_embedding = self.embedding.model
+
         
-            self.model_worddl = FastText.load(os.path.join("data","ftext_lemme_des.model"))
-            self.model_wordd = FastText.load(os.path.join("data","ftext_word_des.model"))        
-            self.model_posd = FastText.load(os.path.join("data","ftext_pos_des.model"))
-            self.model_wordl = FastText.load(os.path.join("data","ftext_lemme_ques.model"))
-            self.model_word = FastText.load(os.path.join("data","ftext_word_ques.model"))
-            self.model_pos = FastText.load(os.path.join("data","ftext_pos_ques.model"))
+
+
+        # if self.config["model"]["fasttext"] : 
+        #     pass
+        #     # self.generate_category = Generate_Category(self.model_word,"fasttext",self.tokenizer_question,config["model"]["category"]["all_word"])
+
+        # elif self.config["model"]["glove"]:
+        #     self.glove = glove
+        #     self.generate_category = Generate_Category(self.glove,"glove",self.tokenizer_question,config["model"]["category"]["all_word"])
+
+            
+
+
         
-        elif self.config["model"]["glove"]:
-            self.glove = glove
+
 
 
 
     
-        # self.embedding = Embeddings(args.all_dictfile,total_words=tokenizer_question.no_words,train=trainset,valid=None,test=None,dictionary_file_question=os.path.join(args.data_dir, args.dict_file_question),dictionary_file_description=os.path.join(args.data_dir, args.dict_file_description),description=config["inputs"]["description"],lemme=config["lemme"],pos=config["pos"])
 
 
+    
 
 
     def filter(self, games):
@@ -79,9 +92,11 @@ class OracleBatchifier(AbstractBatchifier):
             batch['question_word'].append(game.questions[0])
             batch['question'].append(question)
 
+            # print("question = {}".format(game.questions[0]))
+            # self.generate_category.get_category(game.questions[0]) 
+            # exit()
 
             # print("---------------- FINISH QUESTION=",question)
-
             # exit()
 
             if 'embedding_vector_ques' in sources:
@@ -90,10 +105,12 @@ class OracleBatchifier(AbstractBatchifier):
                 # Add glove vectors (NB even <unk> may have a specific glove)
                 # print("oracle_batchifier | question = {}".format(game.questions[0]))
                 words = self.tokenizer_question.apply(game.questions[0],tokent_int=False)
-                # print(" End ................... ,",words)
-                # print(len(words[0]))
-                # print(words)
-                # print("/////////// embedding_vector=")
+
+                # print("before  = {}".format(game.questions[0]))
+                # print("after = {}".format(words))
+
+
+
                 if type(words) == int:
                     exit()
                 
@@ -107,17 +124,12 @@ class OracleBatchifier(AbstractBatchifier):
 
                     # print(batch['embedding_vector_pos'])
                 else:
-                    # print("/////////// question_pos NOT EXIST")
+                    embedding_vectors = self.embedding.get_embedding(words)
+                        
+                    
+                    # print("************ Embedding_vector = ",embedding_vectors.shape)
+                    # exit()
 
-                    if self.config["model"]["fasttext"] : 
-                        print("++++++----- ++++++++ Dans fasttext ")
-                        embedding_vectors,_ = get_embeddings(words,pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos)
-                    elif self.config["model"]["glove"] : 
-                        # print("++++++----- ++++++++ Dans glove ")
-                        embedding_vectors = self.glove.get_embeddings(words)
-                    
-                    # print("************ Embedding_vector = ",embedding_vectors)
-                    
                     # print("taille = {} ".format(embedding_vectors))
                     # exit()
                     # print("////////// embedding_vectors=",len(embedding_vectors[0]))
@@ -127,12 +139,7 @@ class OracleBatchifier(AbstractBatchifier):
                 # print(" Oracle_batchifier | embedding_vector= {}".format(embedding_vectors))
                 # print("---- Embedding = ",len(embedding_vectors))
                 # print("----  =",len(embedding_vectors[0]))
-                #print("---------------- FINISH QUESTION_Emb =",np.asarray(embedding_vectors).shape)
-
-
-
-
-
+                #print("---------------- FINISH QUESTION_Emb =",np.asarray(embedding_vectors).shape
                 # games.question = ['am I a person?'],            
                 # batch['question'].append(self.tokenizer_question.apply(game.questions[0]))
 
@@ -181,24 +188,15 @@ class OracleBatchifier(AbstractBatchifier):
                     #print("++++++----- ++++++++ Dans glove ")
                     embedding_vectors = []
                     for i in range(6):
-                        # print("q=",words[i])
                         embedding_vector= self.glove.get_embeddings(words[i])
                         embedding_vectors.append(embedding_vector)
 
 
                     # embedding_vectors = self.glove.get_embeddings(words)
 
-
-                 
-
-
                 batch['embedding_vector_ques_hist'].append(embedding_vectors)
 
-                
-
-
-
-
+            
 
             # print('embedding_vector_des'in sources)
 
@@ -219,7 +217,6 @@ class OracleBatchifier(AbstractBatchifier):
                     # batch['des_pos'].append(question)
 
                 else:
-
                     if self.config["model"]["fasttext"] : 
                         #print("++++++----- ++++++++ Dans fasttext ")
                         embedding_vectors,_ = get_embeddings(description,pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos) # slow (copy gloves in process)
@@ -245,14 +242,12 @@ class OracleBatchifier(AbstractBatchifier):
                 allcategory = []
                 allcategory_hot = np.zeros(shape=(90),dtype=int)
                 # print("Oracle_batchifier |  Allcategory -------------------------------")
+
+
                 for obj in game.objects:
                     allcategory.append(obj.category_id - 1)
 
-
-
                 allcategory_hot[allcategory] = 1
-                # print("...   ",allcategory,allcategory_hot)
-
                 batch['allcategory'].append(allcategory_hot)
 
             if 'spatial' in sources:
@@ -324,7 +319,7 @@ class OracleBatchifier(AbstractBatchifier):
 
         if 'embedding_vector_ques' in sources:
                         # print("Shape=",np.asarray(batch['embedding_vector_ques'] ).shape)
-                        batch['embedding_vector_ques'],s = padder_3d(batch['embedding_vector_ques'],type_input="question")
+                        batch['embedding_vector_ques'],s = padder_3d(batch['embedding_vector_ques'],max_seq_length=12)
                         # print("+++++ Batch = ",batch['seq_length_question'])
 
                         # print("++++ data = ",np.asarray(batch['embedding_vector_ques']).shape)

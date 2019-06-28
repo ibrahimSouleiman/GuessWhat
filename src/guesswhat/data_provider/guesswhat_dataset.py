@@ -11,12 +11,19 @@ from matplotlib import pyplot as plt
 
 from PIL import ImageFont, ImageDraw
 from PIL import Image as PImage
+
+from PIL import Image as PIL_Image
+
 from nltk.tokenize import TweetTokenizer
 from nltk import WordNetLemmatizer
 
 from generic.data_provider.dataset import AbstractDataset
 from draw.Generate_Category import get_category
 # TODO find a cleaner way!
+
+# from cocoapi.PythonAPI.pycocotools import mask as cocoapi
+# from cocoapi.PythonAPI.pycocotools import mask as cocoapi
+
 try:
     import cocoapi.PythonAPI.pycocotools.mask as cocoapi
     use_coco = True
@@ -45,11 +52,12 @@ class Game:
                            description=image["description"],
                            which_set=which_set,
                            image_builder=image_builder)
-
-    
+        
 
         self.objects = []
         self.all_category = []
+     
+        # print("Object in Image = {} ".format(len(objects)))
 
         for o in objects:
             self.all_category.append(o['category'])
@@ -64,8 +72,23 @@ class Game:
                              image=self.image)
 
          
-
+        
             self.objects.append(new_obj)
+            # img = new_obj.get_crop()
+            # img = [x / 255.0 for x in img]
+            
+            # img = np.asarray(img)
+            # print("Img A= {}".format(img.shape))
+            # exit() 
+            # # print("Type = {} =".format(type(img)))
+            # # print("Type = {} =".format(img.shape))
+            # img = np.reshape(img,224*224*3)
+            # print("Img = {}".format(img.shape))
+            # img = np.reshape(img,(224,224,3))
+            # plt.imshow(img,cmap='gray')
+            # plt.title("Other")
+            # plt.show()
+
 
             if o['id'] == object_id:
                 self.object = new_obj  # Keep ref on the object to find
@@ -80,9 +103,12 @@ class Game:
                 #     # img = np.reshape(img,224*224*3)
                 #     # print("Img = {}".format(img.shape))
                 #     # img = np.reshape(img,(224,224,3))
-                #     plt.imshow(img,cmap='gray')
-                #     plt.show()
+                #     print("Img = {} ".format(img.shape))
                 #     exit()
+                #     plt.imshow(img,cmap='gray')
+                #     plt.title("Crop")
+                #     plt.show()
+       
 
 
 
@@ -105,7 +131,10 @@ class Game:
                 # print("Select=",o['category'])
             else:
                 pass
-                # print(o['category'])     
+
+
+                # print(o['category']) 
+        # exit()    
 
         # print("-----------------------")
         # compteur += 1
@@ -113,7 +142,7 @@ class Game:
         #     exit()
 
 
-        all_img_describtion[image["id"]] = [image["width"],image["height"]]
+        # all_img_describtion[image["id"]] = [image["width"],image["height"]]
 
         self.question_ids = [qa['id'] for qa in qas]
         
@@ -130,7 +159,6 @@ class Game:
 
     def show(self, img_raw_dir, display_index=False, display_mask=False):
             image_path = os.path.join(img_raw_dir, self.image.filename)
-
             img = PImage.open(image_path)
             draw = ImageDraw.Draw(img)
 
@@ -147,8 +175,6 @@ class Game:
 class Word:
     """
     classe qui contient pour chaque mot , son lemme sa parti de discourt
-
-    
     """
 
     def __init__(self,word,lemme=False,pos=False,lemmatizer=None):
@@ -158,7 +184,6 @@ class Word:
         self.pos = ""
         self.lemmetizer = lemmatizer
         if self.lemmetizer != None:
-        
             if lemme :
                 self.lemme = self.lemmetizer.lemmatize(word)
             
@@ -178,10 +203,6 @@ class Word:
         return self.word,self.lemme,self.pos
     
 
-
-
-
-
 class Image:
     def __init__(self, id, width, height, url,description, which_set, image_builder=None):
         self.id = id
@@ -194,7 +215,6 @@ class Image:
         if image_builder is not None:
             self.filename = "{}.jpg".format(id)
             self.image_loader = image_builder.build(id, which_set=which_set, filename=self.filename, optional=False)
-
 
 
 
@@ -237,6 +257,7 @@ class Bbox:
 
 
 class Object:
+
     def __init__(self, id, category, category_id, bbox, area, segment, crop_builder, image, which_set):
         self.id = id
         self.category = category
@@ -246,11 +267,34 @@ class Object:
         self.segment = segment
  
         # https://github.com/cocodataset/cocoapi/blob/master/PythonAPI/pycocotools/mask.py
-        # self.rle_mask = None
-        # if use_coco:
-        #     self.rle_mask = cocoapi.frPyObjects(self.segment,
-        #                                         h=image.height,
-        #                                         w=image.width)
+        self.rle_mask = None
+        if use_coco:
+            self.rle_mask = cocoapi.frPyObjects(self.segment,
+                                                h=image.height,
+                                                w=image.width)
+
+
+        # print("Guess_What = {} ".format(self.rle_mask))
+        # print("get_mask_shape A= {} ".format(self.get_mask().shape ))
+        # get_mask_or = self.get_mask()
+        # get_mask = np.reshape(get_mask_or,(360,640))
+        # print("get_mask_shape B= {} ".format(get_mask.shape))
+
+        # img_path = os.path.join("data/img/raw", "{}.jpg".format(image.id))
+        # img = PIL_Image.open(img_path).convert('RGB')
+        # # img = resize_image(img, self.width , self.height)
+        
+        # # print("/*/*/*/*/******* Image ********/*/*/*/*/*/*/*/ {}".format(self.img_path))
+        
+        
+        # # print("img_shape = {} {} ".format(self.width,self.height))
+        # img_segment = np.multiply(img,get_mask_or)
+
+
+        # plt.imshow(img_segment)
+        # # plt.imshow(get_mask)
+        # plt.show()
+    
 
         if crop_builder is not None:
             filename = "{}.jpg".format(image.id)
@@ -263,9 +307,9 @@ class Object:
             # exit()
 
 
-    # def get_mask(self):
-    #     assert self.rle_mask is not None, "Mask option are not available, please compile and link cocoapi (cf. cocoapi/PythonAPI/setup.py)"
-    #     return cocoapi.decode(self.rle_mask)
+    def get_mask(self):
+        assert self.rle_mask is not None, "Mask option are not available, please compile and link cocoapi (cf. cocoapi/PythonAPI/setup.py)"
+        return cocoapi.decode(self.rle_mask)
 
     def get_idObject(self):
         return self.id
@@ -353,9 +397,9 @@ class Dataset(AbstractDataset):
 
                 # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass)               
                
-                if len(games) > 50: break
-                # if  len(games) > 500: 
-                #  break
+                # if len(games) > 50: break
+                if  len(games) > 5000: 
+                    break
 
 
 
@@ -415,45 +459,26 @@ class OracleDataset(AbstractDataset):
 
         games = []
         for i, q, a in zip(game.question_ids, game.questions, game.answers):
-            # print("****** GuessWhat | oracleDataSet q={}".format(q))
-            # if( self.compteur == 10):
-            #     exit()
-
-            wpt = TweetTokenizer(preserve_case=False)
-            # tokens = [ token for token in wpt.tokenize(q)]
-            # lemme = [self.lemmas.lemmatize(token) for token in tokens]
-            categorie_question = get_category(q,wpt)
-            self.categories_questions[categorie_question] += 1  
             
+            wpt = TweetTokenizer(preserve_case=False)
+            categorie_question = get_category(q,wpt)
+
+            self.categories_questions[categorie_question] += 1  
+            self.compteur += 1 
             new_game = copy.copy(game)
             new_game.questions = [q]
-            # print("question = {} ,taille = {} ".format(q,len(q.split(" "))))
-
-            # try:
-            #     self.length_question[len(q.split(" "))] += 1
-            # except KeyError:
-            #     self.length_question[len(q.split(" "))] = 0
-
-
             new_game.question_ids = [i]
             new_game.answers = [a]
-            # print(q)
-            self.compteur += 1 
+
 
             for category in game.all_category:
                 self.all_category.append(category)
-
             
             last_question =  self.add_question(game.all_last_question,q,a)
-
-            # print("All question = {} ".format(game.all_last_question))
-
-            # exit()
-
             new_game.all_last_question = last_question
-            # print("Image_id={}, dialogue_id,={}, question_id={}, question={},last_question={}".format(new_game.image.id,new_game.dialogue_id,i,q,last_question))
-
             games.append(new_game)
+
+
 
         
         return games
@@ -463,24 +488,17 @@ class OracleDataset(AbstractDataset):
 
 
         before = ""
-        # print("In = {} ",last_questions)
-
         i = 0
+
         nb_question = [i+1 for s in last_questions if s[0]!="unk"]
-
         list_copy = last_questions.copy()
-
         nb_question = int(np.sum(nb_question)) + 1
-        # print("Nb_question = {},question={}".format(nb_question,question))
+
         for i in  reversed(range(6)):
             if i == 5:
                 last_questions[i] = [ [answer],[question]]
-                # print("i={},{}".format(i,last_questions[i]))
-
             elif  nb_question > 0 and i > 0:
-                # print("i={},{}".format(i,list_copy[i+1]))
                 last_questions[i] =  list_copy[i+1]
-
             nb_question -= 1
 
 

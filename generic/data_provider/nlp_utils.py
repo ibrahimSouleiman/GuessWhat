@@ -1,19 +1,26 @@
 import numpy as np
 import json
+from random import shuffle
+import re
+import urllib.request
+import zipfile
+import lxml.etree
+import urllib.request
 
 # from pyfasttext import FastText
 
 #import glove
 
+
 from nltk.tokenize import TweetTokenizer
 from gensim.scripts.glove2word2vec import glove2word2vec
 from pathlib import Path
 from generic.utils.file_handlers import pickle_loader
-from gensim.models import word2vec,FastText,KeyedVectors
+from gensim.models import Word2Vec,FastText,KeyedVectors
 
 #from guesswhat.data_provider.lemmatize import lemmatize
 import os
-
+import numpy as np
 
 
 
@@ -41,6 +48,8 @@ class GloveEmbeddings(object):
 
         self.glove_Wonly = Path(os.path.join("data","glove_onlyWord_GuessWhat_{}_{}.txt".format(glove_dim,"wikipedia")))
 
+      
+    
         if self.glove_Wonly.is_file() == False:
             self.all_word = Path(os.path.join("data","all_word.npy"))
             dict_all_word_values = np.load(self.all_word)
@@ -59,10 +68,6 @@ class GloveEmbeddings(object):
                             if word in dict_all_word:
                                 file_out.write(line)
 
-          
-            
-
-
 
         if self.file_word2vec.is_file() == False:
             glove2word2vec(self.glove_Wonly, self.filename)
@@ -76,23 +81,22 @@ class GloveEmbeddings(object):
         # print("........... get_embeddings")
         vectors = []
         for token in tokens:
-            token = token.lower().replace("\'s", "")
-            # print("token=",token)
-            
+            token = token.lower().replace("\'s", "")            
             try:
                 emb_token = self.glove[token]
                 vectors.append(np.array(self.glove[token]))
             except KeyError:
                 vectors.append(np.zeros((self.glove_dim,)))
 
-        # print(vectors)
-        # print("Done ! get_embeddings")
+
 
         return vectors
 
 class Embeddings(object):
 
-    def __init__(self, file,total_words=0,emb_dim=100,emb_window=3,embedding="fasttext",train=None,valid=None,test=None,dictionary_file_question="dict.json",dictionary_file_description="dict_Description.json",lemme=False,pos=False,description=False):
+    def __init__(self, file_name,total_words=0,emb_dim=100,emb_window=3,embedding_name="fasttext",train=None,valid=None,test=None,dictionary_file_question="dict.json",dictionary_file_description="dict_Description.json",lemme=False,pos=False,description=False):
+
+        self.file_name = file_name
 
         self.unk = "<unk>"
         self.lemme = lemme
@@ -101,23 +105,87 @@ class Embeddings(object):
 
         self.emb_dim = emb_dim
         self.emb_window = emb_window
-        self.embedding = embedding
+        self.embedding_name = embedding_name
+
+
         self.train = train
         self.valid = valid
         self.test = test
+
+
+        self.input_text = self.get_data(self.file_name)
+        self.get_list_data = self.get_list_data(self.input_text)
+        self.model = self.get_model_embedding(self.get_list_data)
+
+
+
+      
         
             
-        # self.dictionary_file_question = dictionary_file_question
-        # self.dictionary_file_description = dictionary_file_description
-      
-        # print(" nlp_utls | start to create list_question [] ...")
+    
+    def get_data(self,name_file):
+        extension_file = name_file.split(".")[-1]
+        urllib.request.urlretrieve("https://wit3.fbk.eu/get.php?path=XML_releases/xml/ted_en-20160408.zip&filename=ted_en-20160408.zip", filename="ted_en-20160408.zip")
 
-        # self.model_word,self.model_pos = self.build("all_question.npy","all_lemmes.npy","all_pos.npy",dictionary_file=self.dictionary_file_question)
-        # if self.description:
-        #      self.model_wordd,self.model_posd = self.build("all_description.npy","all_dlemme.npy","all_dpos.npy",dictionary_file=self.dictionary_file_description)
+        print("extension_file = {}".format(extension_file))
+
+        if extension_file == "zip":
+            with zipfile.ZipFile(name_file, 'r') as z:
+                doc = lxml.etree.parse(z.open('ted_en-20160408.xml', 'r'))
+            input_text = '\n'.join(doc.xpath('//content/text()'))
+
+        return input_text
+
+    def get_list_data(self,data):
+
+        input_text_noparens = re.sub(r'\([^)]*\)', '', data)
+        # store as list of sentences
+        sentences_strings_ted = []
         
+        for line in input_text_noparens.split('\n'):
+            m = re.match(r'^(?:(?P<precolon>[^:]{,20}):)?(?P<postcolon>.*)$', line)
+            sentences_strings_ted.extend(sent for sent in m.groupdict()['postcolon'].split('.') if sent)
         
-     
+        # store as list of lists of words
+        sentences_ted = []
+        for sent_str in sentences_strings_ted:
+            tokens = re.sub(r"[^a-z0-9]+", " ", sent_str.lower()).split()
+            sentences_ted.append(tokens)
+            
+        return sentences_ted 
+
+    def get_model_embedding(self,sentences):
+        self.model = None
+        if self.embedding_name == "fasttext":
+            self.model = FastText(sentences, size=self.emb_dim, window=5, min_count=5, workers=4,sg=1)
+        elif self.embedding_name == "glove":
+            self.model = Word2Vec(sentences=sentences, size=self.emb_dim, window=5, min_count=5, workers=4, sg=0)
+
+            
+
+        return self.model
+
+
+    def get_embedding(self,words):
+
+
+
+        vector_zeros = np.zeros(self.emb_dim)
+        self.all_embedding = []
+        
+        for word in words:
+            try:
+                self.all_embedding.append( self.model[word])
+            except Exception:
+                self.all_embedding.append( vector_zeros ) 
+
+        self.all_embedding = np.asarray(self.all_embedding)
+
+        return self.all_embedding
+        
+
+
+
 
     def build(self,file_question,file_lemme,file_pos,dictionary_file):
 
@@ -291,6 +359,7 @@ def get_embeddings(tokens_word,lemme=False,pos=False,description=False,embedding
     pos_vectors = []
     unk = "<unk>"
 
+    return np.zeros((300)),600
 
     if embedding == "fasttext":
         
@@ -322,7 +391,7 @@ def get_embeddings(tokens_word,lemme=False,pos=False,description=False,embedding
                         vectors.append(np.asarray(model_word[token]))
                     else:vectors.append(np.asarray(model_wordl[token]))
                 
-                except KeyError:
+                except Exception:
                     # print("_____________ 3Unknow=",self.unk)
                     vectors.append(np.asarray(model_word[unk]))
                 
@@ -384,14 +453,14 @@ def padder(list_of_tokens, seq_length=None, padding_symbol=0, max_seq_length=0):
         padded_tokens[i, :len(seq)] = seq
 
     return padded_tokens, seq_length
+    
 
-def padder_3d(list_of_tokens, max_seq_length=0,type_input=None):
+def padder_3d(list_of_tokens, max_seq_length=0):
     seq_length = np.array([len(q) for q in list_of_tokens], dtype=np.int32)
 
     if max_seq_length == 0:
         max_seq_length = seq_length.max()
-    if type_input == "question":
-        max_seq_length = 10
+    
     batch_size = len(list_of_tokens)
     feature_size = list_of_tokens[0][0].shape[0]
 
