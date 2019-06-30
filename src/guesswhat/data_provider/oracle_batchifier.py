@@ -32,17 +32,19 @@ class OracleBatchifier(AbstractBatchifier):
         self.config = config
         embedding_name = ""
 
+
+
         if config["model"]["fasttext"]:
             embedding_name = "fasttext"
 
         elif config["model"]["glove"]:
             embedding_name = "glove"
 
-  
-        self.embedding = Embeddings(file_name="ted_en-20160408.zip",embedding_name=embedding_name,emb_dim=300,total_words=tokenizer_question.no_words,train=trainset,valid=None,test=None,dictionary_file_question=os.path.join(args.data_dir, args.dict_file_question),dictionary_file_description=os.path.join(args.data_dir, args.dict_file_description),description=config["inputs"]["description"])
-        self.model_embedding = self.embedding.model
+        #   ted_en-20160408.zip
+        #   all_question_game.txt
 
-        
+        self.embedding = Embeddings(file_name=["ted_en-20160408.zip" ],embedding_name=embedding_name,emb_dim=300,total_words=tokenizer_question.no_words,train=trainset,valid=None,test=None,dictionary_file_question=os.path.join(args.data_dir, args.dict_file_question),dictionary_file_description=os.path.join(args.data_dir, args.dict_file_description),description=config["inputs"]["description"])
+        self.model_embedding = self.embedding.model
 
 
         # if self.config["model"]["fasttext"] : 
@@ -53,20 +55,7 @@ class OracleBatchifier(AbstractBatchifier):
         #     self.glove = glove
         #     self.generate_category = Generate_Category(self.glove,"glove",self.tokenizer_question,config["model"]["category"]["all_word"])
 
-            
-
-
         
-
-
-
-
-    
-
-
-    
-
-
     def filter(self, games):
         if len(self.status) > 0:
             return [g for g in games if g.status in self.status]
@@ -226,7 +215,6 @@ class OracleBatchifier(AbstractBatchifier):
 
                     # print("------ ELSE".format(embedding_vectors))
                     # exit()
-
                     batch['embedding_vector_des'].append(embedding_vectors)
 
 

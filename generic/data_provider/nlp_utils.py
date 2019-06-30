@@ -123,17 +123,33 @@ class Embeddings(object):
         
             
     
-    def get_data(self,name_file):
-        extension_file = name_file.split(".")[-1]
+    def get_data(self,name_files):
+        
         urllib.request.urlretrieve("https://wit3.fbk.eu/get.php?path=XML_releases/xml/ted_en-20160408.zip&filename=ted_en-20160408.zip", filename="ted_en-20160408.zip")
 
-        print("extension_file = {}".format(extension_file))
+        input_text = ""
 
-        if extension_file == "zip":
-            with zipfile.ZipFile(name_file, 'r') as z:
-                doc = lxml.etree.parse(z.open('ted_en-20160408.xml', 'r'))
-            input_text = '\n'.join(doc.xpath('//content/text()'))
+        for name_file in name_files:
+            extension_file = name_file.split(".")[-1]
 
+            print("name_file = {}".format(name_file))
+
+            if extension_file == "zip":
+                with zipfile.ZipFile(name_file, 'r') as z:
+                    doc = lxml.etree.parse(z.open('ted_en-20160408.xml', 'r'))
+                input_text += '\n'.join(doc.xpath('//content/text()'))
+
+            
+                   
+
+            elif extension_file == "txt":
+                with open(name_file,'r') as f:
+                    input_text += f.read()
+
+            
+                
+
+ 
         return input_text
 
     def get_list_data(self,data):
@@ -155,14 +171,13 @@ class Embeddings(object):
         return sentences_ted 
 
     def get_model_embedding(self,sentences):
+
         self.model = None
         if self.embedding_name == "fasttext":
             self.model = FastText(sentences, size=self.emb_dim, window=5, min_count=5, workers=4,sg=1)
         elif self.embedding_name == "glove":
             self.model = Word2Vec(sentences=sentences, size=self.emb_dim, window=5, min_count=5, workers=4, sg=0)
-
-            
-
+    
         return self.model
 
 

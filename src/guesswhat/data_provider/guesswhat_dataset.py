@@ -142,12 +142,12 @@ class Game:
         #     exit()
 
 
-        # all_img_describtion[image["id"]] = [image["width"],image["height"]]
+        
 
         self.question_ids = [qa['id'] for qa in qas]
         
         self.questions = [qa['question'] for qa in qas]
-        
+        t = [all_img_describtion.append(qa['question']) for qa in qas]
         self.answers = [qa['answer'] for qa in qas]
 
         self.status = status
@@ -398,8 +398,8 @@ class Dataset(AbstractDataset):
                 # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass)               
                
                 # if len(games) > 50: break
-                if  len(games) > 5000: 
-                    break
+                # if  len(games) > 5000: 
+                #     break
 
 
 

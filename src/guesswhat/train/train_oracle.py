@@ -8,6 +8,7 @@ import tensorflow as tf
 
 import numpy as np
 import json
+from pathlib import Path
 
 from generic.data_provider.iterator import Iterator
 from generic.tf_utils.evaluator import Evaluator
@@ -96,7 +97,8 @@ if __name__ == '__main__':
     logger.info('Loading data..')
 
     all_img_bbox = {}
-    all_img_describtion = {}
+    all_img_describtion = []
+
     trainset = OracleDataset.load(args.data_dir, "train",image_builder = image_builder, crop_builder = crop_builder,all_img_bbox  = all_img_bbox,all_img_describtion=all_img_describtion)
     validset = OracleDataset.load(args.data_dir, "valid", image_builder= image_builder, crop_builder = crop_builder,all_img_bbox = all_img_bbox,all_img_describtion=all_img_describtion)
     testset = OracleDataset.load(args.data_dir, "test",image_builder= image_builder, crop_builder = crop_builder,all_img_bbox = all_img_bbox,all_img_describtion=all_img_describtion)
@@ -107,12 +109,17 @@ if __name__ == '__main__':
     print("load data Done ! ")
     # with open('all_img_bbox.json', 'a') as file:
     #         file.write(json.dumps(all_img_bbox,sort_keys=True, indent=4, separators=(',', ': ')))
+    file_allquestion =  Path("all_question_game.txt")
 
-    # with open('image-width_height.json', 'a') as file:
-    #         file.write(json.dumps(all_img_describtion,sort_keys=True, indent=4, separators=(',', ': ')))
-
-
-    # exit()
+    # verify if file exist
+    
+    if not file_allquestion.is_file():
+        with open('all_question_game.txt', 'a') as file:
+            for question in all_img_describtion:
+                file.write(question+"\n")
+    else:
+        print("all_question exist")                
+    
 
 
     # Load dictionary
@@ -222,6 +229,7 @@ if __name__ == '__main__':
                 t2 = time.time()
 
                 print(" train_oracle | Iterator...Total=",t2-t1)
+                
                 t1 = time.time()
                 train_loss, train_accuracy = evaluator.process(sess, train_iterator, outputs=outputs + [optimizer],out_net=best_param)
                 t2 = time.time()
