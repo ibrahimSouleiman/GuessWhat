@@ -24,16 +24,16 @@ class OracleNetwork(ResnetModel):
      
                 self._is_training = tf.placeholder(tf.bool, name="is_training")
                 
-                self._question_word = tf.placeholder(tf.int32, [self.batch_size], name='question_word') # 
+                # self._question_word = tf.placeholder(tf.int32, [self.batch_size], name='question_word') # 
 
-                self._question = tf.placeholder(tf.int32, [self.batch_size, 6], name='question')
+                self._question = tf.placeholder(tf.int32, [self.batch_size, None], name='question')
                 
                 self.seq_length_question = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question')
 
-                word_emb = utils.get_embedding(self._question,
-                                            n_words=num_words_question,
-                                            n_dim=int(config["model"]["word_embedding_dim"]),
-                                            scope="word_embedding")
+                # word_emb = utils.get_embedding(self._question,
+                #                             n_words=num_words_question,
+                #                             n_dim=int(config["model"]["word_embedding_dim"]),
+                #                             scope="word_embedding")
 
 
                 if config["model"]["glove"] == True or config["model"]["fasttext"] == True:
@@ -58,7 +58,11 @@ class OracleNetwork(ResnetModel):
                     self.lstm_states_question, self.lstm_all_state_ques = rnn.variable_length_LSTM(word_emb,
                                                         num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
                                                         seq_length=self.seq_length_question)
+
+
                     self.out_question =  self.lstm_all_state_ques
+
+                    
                 else:
                     self.out_question = word_emb
 
@@ -87,20 +91,19 @@ class OracleNetwork(ResnetModel):
 
                     self._question_pos = tf.placeholder(tf.int32, [self.batch_size, None], name='question_pos')
                     self.seq_length_pos = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_ques_pos')
-
                     word_emb = utils.get_embedding(self._question_pos,
                                                 n_words=num_words_question,
-                                                n_dim=300,
+                                                n_dim=100,
                                                 scope="word_embedding_pos")
 
                     if config["model"]["glove"] == True or config["model"]["fasttext"] == True:
-
                         self._glove = tf.placeholder(tf.float32, [None, None,int(config["model"]["word_embedding_dim"])], name="embedding_vector_ques_pos")
                         word_emb = tf.concat([word_emb, self._glove], axis=2)
 
                     else:
                         print("None ****************")
                     
+
                     lstm_states, _ = rnn.variable_length_LSTM(word_emb,
                                                         num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
                                                         seq_length=self.seq_length_pos,scope="lstm2")
@@ -110,9 +113,6 @@ class OracleNetwork(ResnetModel):
                     # embeddings.append(lstm_states)
 
             # DESCRIPTION
-
-        
-
             if config['inputs']['description']:
                 print("****  Oracle_network |  inpurt = Description ")
 
@@ -124,6 +124,7 @@ class OracleNetwork(ResnetModel):
                 #                             n_dim=300,
                 #                             scope="word_embedding_description")
                 
+
                 if config["model"]["glove"] == True or config["model"]["fasttext"] == True:
                     self._glove = tf.placeholder(tf.float32, [None, None,int(config["model"]["word_embedding_dim"])], name="embedding_vector_des")
                     word_emb =  self._glove
@@ -175,11 +176,8 @@ class OracleNetwork(ResnetModel):
 
 
                     print("*+*+*+*+*+*+*+**Length=",self.seq_length_question_history,word_emb)
-                    
                     print("Batch_size = ",self.batch_size)
-
-
-
+                    
                     self.lstm_states, self.lstm_all_state_ques_hist = rnn.variable_length_LSTM(placeholders_lstmQuestion,
                                                     num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
                                                     seq_length=placeholders_lstmLength,scope="lstm4",dim_4=True)
@@ -315,8 +313,8 @@ class OracleNetwork(ResnetModel):
                 co_attention[3]  = self.image_out
                 print(" -- image_int ={}".format(self._image))
                 # exit()
-                # image_feature = tf.reshape(self.image_out, shape=[-1, (7 * 7) * 2048]) # input image_feature ?,7,7,2048 => ?,49,2048
-                # embeddings.append(self.image_out)
+                image_feature = tf.reshape(self.image_out, shape=[-1, (7 * 7) * 2048]) # input image_feature ?,7,7,2048 => ?,49,2048
+                embeddings.append(image_feature)
                 # print("... Image Features = {}".format(self.image_out))
 
 
@@ -328,13 +326,14 @@ class OracleNetwork(ResnetModel):
                 # self._crop_id = tf.placeholder(tf.float32, [self.batch_size], name='crop_id')
 
                 self._crop = tf.placeholder(tf.float32, [self.batch_size] + config['model']['crop']["dim"], name='crop')
-               
+                
                 self.crop_out = get_image_features(
                     image=self._crop, question=self.lstm_states,
                     is_training=self._is_training,
                     scope_name=scope.name,
                     scope_feature="Crop/",
                     config=config["model"]['crop'])
+                
 
                 co_attention[3] = self.crop_out
 

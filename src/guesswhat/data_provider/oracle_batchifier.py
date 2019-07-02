@@ -42,9 +42,9 @@ class OracleBatchifier(AbstractBatchifier):
 
         #   ted_en-20160408.zip
         #   all_question_game.txt
-
-        self.embedding = Embeddings(file_name=["ted_en-20160408.zip" ],embedding_name=embedding_name,emb_dim=300,total_words=tokenizer_question.no_words,train=trainset,valid=None,test=None,dictionary_file_question=os.path.join(args.data_dir, args.dict_file_question),dictionary_file_description=os.path.join(args.data_dir, args.dict_file_description),description=config["inputs"]["description"])
-        self.model_embedding = self.embedding.model
+        if self.config["model"]["fasttext"] or  self.config["model"]["glove"]:
+            self.embedding = Embeddings(file_name=["ted_en-20160408.zip" ],embedding_name=embedding_name,emb_dim=100,total_words=tokenizer_question.no_words,train=trainset,valid=None,test=None,dictionary_file_question=os.path.join(args.data_dir, args.dict_file_question),dictionary_file_description=os.path.join(args.data_dir, args.dict_file_description),description=config["inputs"]["description"])
+            self.model_embedding = self.embedding.model
 
 
         # if self.config["model"]["fasttext"] : 
@@ -65,28 +65,19 @@ class OracleBatchifier(AbstractBatchifier):
 
     def apply(self, games):
         sources = self.sources
-        t1 = time.time()
-
-        t1 = time.time()
+        
         batch = collections.defaultdict(list)
 
         for i, game in enumerate(games):
             batch['raw'].append(game)
             image = game.image
-            question = self.tokenizer_question.apply(game.questions[0])
-            # print("question =____",game.questions[0])
-            # print("tokenize = ___",self.tokenizer_question.apply(game.questions[0]))
-            # print(question)
-            # exit()
-            batch['question_word'].append(game.questions[0])
-            batch['question'].append(question)
+            
+            
 
-            # print("question = {}".format(game.questions[0]))
-            # self.generate_category.get_category(game.questions[0]) 
-            # exit()
+            if 'question' in sources :
+                question = self.tokenizer_question.apply(game.questions[0])
+                batch['question'].append(question)
 
-            # print("---------------- FINISH QUESTION=",question)
-            # exit()
 
             if 'embedding_vector_ques' in sources:
                 
@@ -94,14 +85,6 @@ class OracleBatchifier(AbstractBatchifier):
                 # Add glove vectors (NB even <unk> may have a specific glove)
                 # print("oracle_batchifier | question = {}".format(game.questions[0]))
                 words = self.tokenizer_question.apply(game.questions[0],tokent_int=False)
-
-                # print("before  = {}".format(game.questions[0]))
-                # print("after = {}".format(words))
-
-
-
-                if type(words) == int:
-                    exit()
                 
                 if "question_pos" in sources:
                     # print("/////////// question_pos")
@@ -110,15 +93,13 @@ class OracleBatchifier(AbstractBatchifier):
                     batch['embedding_vector_ques'].append(embedding_vectors)
                     batch['embedding_vector_ques_pos'].append(embedding_pos)
                     batch['question_pos'].append(question)
-
                     # print(batch['embedding_vector_pos'])
+
                 else:
                     embedding_vectors = self.embedding.get_embedding(words)
-                        
-                    
+            
                     # print("************ Embedding_vector = ",embedding_vectors.shape)
                     # exit()
-
                     # print("taille = {} ".format(embedding_vectors))
                     # exit()
                     # print("////////// embedding_vectors=",len(embedding_vectors[0]))
@@ -153,20 +134,8 @@ class OracleBatchifier(AbstractBatchifier):
                     else:
                         word = self.tokenizer_question.apply(game.all_last_question[i][0],tokent_int=False)
                         words.append(word)
-                    
-
-
-                
-                # print(len(words[0]))
-                # print(words)
-                # print("/////////// embedding_vector=")
-                if type(words) == int:
-                    exit()
-                
-            
 
                 if self.config["model"]["fasttext"] : 
-                    #print("++++++----- ++++++++ Dans fasttext ")
                     embedding_vectors = []
                     for i in range(6):
                         embedding_vector,_ = get_embeddings(words[i],pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos)
@@ -185,20 +154,12 @@ class OracleBatchifier(AbstractBatchifier):
 
                 batch['embedding_vector_ques_hist'].append(embedding_vectors)
 
-            
-
             # print('embedding_vector_des'in sources)
-
-
             if 'embedding_vector_des'in sources:
-                
-
                 description = self.tokenizer_description.apply(game.image.description,tokent_int=False)
 
                 #print("*************** Description =",description)
                 # batch['description'].append(description)
-
-       
                 if "des_pos" in sources:
                     embedding_vectors,embedding_pos = get_embeddings(description,pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos) # slow (copy gloves in process)
                     batch['embedding_vector_des'].append(embedding_vectors)
@@ -288,32 +249,24 @@ class OracleBatchifier(AbstractBatchifier):
         
         
         if "question" in sources:
-            batch['question'] , batch['seq_length_question'] = padder(batch['question'],
-                                                        padding_symbol=self.tokenizer_question.padding_token)
-
-         
-
-
+            batch['question'] , batch['seq_length_question'] = padder(batch['question'],padding_symbol=self.tokenizer_question.padding_token)
+            
         if "question_pos" in sources:
             batch['question_pos'], batch['seq_length_ques_pos'] = padder(batch['question_pos'],
                                                             padding_symbol=self.tokenizer_question.padding_token)
 
+
+
         # if "description" in sources:
         #     batch['description'], batch['seq_length_description'] = padder(batch['description'],
         #                                                     padding_symbol=self.tokenizer_question.padding_token)
-        
+
 
         # batch['embedding_vector_pos'], _ = padder_3d(batch['embedding_vector_pos'])
 
         if 'embedding_vector_ques' in sources:
-                        # print("Shape=",np.asarray(batch['embedding_vector_ques'] ).shape)
                         batch['embedding_vector_ques'],s = padder_3d(batch['embedding_vector_ques'],max_seq_length=12)
-                        # print("+++++ Batch = ",batch['seq_length_question'])
-
-                        # print("++++ data = ",np.asarray(batch['embedding_vector_ques']).shape)
-                        # exit()
-
-                        # print("--- Len=",len(batch['seq_length_question']))
+               
 
         if 'embedding_vector_ques_hist' in sources:
                         # print("Shape=",np.asarray(batch['embedding_vector_ques_hist'] ).shape)
@@ -321,12 +274,6 @@ class OracleBatchifier(AbstractBatchifier):
 
                         batch_hist = np.asarray(batch_hist)
                         size_sentences = np.asarray(size_sentences)
-
-                        # print("All before = ",batch_hist.shape)
-                        # batch_hist = np.reshape(batch_hist,(-1,6*max_seq,300))                     
-                        # print("All after = ",batch_hist.shape)
-                        # exit()
-                        # print("+++++ Batch = ",np.asarray(size_sentences).shape)
 
                         batch['embedding_vector_ques_hist'] = batch_hist
 
@@ -358,23 +305,10 @@ class OracleBatchifier(AbstractBatchifier):
         # if 'description' in sources:
         #     # complete par padding en prenons la taille maximal
         # batch['description'], batch['seq_length_description'] = padder_3d(batch['description'])
-
-
-
-
-
-
-
-
-
-
-
         
         # print(" Bath = {} ".format(batch.keys()))
-
         # exit()
         # print("finish oracle_bachifier .... time=",total)
-
         # print("TotalBatch=",total)
 
 

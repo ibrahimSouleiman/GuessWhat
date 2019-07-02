@@ -3,14 +3,14 @@
     "question": true,
     "description":false,
     "allcategory":false,
-    "category": true,
-    "spatial": true,
+    "category": false,
+    "spatial": false,
     "crop": false,
     "image": false
   },
   "model": {
-    "glove":true,
-    "fasttext":false,
+    "glove":false,
+    "fasttext":true,
 
     "question": {
       "no_LSTM_hiddens": 1024,
@@ -19,7 +19,7 @@
       "lemme":false,
       "lstm" : true
     },
-    "word_embedding_dim": 300,
+    "word_embedding_dim": 100,
     "description": {
       "no_LSTM_hiddens": 1024,
       "embedding_window":3,

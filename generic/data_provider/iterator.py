@@ -57,6 +57,11 @@ class Iterator(object):
 
         # Filtered games
         games = dataset.get_data()
+        # print("games = {}".format(games))
+        # print("dataset = {} ".format(dataset))
+
+        # exit()
+
         games = batchifier.filter(games)
 
         if shuffle:

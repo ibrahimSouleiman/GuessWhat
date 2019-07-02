@@ -171,8 +171,8 @@ class RawImageLoader(AbstractImgLoader):
         
         # print("img_shape = {} {} ".format(self.width,self.height))
 
-        imgplot = plt.imshow(img)
-        plt.show()
+        # imgplot = plt.imshow(img)
+        # plt.show()
 
         # exit()
         img = np.array(img, dtype=np.float32)

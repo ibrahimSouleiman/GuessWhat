@@ -54,7 +54,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
  
     config, exp_identifier, save_path = load_config(args.config, args.exp_dir)
-    # print("Save_path = ",save_path)
+    # logger.info("Save_path = ",save_path)
     # exit()
 
 
@@ -83,6 +83,8 @@ if __name__ == '__main__':
     # Load image
     image_builder, crop_builder = None, None
     use_resnet = False
+    logger.info("Loading ")
+    t1 = time.time()
     if config['inputs'].get('image', False):
         logger.info('Loading images..')
         image_builder = get_img_builder(config['model']['image'], args.img_dir)
@@ -93,44 +95,57 @@ if __name__ == '__main__':
         crop_builder = get_img_builder(config['model']['crop'], args.crop_dir, is_crop=True)
         use_resnet = crop_builder.is_raw_image()
 
+    
+
+    t2 = time.time()
+
+
     # Load data
     logger.info('Loading data..')
 
     all_img_bbox = {}
     all_img_describtion = []
 
+
+
+
     trainset = OracleDataset.load(args.data_dir, "train",image_builder = image_builder, crop_builder = crop_builder,all_img_bbox  = all_img_bbox,all_img_describtion=all_img_describtion)
     validset = OracleDataset.load(args.data_dir, "valid", image_builder= image_builder, crop_builder = crop_builder,all_img_bbox = all_img_bbox,all_img_describtion=all_img_describtion)
-    testset = OracleDataset.load(args.data_dir, "test",image_builder= image_builder, crop_builder = crop_builder,all_img_bbox = all_img_bbox,all_img_describtion=all_img_describtion)
+    testset  =  OracleDataset.load(args.data_dir, "test",image_builder= image_builder, crop_builder = crop_builder,all_img_bbox = all_img_bbox,all_img_describtion=all_img_describtion)
     
+ 
+    
+
     # np.save("all_img_bbox.npy",all_img_bbox)
-    # print("Image_crop legnth= {}".format(len(all_img_describtion)))
-    # print("Image_crop = {}".format(all_img_describtion))
-    print("load data Done ! ")
+    # logger.info("Image_crop legnth= {}".format(len(all_img_describtion)))
+    # logger.info("Image_crop = {}".format(all_img_describtion))
     # with open('all_img_bbox.json', 'a') as file:
     #         file.write(json.dumps(all_img_bbox,sort_keys=True, indent=4, separators=(',', ': ')))
     file_allquestion =  Path("all_question_game.txt")
 
     # verify if file exist
-    
+
     if not file_allquestion.is_file():
         with open('all_question_game.txt', 'a') as file:
             for question in all_img_describtion:
                 file.write(question+"\n")
     else:
-        print("all_question exist")                
+        logger.info("all_question exist")                
     
 
 
     # Load dictionary
+
     logger.info('Loading dictionary Question..')
     tokenizer = GWTokenizer(os.path.join(args.data_dir, args.dict_file_question))
+
 
     # Load dictionary
     tokenizer_description = None
     if config["inputs"]["description"]:
         logger.info('Loading dictionary Description......')
         tokenizer_description = GWTokenizer(os.path.join(args.data_dir,args.dict_file_description),question=False)
+
 
 
     # Build Network
@@ -152,16 +167,19 @@ if __name__ == '__main__':
     ##############################
     #  START  TRAINING           
     #############################
-    print("Start training .......")
+    logger.info("Start training .......")
 
     # create a saver to store/load checkpoint
     saver = tf.train.Saver()
     resnet_saver = None
 
+    logger.info("saver done !")
 
-
-    cpu_pool = Pool(args.no_thread, maxtasksperchild=1000)
+    cpu_pool = Pool(args.no_thread, maxtasksperchild=5000)
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=args.gpu_ratio)
+
+    logger.info("gpu_options done !")
+
 
     # Retrieve only resnet variabes
     if use_resnet:
@@ -170,10 +188,17 @@ if __name__ == '__main__':
     # use_embedding = False
     # if config["embedding"] != "None":
     #      use_embedding = True
+
+    logger.info("resnet_saver done !")
+
+
     glove = None
     if use_glove:
         logger.info('Loading glove..')
         glove = GloveEmbeddings(os.path.join(args.data_dir, config["glove_name"]),glove_dim=300,type_data="common_crow")
+
+
+    logger.info("glove done !")   
 
     # embedding = None
     # if use_embedding:
@@ -199,9 +224,9 @@ if __name__ == '__main__':
         # # create training tools
         evaluator = Evaluator(sources, network.scope_name,network=network,tokenizer=tokenizer)
 
-        # #train_evaluator = MultiGPUEvaluator(sources, scope_names, networks=networks, tokenizer=tokenizer)
-        # #train_evaluator = Evaluator(sources, scope_names[0], network=networks[0], tokenizer=tokenizer)
-        # #eval_evaluator = Evaluator(sources, scope_names[0], network=networks[0], tokenizer=tokenizer)
+        # train_evaluator = MultiGPUEvaluator(sources, scope_names, networks=networks, tokenizer=tokenizer)
+        # train_evaluator = Evaluator(sources, scope_names[0], network=networks[0], tokenizer=tokenizer)
+        # eval_evaluator = Evaluator(sources, scope_names[0], network=networks[0], tokenizer=tokenizer)
         
         batchifier =  OracleBatchifier(tokenizer, sources, status=config['status'],glove=glove,tokenizer_description=tokenizer_description,args = args,config=config)
 
@@ -209,32 +234,31 @@ if __name__ == '__main__':
         progress_compteur = 0
         t = 0
 
+
         if inference == False:
 
             while start_epoch < no_epoch and not stop_learning :
 
             # for t in range(start_epoch, no_epoch):
-
                 logger.info('Epoch {}..'.format(t + 1))
-                # print('Epoch {}..'.format(t + 1))
-
-                print(" train_oracle | Iterator ...")
+                # logger.info('Epoch {}..'.format(t + 1))
+                logger.info(" train_oracle | Iterator ...")
                 
                 t1 = time.time()
                 train_iterator = Iterator(trainset,
                                         batch_size=batch_size, pool=cpu_pool,
                                         batchifier=batchifier,
                                         shuffle=True)
-                
+
                 t2 = time.time()
 
-                print(" train_oracle | Iterator...Total=",t2-t1)
+                logger.info(" train_oracle | Iterator...Total=",t2-t1)
                 
                 t1 = time.time()
                 train_loss, train_accuracy = evaluator.process(sess, train_iterator, outputs=outputs + [optimizer],out_net=best_param)
                 t2 = time.time()
 
-                print(" train_oracle | evaluatorator...Total=",t2-t1)
+                logger.info(" train_oracle | evaluatorator...Total=",t2-t1)
 
                 t1 = time.time()
 
@@ -244,9 +268,11 @@ if __name__ == '__main__':
                                         batch_size=batch_size*2,
                                         batchifier=batchifier,
                                         shuffle=False)
+
+
                 t2 = time.time()
 
-                print(" train_oracle | Iterator validset...Total=",t2-t1)
+                logger.info(" train_oracle | Iterator validset...Total=",t2-t1)
 
 
                 t1 = time.time()
@@ -254,7 +280,7 @@ if __name__ == '__main__':
                 valid_loss, valid_accuracy = evaluator.process(sess, valid_iterator, outputs=outputs,type_data="Valid")
                 t2 = time.time()
 
-                print(" train_oracle | evaluator ...Total=",t2-t1)
+                logger.info(" train_oracle | evaluator ...Total=",t2-t1)
 
                 logger.info("Training loss: {}".format(train_loss))
                 logger.info("Training error: {}".format(1-train_accuracy))
@@ -280,7 +306,7 @@ if __name__ == '__main__':
                     stop_learning = True
 
                 t2 = time.time()
-                print(" train_oracle | Condition ...Total=",t2-t1)
+                logger.info(" train_oracle | Condition ...Total=",t2-t1)
 
                 t += 1
                 start_epoch += 1
@@ -303,7 +329,7 @@ if __name__ == '__main__':
             # out/oracle/ce02141129f6d87172cafc817c6d0b59/params.ckpt
             # save_path = save_path.format('params.ckpt')
 
-            print("***** save_path = ",save_path)
+            logger.info("***** save_path = ",save_path)
             
 
 
@@ -312,28 +338,29 @@ if __name__ == '__main__':
         save_path = save_path.format('params.ckpt')
         saver.restore(sess, save_path)
 
+
         test_iterator = Iterator(testset, pool=cpu_pool,
                                  batch_size=batch_size*2,
                                  batchifier=batchifier,
                                  shuffle=True)
 
 
-        print("Output = {}".format(outputs[1]))
-        print("Best_param = {}".format(best_param))
+        logger.info("Output = {}".format(outputs[1]))
+        logger.info("Best_param = {}".format(best_param))
 
 
         test_loss, test_accuracy = evaluator.process(sess, test_iterator,  outputs=outputs ,out_net=best_param,inference=inference,type_data="Test")
        
         t2 = time.time()
         
-        print(" train_oracle | Iterator testset  ...Total=",t2-t1)
+        logger.info(" train_oracle | Iterator testset  ...Total=",t2-t1)
        
         try:
             logger.info("Testing loss: {}".format(test_loss))
         except Exception:
-            print("Erreur loss")
+            logger.info("Erreur loss")
 
         try:
             logger.info("Testing error: {}".format(1-test_accuracy))
         except Exception:
-            print("Erreur accuracy")
+            logger.info("Erreur accuracy")

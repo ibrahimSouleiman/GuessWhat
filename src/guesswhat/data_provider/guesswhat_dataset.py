@@ -5,13 +5,14 @@ import os
 import nltk
 import time
 import numpy as np
+import logging
+
 
 from collections import Counter
 from matplotlib import pyplot as plt
 
 from PIL import ImageFont, ImageDraw
 from PIL import Image as PImage
-
 from PIL import Image as PIL_Image
 
 from nltk.tokenize import TweetTokenizer
@@ -23,12 +24,13 @@ from draw.Generate_Category import get_category
 
 # from cocoapi.PythonAPI.pycocotools import mask as cocoapi
 # from cocoapi.PythonAPI.pycocotools import mask as cocoapi
+logger = logging.getLogger()
 
 try:
     import cocoapi.PythonAPI.pycocotools.mask as cocoapi
     use_coco = True
 except ImportError:
-    print("Coco API was not detected - advanced segmentation features cannot be used")
+    logger.info("Coco API was not detected - advanced segmentation features cannot be used")
     use_coco = False
     pass
 
@@ -43,7 +45,7 @@ class Game:
         
         compteur = 0
 
-        # print("image_width = {},image_height = {}".format(image["width"],image["height"]))
+        # logger.info("image_width = {},image_height = {}".format(image["width"],image["height"]))
 
         self.image = Image(id=image["id"],
                            width=image["width"],
@@ -57,7 +59,7 @@ class Game:
         self.objects = []
         self.all_category = []
      
-        # print("Object in Image = {} ".format(len(objects)))
+        # logger.info("Object in Image = {} ".format(len(objects)))
 
         for o in objects:
             self.all_category.append(o['category'])
@@ -78,12 +80,12 @@ class Game:
             # img = [x / 255.0 for x in img]
             
             # img = np.asarray(img)
-            # print("Img A= {}".format(img.shape))
+            # logger.info("Img A= {}".format(img.shape))
             # exit() 
-            # # print("Type = {} =".format(type(img)))
-            # # print("Type = {} =".format(img.shape))
+            # # logger.info("Type = {} =".format(type(img)))
+            # # logger.info("Type = {} =".format(img.shape))
             # img = np.reshape(img,224*224*3)
-            # print("Img = {}".format(img.shape))
+            # logger.info("Img = {}".format(img.shape))
             # img = np.reshape(img,(224,224,3))
             # plt.imshow(img,cmap='gray')
             # plt.title("Other")
@@ -92,18 +94,18 @@ class Game:
 
             if o['id'] == object_id:
                 self.object = new_obj  # Keep ref on the object to find
-                # print("image_id = {},{}".format(image["id"],type(image["id"])))
+                # logger.info("image_id = {},{}".format(image["id"],type(image["id"])))
 
                 # if image["id"] == 632:
                 #     img = new_obj.get_crop()
                 #     img = [x / 255.0 for x in img] 
                 #     img = np.asarray(img)
-                #     # # print("Type = {} =".format(type(img)))
-                #     # # print("Type = {} =".format(img.shape))
+                #     # # logger.info("Type = {} =".format(type(img)))
+                #     # # logger.info("Type = {} =".format(img.shape))
                 #     # img = np.reshape(img,224*224*3)
-                #     # print("Img = {}".format(img.shape))
+                #     # logger.info("Img = {}".format(img.shape))
                 #     # img = np.reshape(img,(224,224,3))
-                #     print("Img = {} ".format(img.shape))
+                #     logger.info("Img = {} ".format(img.shape))
                 #     exit()
                 #     plt.imshow(img,cmap='gray')
                 #     plt.title("Crop")
@@ -115,28 +117,28 @@ class Game:
 
                 # all_img_describtion [image["id"]]  = img   
 
-                # print("object = {} ".format(self.object))
+                # logger.info("object = {} ".format(self.object))
 
 
                 # all_img_describtion[image["id"]] = [new_obj]
 
-                # print("Img = {}".format(img))
+                # logger.info("Img = {}".format(img))
 
                 # plt.imshow(img,cmap='gray')
                 # plt.show()
 
-                # print("shape = {}".format(img.shape))
+                # logger.info("shape = {}".format(img.shape))
                 # exit()
                 # all_img_bbox[image["id"] ]= o['bbox']    
-                # print("Select=",o['category'])
+                # logger.info("Select=",o['category'])
             else:
                 pass
 
 
-                # print(o['category']) 
+                # logger.info(o['category']) 
         # exit()    
 
-        # print("-----------------------")
+        # logger.info("-----------------------")
         # compteur += 1
         # if compteur == 15:
         #     exit()
@@ -145,15 +147,11 @@ class Game:
         
 
         self.question_ids = [qa['id'] for qa in qas]
-        
         self.questions = [qa['question'] for qa in qas]
-        t = [all_img_describtion.append(qa['question']) for qa in qas]
+        _ = [all_img_describtion.append(qa['question']) for qa in qas]
         self.answers = [qa['answer'] for qa in qas]
-
         self.status = status
-
         self.last_question = ["unk" for i in range(1)]
-        
         self.all_last_question = [self.last_question for i in range(6)]
 
 
@@ -166,7 +164,7 @@ class Game:
                 if display_index:
                     draw.text((obj.bbox.x_center, self.image.height-obj.bbox.y_center), str(i))
                 if display_mask:
-                    print("Show mask: Not yet implemented... sry")
+                    logger.info("Show mask: Not yet implemented... sry")
 
             img.show()
 
@@ -233,7 +231,7 @@ class Image:
 class Bbox:
     def __init__(self, bbox, im_width, im_height):
         # Retrieve features (COCO format)
-        # print("bbox = {} ,im_width = {} ,im_height = {}".format(bbox,im_width,im_height))
+        # logger.info("bbox = {} ,im_width = {} ,im_height = {}".format(bbox,im_width,im_height))
         # exit()
 
 
@@ -274,20 +272,20 @@ class Object:
                                                 w=image.width)
 
 
-        # print("Guess_What = {} ".format(self.rle_mask))
-        # print("get_mask_shape A= {} ".format(self.get_mask().shape ))
+        # logger.info("Guess_What = {} ".format(self.rle_mask))
+        # logger.info("get_mask_shape A= {} ".format(self.get_mask().shape ))
         # get_mask_or = self.get_mask()
         # get_mask = np.reshape(get_mask_or,(360,640))
-        # print("get_mask_shape B= {} ".format(get_mask.shape))
+        # logger.info("get_mask_shape B= {} ".format(get_mask.shape))
 
         # img_path = os.path.join("data/img/raw", "{}.jpg".format(image.id))
         # img = PIL_Image.open(img_path).convert('RGB')
         # # img = resize_image(img, self.width , self.height)
         
-        # # print("/*/*/*/*/******* Image ********/*/*/*/*/*/*/*/ {}".format(self.img_path))
+        # # logger.info("/*/*/*/*/******* Image ********/*/*/*/*/*/*/*/ {}".format(self.img_path))
         
         
-        # # print("img_shape = {} {} ".format(self.width,self.height))
+        # # logger.info("img_shape = {} {} ".format(self.width,self.height))
         # img_segment = np.multiply(img,get_mask_or)
 
 
@@ -298,12 +296,12 @@ class Object:
 
         if crop_builder is not None:
             filename = "{}.jpg".format(image.id)
-            # print("id = {} ,filemane = {} ,which_set = {},bbox = {}".format(id,filename,which_set,bbox))
+            # logger.info("id = {} ,filemane = {} ,which_set = {},bbox = {}".format(id,filename,which_set,bbox))
             
 
 
-            self.crop_loader = crop_builder.build(id, filename=filename, which_set=which_set, bbox=bbox)            # print("Image_id=",image.id)
-            # print("crop_loader = {} ".format(self.crop_loader))
+            self.crop_loader = crop_builder.build(id, filename=filename, which_set=which_set, bbox=bbox)            # logger.info("Image_id=",image.id)
+            # logger.info("crop_loader = {} ".format(self.crop_loader))
             # exit()
 
 
@@ -352,10 +350,12 @@ class Dataset(AbstractDataset):
                 line = line.decode("utf-8")
                 game = json.loads(line.strip('\n'))
                 # try : 
-                    # print(game["image"])
-                    # print("Dans try")
-                    # print(game["id"],type(game["id"]))
+                    # logger.info(game["image"])
+                    # logger.info("Dans try")
+                    # logger.info(game["id"],type(game["id"]))
+
                 nb_pass += 1
+
                 g = Game(id=game['id'],
                         object_id=game['object_id'],
                         objects=game['objects'],
@@ -369,20 +369,21 @@ class Dataset(AbstractDataset):
                         all_img_bbox = all_img_bbox,
                         all_img_describtion = all_img_describtion
                         )
+
                 question_length = len(g.questions)
                 
 
-                self.count_questions[len(self.count_questions)] = question_length
-                self.total += question_length 
+                # self.count_questions[len(self.count_questions)] = question_length
+                # self.total += question_length 
                 
-                for question in g.questions:
-                    words = question.split()
+                # for question in g.questions:
+                #     words = question.split()
                  
-                    all_size.append(len(words))
+                #     all_size.append(len(words))
 
             
 
-                if self.maxlength_question < question_length: self.maxlength_question = question_length
+                # if self.maxlength_question < question_length: self.maxlength_question = question_length
 
                 games.append(g)
                 
@@ -391,19 +392,20 @@ class Dataset(AbstractDataset):
 
                 #     # exit()
                 # except TypeError:
-                #     print("error to create dataset")
+                #     logger.info("error to create dataset")
                 #     nb_erreur += 1
 
 
-                # print("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass)               
+                # logger.info("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass)               
                
                 # if len(games) > 50: break
-                # if  len(games) > 5000: 
-                #     break
+
+                if  len(games) > 5000: 
+                    break
 
 
 
-        print(" Max Length of Question = {} , total_question = {}, nb_parties = {} | {}".format(self.maxlength_question,self.total,len(self.count_questions),which_set))
+        # logger.info(" Max Length of Question = {} , total_question = {}, nb_parties = {} | {}".format(self.maxlength_question,self.total,len(self.count_questions),which_set))
 
 
        
@@ -427,20 +429,21 @@ class OracleDataset(AbstractDataset):
         
         for i,g in enumerate(old_games):
             new_games += self.split(g)   
-        # print(" Nb question = ",format(self.compteur))
+        # logger.info(" Nb question = ",format(self.compteur))
         # exit()
-        # print(" Guess_dataset | Lemme different = {} ",format(self.compteur))
+        # logger.info(" Guess_dataset | Lemme different = {} ",format(self.compteur))
 
         # for i in range(1000):
-        #     print("Question = ",new_games[i].questions)
+        #     logger.info("Question = ",new_games[i].questions)
 
         self.unique_category = np.unique(np.asarray(self.all_category))
-        print("Distrubution of category = ",self.categories_questions)
-        # print(Counter(self.all_category))
-        # print("len=",len(self.unique_category))
-        # print("Conteur = ",self.compteur)
+        logger.info("Distrubution of category = {}".format(self.categories_questions))
 
-        # print(self.length_question)
+        # logger.info(Counter(self.all_category))
+        # logger.info("len=",len(self.unique_category))
+        # logger.info("Conteur = ",self.compteur)
+
+        # logger.info(self.length_question)
         # exit()
         
         super(OracleDataset, self).__init__(new_games)
@@ -448,7 +451,7 @@ class OracleDataset(AbstractDataset):
     @classmethod
     def load(cls, folder, which_set,all_category=None, image_builder=None, crop_builder=None,all_img_bbox=None,all_img_describtion=None):
         
-        print("#################### {} ##########################".format(which_set))
+        logger.info("#################### {} ##########################".format(which_set))
 
         return cls(Dataset(folder, which_set, image_builder, crop_builder,all_img_bbox,all_img_describtion))
 
@@ -461,24 +464,20 @@ class OracleDataset(AbstractDataset):
         for i, q, a in zip(game.question_ids, game.questions, game.answers):
             
             wpt = TweetTokenizer(preserve_case=False)
-            categorie_question = get_category(q,wpt)
-
-            self.categories_questions[categorie_question] += 1  
-            self.compteur += 1 
+            
             new_game = copy.copy(game)
             new_game.questions = [q]
             new_game.question_ids = [i]
             new_game.answers = [a]
 
+            # for all_category
 
-            for category in game.all_category:
-                self.all_category.append(category)
+            # for category in game.all_category:
+            #     self.all_category.append(category)
             
-            last_question =  self.add_question(game.all_last_question,q,a)
-            new_game.all_last_question = last_question
+            # last_question =  self.add_question(game.all_last_question,q,a)
+            # new_game.all_last_question = last_question
             games.append(new_game)
-
-
 
         
         return games
@@ -500,7 +499,6 @@ class OracleDataset(AbstractDataset):
             elif  nb_question > 0 and i > 0:
                 last_questions[i] =  list_copy[i+1]
             nb_question -= 1
-
 
         return last_questions
 

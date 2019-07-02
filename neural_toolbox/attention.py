@@ -140,6 +140,7 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
         for key,value in step_attention.items():
             
             input_data , g1 , g2 = get_input_g1_g2(value[0],value[1],value[2])
+            
             dimension_two = int(input_data.get_shape()[1])
 
 

@@ -139,8 +139,8 @@ class Embeddings(object):
                     doc = lxml.etree.parse(z.open('ted_en-20160408.xml', 'r'))
                 input_text += '\n'.join(doc.xpath('//content/text()'))
 
-            
-                   
+
+
 
             elif extension_file == "txt":
                 with open(name_file,'r') as f:
@@ -504,9 +504,6 @@ def padder_4d(list_of_tokens,max_seq_length=0):
 
     feature_size = list_of_tokens[0][0][0].shape[0]
     
-   
-
-
     padded_tokens = np.zeros(shape=(batch_size,memory_length, max_seq_length, feature_size))
     
     for i, hist in enumerate(list_of_tokens):
