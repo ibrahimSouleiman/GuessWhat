@@ -67,20 +67,20 @@ class OracleBatchifier(AbstractBatchifier):
         sources = self.sources
         
         batch = collections.defaultdict(list)
+        batch_size = len(games)
+        assert batch_size > 0
+
 
         for i, game in enumerate(games):
             batch['raw'].append(game)
             image = game.image
             
-            
-
             if 'question' in sources :
+
                 question = self.tokenizer_question.apply(game.questions[0])
                 batch['question'].append(question)
 
-
             if 'embedding_vector_ques' in sources:
-                
                 assert  len(game.questions) == 1
                 # Add glove vectors (NB even <unk> may have a specific glove)
                 # print("oracle_batchifier | question = {}".format(game.questions[0]))
@@ -97,35 +97,15 @@ class OracleBatchifier(AbstractBatchifier):
 
                 else:
                     embedding_vectors = self.embedding.get_embedding(words)
-            
-                    # print("************ Embedding_vector = ",embedding_vectors.shape)
-                    # exit()
-                    # print("taille = {} ".format(embedding_vectors))
-                    # exit()
-                    # print("////////// embedding_vectors=",len(embedding_vectors[0]))
-
                     batch['embedding_vector_ques'].append(embedding_vectors)
-
-                # print(" Oracle_batchifier | embedding_vector= {}".format(embedding_vectors))
-                # print("---- Embedding = ",len(embedding_vectors))
-                # print("----  =",len(embedding_vectors[0]))
-                #print("---------------- FINISH QUESTION_Emb =",np.asarray(embedding_vectors).shape
-                # games.question = ['am I a person?'],            
-                # batch['question'].append(self.tokenizer_question.apply(game.questions[0]))
-
-
-
 
 
             if 'embedding_vector_ques_hist' in sources:
                 
                 assert  len(game.questions) == 1
-                # Add glove vectors (NB even <unk> may have a specific glove)
-                # print("oracle_batchifier | question = {}".format(game.questions))
-                # print("history=",game.all_last_question)
                 words = []
-                for i in range(6):
 
+                for i in range(6):
                     question_answer = game.all_last_question[i]
                     if len(question_answer) > 1: 
                         # print("QUESTION=",game.all_last_question[i])
@@ -140,8 +120,7 @@ class OracleBatchifier(AbstractBatchifier):
                     for i in range(6):
                         embedding_vector,_ = get_embeddings(words[i],pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos)
                         embedding_vectors.append(embedding_vector)
-                
-                
+                    
                 elif self.config["model"]["glove"] : 
                     #print("++++++----- ++++++++ Dans glove ")
                     embedding_vectors = []
@@ -180,18 +159,24 @@ class OracleBatchifier(AbstractBatchifier):
 
 
             if 'answer' in sources:
+
+                
+                if "answer" not in batch:
+                    batch["answer"] = np.zeros((batch_size,3))    
                 assert len(game.answers) == 1
-                batch['answer'].append(answer_dict[game.answers[0]])
+                batch['answer'][i] = answer_dict[game.answers[0]]
                 #print(" Correct Answer = ",game.answers[0])
 
             if 'category' in sources:
-                batch['category'].append(game.object.category_id)
+
+                if "category" not in batch:
+                    batch['category'] = np.zeros((batch_size))
+                batch['category'][i] = game.object.category_id
 
             if 'allcategory' in sources:
                 allcategory = []
                 allcategory_hot = np.zeros(shape=(90),dtype=int)
                 # print("Oracle_batchifier |  Allcategory -------------------------------")
-
 
                 for obj in game.objects:
                     allcategory.append(obj.category_id - 1)
@@ -200,8 +185,10 @@ class OracleBatchifier(AbstractBatchifier):
                 batch['allcategory'].append(allcategory_hot)
 
             if 'spatial' in sources:
+                if 'spatial' not in batch:
+                    batch['spatial'] = np.zeros((batch_size,8),dtype=float)
                 spat_feat = get_spatial_feat(game.object.bbox, image.width, image.height)
-                batch['spatial'].append(spat_feat)
+                batch['spatial'][i]  = spat_feat
 
             if 'crop' in sources:
                 batch['crop'].append(game.object.get_crop())
@@ -211,27 +198,10 @@ class OracleBatchifier(AbstractBatchifier):
                 # exit()
                 
             if 'image' in sources:
-                # print("----  Image = {} ".format(image.get_image()))
-                # print("---   shape = {}".format(image.get_image().shape))
-                # print("--- path = {} ".format(image.id))
-                
-                # img = Image.open("data/img/raw/{}.jpg".format(image.id)).convert('RGB')
-                # img = resize_image(img, 224 , 224)
-                
-                # plt.imshow(img)
-                # plt.axis('off')
-                # plt.show()
-
-
                 features_image = image.get_image()
-                # features_image = features_image.astype(numpy.int64)
                 batch['image'].append(features_image)
                 batch['image_id'].append(image.get_idimage())
-                # print("-- Image = {} ".format(features_image))
-                # print("-- type = {}".format(type(features_image[0][0])))
-                # print("-- type_int = {}".format(type(features_image[0][0][0])))
-
-                # exit()
+          
 
             if 'mask' in sources:
                 assert "image" in batch['image'], "mask input require the image source"
@@ -249,7 +219,7 @@ class OracleBatchifier(AbstractBatchifier):
         
         
         if "question" in sources:
-            batch['question'] , batch['seq_length_question'] = padder(batch['question'],padding_symbol=self.tokenizer_question.padding_token)
+            batch['question'] , batch['seq_length_question'] = padder(batch['question'])
             
         if "question_pos" in sources:
             batch['question_pos'], batch['seq_length_ques_pos'] = padder(batch['question_pos'],
@@ -271,7 +241,6 @@ class OracleBatchifier(AbstractBatchifier):
         if 'embedding_vector_ques_hist' in sources:
                         # print("Shape=",np.asarray(batch['embedding_vector_ques_hist'] ).shape)
                         batch_hist, size_sentences,max_seq = padder_4d(batch['embedding_vector_ques_hist'])
-
                         batch_hist = np.asarray(batch_hist)
                         size_sentences = np.asarray(size_sentences)
 

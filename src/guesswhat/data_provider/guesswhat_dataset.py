@@ -57,12 +57,12 @@ class Game:
         
 
         self.objects = []
-        self.all_category = []
+        # self.all_category = []
      
         # logger.info("Object in Image = {} ".format(len(objects)))
 
         for o in objects:
-            self.all_category.append(o['category'])
+            # self.all_category.append(o['category'])
             new_obj = Object(id=o['id'],
                              category=o['category'],
                              category_id=o['category_id'],
@@ -76,6 +76,8 @@ class Game:
          
         
             self.objects.append(new_obj)
+
+
             # img = new_obj.get_crop()
             # img = [x / 255.0 for x in img]
             
@@ -131,8 +133,8 @@ class Game:
                 # exit()
                 # all_img_bbox[image["id"] ]= o['bbox']    
                 # logger.info("Select=",o['category'])
-            else:
-                pass
+            # else:
+            #     pass
 
 
                 # logger.info(o['category']) 
@@ -208,7 +210,6 @@ class Image:
         self.height = height
         self.url = url
         self.description = description
-
         self.image_loader = None
         if image_builder is not None:
             self.filename = "{}.jpg".format(id)
@@ -218,6 +219,7 @@ class Image:
 
     def get_idimage(self):
         return self.id
+
 
     def get_image(self, **kwargs):
         if self.image_loader is not None:
@@ -374,22 +376,20 @@ class Dataset(AbstractDataset):
                 
 
                 # self.count_questions[len(self.count_questions)] = question_length
-                # self.total += question_length 
+
+                self.total += question_length 
                 
-                # for question in g.questions:
-                #     words = question.split()
+                for question in g.questions:
+                    words = question.split()
                  
-                #     all_size.append(len(words))
+                    all_size.append(len(words))
 
             
 
-                # if self.maxlength_question < question_length: self.maxlength_question = question_length
+                if self.maxlength_question < question_length: self.maxlength_question = question_length
 
                 games.append(g)
                 
-
-
-
                 #     # exit()
                 # except TypeError:
                 #     logger.info("error to create dataset")
@@ -398,14 +398,14 @@ class Dataset(AbstractDataset):
 
                 # logger.info("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass)               
                
-                # if len(games) > 50: break
+                if len(games) > 50: break
 
-                if  len(games) > 5000: 
-                    break
+                # if  len(games) > 5000: 
+                #     break
 
 
 
-        # logger.info(" Max Length of Question = {} , total_question = {}, nb_parties = {} | {}".format(self.maxlength_question,self.total,len(self.count_questions),which_set))
+        logger.info(" Max Length of Question = {} , total_question = {}, nb_parties = {} | {}".format(self.maxlength_question,self.total,len(games),which_set))
 
 
        

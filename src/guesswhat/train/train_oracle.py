@@ -107,14 +107,16 @@ if __name__ == '__main__':
     all_img_describtion = []
 
 
+    t1 = time.time()
 
-
-    trainset = OracleDataset.load(args.data_dir, "train",image_builder = image_builder, crop_builder = crop_builder,all_img_bbox  = all_img_bbox,all_img_describtion=all_img_describtion)
-    validset = OracleDataset.load(args.data_dir, "valid", image_builder= image_builder, crop_builder = crop_builder,all_img_bbox = all_img_bbox,all_img_describtion=all_img_describtion)
+    trainset =  OracleDataset.load(args.data_dir, "train",image_builder = image_builder, crop_builder = crop_builder,all_img_bbox  = all_img_bbox,all_img_describtion=all_img_describtion)
+    validset =  OracleDataset.load(args.data_dir, "valid", image_builder= image_builder, crop_builder = crop_builder,all_img_bbox = all_img_bbox,all_img_describtion=all_img_describtion)
     testset  =  OracleDataset.load(args.data_dir, "test",image_builder= image_builder, crop_builder = crop_builder,all_img_bbox = all_img_bbox,all_img_describtion=all_img_describtion)
     
- 
-    
+    t2 = time.time()
+
+
+    logger.info("Time to load data = {}".format(t2-t1))
 
     # np.save("all_img_bbox.npy",all_img_bbox)
     # logger.info("Image_crop legnth= {}".format(len(all_img_describtion)))
@@ -252,13 +254,13 @@ if __name__ == '__main__':
 
                 t2 = time.time()
 
-                logger.info(" train_oracle | Iterator...Total=",t2-t1)
+                logger.info(" train_oracle | Iterator...Total=".format(t2-t1))
                 
                 t1 = time.time()
                 train_loss, train_accuracy = evaluator.process(sess, train_iterator, outputs=outputs + [optimizer],out_net=best_param)
                 t2 = time.time()
 
-                logger.info(" train_oracle | evaluatorator...Total=",t2-t1)
+                logger.info(" train_oracle | evaluatorator...Total=".format(t2-t1))
 
                 t1 = time.time()
 
@@ -272,7 +274,7 @@ if __name__ == '__main__':
 
                 t2 = time.time()
 
-                logger.info(" train_oracle | Iterator validset...Total=",t2-t1)
+                logger.info(" train_oracle | Iterator validset...Total=".format(t2-t1))
 
 
                 t1 = time.time()
@@ -280,7 +282,7 @@ if __name__ == '__main__':
                 valid_loss, valid_accuracy = evaluator.process(sess, valid_iterator, outputs=outputs,type_data="Valid")
                 t2 = time.time()
 
-                logger.info(" train_oracle | evaluator ...Total=",t2-t1)
+                logger.info(" train_oracle | evaluator ...Total=".format(t2-t1))
 
                 logger.info("Training loss: {}".format(train_loss))
                 logger.info("Training error: {}".format(1-train_accuracy))
@@ -306,7 +308,7 @@ if __name__ == '__main__':
                     stop_learning = True
 
                 t2 = time.time()
-                logger.info(" train_oracle | Condition ...Total=",t2-t1)
+                logger.info(" train_oracle | Condition ...Total=".format(t2-t1))
 
                 t += 1
                 start_epoch += 1
@@ -329,7 +331,7 @@ if __name__ == '__main__':
             # out/oracle/ce02141129f6d87172cafc817c6d0b59/params.ckpt
             # save_path = save_path.format('params.ckpt')
 
-            logger.info("***** save_path = ",save_path)
+            logger.info("***** save_path = ".format(save_path))
             
 
 
@@ -353,7 +355,7 @@ if __name__ == '__main__':
        
         t2 = time.time()
         
-        logger.info(" train_oracle | Iterator testset  ...Total=",t2-t1)
+        logger.info(" train_oracle | Iterator testset  ...Total=".format(t2-t1))
        
         try:
             logger.info("Testing loss: {}".format(test_loss))
