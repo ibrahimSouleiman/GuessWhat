@@ -4,13 +4,18 @@ from neural_toolbox import rnn, utils
 
 from generic.tf_utils.abstract_network import ResnetModel
 from generic.tf_factory.image_factory import get_image_features
-
 from neural_toolbox.attention import compute_all_attention
 
+
+import pickle
 class OracleNetwork(ResnetModel):
 
     def __init__(self, config, num_words_question ,num_words_description=None,  device='', reuse=False):
         ResnetModel.__init__(self, "oracle", device=device)
+
+        with open("data/dict_word_embedding.pickle","rb") as f:
+            dict_all_embedding = pickle.load(f)
+
 
         with tf.variable_scope(self.scope_name, reuse=reuse) as scope:
             embeddings = []
@@ -21,54 +26,53 @@ class OracleNetwork(ResnetModel):
 
             # QUESTION
             if config['inputs']['question']:
-     
                 self._is_training = tf.placeholder(tf.bool, name="is_training")
-                
                 # self._question_word = tf.placeholder(tf.int32, [self.batch_size], name='question_word') # 
-
                 self._question = tf.placeholder(tf.int32, [self.batch_size, None], name='question')
-                
                 self.seq_length_question = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question')
-
-                # word_emb = utils.get_embedding(self._question,
-                #                             n_words=num_words_question,
-                #                             n_dim=int(config["model"]["word_embedding_dim"]),
-                #                             scope="word_embedding")
-
+                
 
                 if config["model"]["glove"] == True or config["model"]["fasttext"] == True:
-                    self._embWord = tf.placeholder(tf.float32, [self.batch_size, max_seq_length, int(config["model"]["word_embedding_dim"])], name="embedding_vector_ques")
-                    word_emb = self._embWord
+                    # self._embWord = tf.placeholder(tf.float32, [self.batch_size, max_seq_length, int(config["model"]["word_embedding_dim"])], name="embedding_vector_ques")
+                    # word_emb = self._embWord
+                    print("****** WITH EMBEDDING ******")
+                    word_emb = utils.get_embedding(self._question,
+                                                n_words=num_words_question,
+                                                n_dim=int(config["model"]["word_embedding_dim"]),
+                                                scope="word_embedding",
+                                                dict_all_embedding=dict_all_embedding)
+
+                    # print("word_emb ={}".format(word_emb))
+                    # exit()
 
                     # word_emb = tf.concat([ word_emb,self._embWord], axis=2)
                 else:
-                    print("None -------------------------- None")
-		  
+                    print("****** NOT EMBEDDING ******")
+
+
+                    word_emb = utils.get_embedding(self._question,
+                                                n_words=num_words_question,
+                                                n_dim=int(config["model"]["word_embedding_dim"]),
+                                                scope="word_embedding",
+                                                dict_all_embedding=dict_all_embedding)
+
+
+                    # print("word_emb ={}".format(word_emb))
+                    # exit()
                 #     if config['glove']:
                 # self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['question']["embedding_dim"])], name="glove")
                 # word_emb = tf.concat([word_emb, self._glove], axis=2)
-                    
-
                 print("word_emb = {} ".format(word_emb))
-
-
                 self.out_question = None
-
                 if config['model']['question']['lstm']:
                     self.lstm_states_question, self.lstm_all_state_ques = rnn.variable_length_LSTM(word_emb,
                                                         num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
                                                         seq_length=self.seq_length_question)
 
-
+                
                     self.out_question =  self.lstm_all_state_ques
-
-                    
                 else:
                     self.out_question = word_emb
-
-
-                
-
                 if config["model"]["attention"]["co-attention"]:
                     co_attention[0] = self.out_question     # embeddings.append(self.lstm_all_state_ques)
                 else:
@@ -84,7 +88,6 @@ class OracleNetwork(ResnetModel):
 
 
                 # QUESTION-Pos
-
                 if config['model']['question'] ['pos']:
                     print("----------------------------------------")
                     print("**** Oracle_network |  input = question-pos ")
@@ -238,18 +241,18 @@ class OracleNetwork(ResnetModel):
             # CATEGORY
             if config['inputs']['category']:
                 print("****  Oracle_network |  input = category ")
-
-                self._category = tf.placeholder(tf.int32, [self.batch_size], name='category')
-
-
-                print(".... ORACLE =",self._category)
-
-                cat_emb = utils.get_embedding(self._category,
-                                              int(config['model']['category']["n_categories"]) + 1,  # we add the unkwon category
-                                              int(config["model"]["word_embedding_dim"]),
-                                              scope="cat_embedding")
-
                 
+                if config["model"]["category"]["use_embedding"]:
+                    self._category = tf.placeholder(tf.float32, [self.batch_size,int(config["model"]["word_embedding_dim"])], name='category')
+                    cat_emb = self._category
+                else:
+                    self._category = tf.placeholder(tf.int32, [self.batch_size], name='category')
+                    cat_emb = utils.get_embedding(self._category,
+                                                int(config['model']['category']["n_categories"]) + 1,  # we add the unkwon category
+                                                int(config["model"]["word_embedding_dim"]),
+                                                scope="cat_embedding")
+
+
 
                 # cat_emb = tf.expand_dims(cat_emb,1)
                 embeddings.append(cat_emb)

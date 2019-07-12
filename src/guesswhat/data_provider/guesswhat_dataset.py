@@ -20,6 +20,8 @@ from nltk import WordNetLemmatizer
 
 from generic.data_provider.dataset import AbstractDataset
 from draw.Generate_Category import get_category
+from generic.data_provider.nlp_utils import Embeddings,get_embeddings
+
 # TODO find a cleaner way!
 
 # from cocoapi.PythonAPI.pycocotools import mask as cocoapi
@@ -35,11 +37,12 @@ except ImportError:
     pass
 
 
+all_word = []
 
 
 class Game:
 
-    def __init__(self, id, object_id, image, objects, qas , status, which_set, image_builder, crop_builder,lemmatizer,all_img_bbox,all_img_describtion):
+    def __init__(self, id, object_id, image, objects, qas , status, which_set, image_builder, crop_builder,lemmatizer,all_img_bbox,all_img_describtion,embedding=None):
         self.dialogue_id = id
         self.object_id = object_id
         
@@ -144,10 +147,6 @@ class Game:
         # compteur += 1
         # if compteur == 15:
         #     exit()
-
-
-        
-
         self.question_ids = [qa['id'] for qa in qas]
         self.questions = [qa['question'] for qa in qas]
         _ = [all_img_describtion.append(qa['question']) for qa in qas]
@@ -176,7 +175,6 @@ class Word:
     """
     classe qui contient pour chaque mot , son lemme sa parti de discourt
     """
-
     def __init__(self,word,lemme=False,pos=False,lemmatizer=None):
 
         self.word = word
@@ -322,29 +320,24 @@ class Object:
 
 
 class Dataset(AbstractDataset):
+
     """Loads the dataset."""
+    
     def __init__(self, folder, which_set, image_builder=None, crop_builder=None,all_img_bbox=None,all_img_describtion=None):
         self.set = which_set
         self.lemmas = WordNetLemmatizer()
-
         self.maxlength_question = 0
         self.count_questions = {}
         self.indice = 0
         self.total = 0
-
+        
         filegues = '{}/guesswhat_{}2014.jsonl.gz'.format(folder,which_set)
         file_description = '{}/captions_{}2014.json'.format(folder, which_set)
         games = []
         nb_pass = 0
         nb_erreur = 0
 
-
-
-        tokenizer = TweetTokenizer(preserve_case=True)
-
-
         t1 = time.time()
-
         all_size = []
 
         with gzip.open(filegues) as f:
@@ -369,7 +362,7 @@ class Dataset(AbstractDataset):
                         crop_builder=crop_builder,
                         lemmatizer = self.lemmas,
                         all_img_bbox = all_img_bbox,
-                        all_img_describtion = all_img_describtion
+                        all_img_describtion = all_img_describtion,
                         )
 
                 question_length = len(g.questions)
@@ -381,36 +374,20 @@ class Dataset(AbstractDataset):
                 
                 for question in g.questions:
                     words = question.split()
-                 
                     all_size.append(len(words))
 
-            
-
+        
                 if self.maxlength_question < question_length: self.maxlength_question = question_length
-
                 games.append(g)
-                
-                #     # exit()
-                # except TypeError:
-                #     logger.info("error to create dataset")
-                #     nb_erreur += 1
 
-
-                # logger.info("NP_pass = {} , nb_erreur = {} ".format(nb_erreur,nb_pass)               
-               
-                if len(games) > 50: break
-
-                # if  len(games) > 5000: 
-                #     break
-
-
+                if len(games) > 5000: break
 
         logger.info(" Max Length of Question = {} , total_question = {}, nb_parties = {} | {}".format(self.maxlength_question,self.total,len(games),which_set))
 
 
        
 
-
+        print("Dataset ...")
         super(Dataset, self).__init__(games)
 
 
@@ -424,17 +401,34 @@ class OracleDataset(AbstractDataset):
         self.compteur = 0
         self.all_category = []
         self.categories_questions = {0:0,1:0,2:0,3:0}
-
+        self.all_question = []
+        # self.embedding = Embeddings(file_name=["ted_en-20160408.zip" ],embedding_name="fasttext",emb_dim=100)
+        # self.words = []
         self.length_question = {}
-        
+        self.tokenizer = TweetTokenizer(preserve_case=True)
+
+
         for i,g in enumerate(old_games):
-            new_games += self.split(g)   
+            game,words = self.split(g)
+            # self.words += words 
+            new_games += game
+
+
+        # self.words = list(set(self.words))
+
+      
+
+
+
         # logger.info(" Nb question = ",format(self.compteur))
         # exit()
         # logger.info(" Guess_dataset | Lemme different = {} ",format(self.compteur))
 
         # for i in range(1000):
         #     logger.info("Question = ",new_games[i].questions)
+
+        # print("question = {}".format(self.all_question))
+        # exit()
 
         self.unique_category = np.unique(np.asarray(self.all_category))
         logger.info("Distrubution of category = {}".format(self.categories_questions))
@@ -461,26 +455,42 @@ class OracleDataset(AbstractDataset):
     def split(self, game):
 
         games = []
+        all_question  = []
+        all_words = []
+
         for i, q, a in zip(game.question_ids, game.questions, game.answers):
             
-            wpt = TweetTokenizer(preserve_case=False)
             
+
+
+
+            # wpt = TweetTokenizer(preserve_case=False)
+
             new_game = copy.copy(game)
             new_game.questions = [q]
+            # words = self.tokenizer.tokenize(q)
+            # a = [all_words.append(word.lower()) for word in words]
+
             new_game.question_ids = [i]
             new_game.answers = [a]
 
-            # for all_category
 
+            all_question.append(new_game.questions)
+
+            # for all_category
             # for category in game.all_category:
             #     self.all_category.append(category)
-            
             # last_question =  self.add_question(game.all_last_question,q,a)
             # new_game.all_last_question = last_question
+
+
             games.append(new_game)
 
+        all_words = list(set(all_words))
+
+
         
-        return games
+        return games,all_words
 
 
     def add_question(self,last_questions,question,answer):

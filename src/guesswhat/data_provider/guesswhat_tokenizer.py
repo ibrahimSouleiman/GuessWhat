@@ -1,11 +1,20 @@
 from nltk.tokenize import TweetTokenizer
 import json
+import pickle
 
 class GWTokenizer:
     """ """
-    def __init__(self, dictionary_file,question=True):
+    def __init__(self, dictionary_file,question=True,dic_all_question=""):
         with open(dictionary_file, 'r') as f:
             self.word2i = json.load(f)['word2i']
+        
+        # if dic_all_question != "":
+        #     with open(dic_all_question,"rb") as f:
+        #         self.ques_word2i = pickle.load(f)
+                # print("ques_word2i = {}".format(self.ques_word2i))
+                # exit()
+
+
 
 
         self.wpt = TweetTokenizer(preserve_case=False)
@@ -38,7 +47,7 @@ class GWTokenizer:
     Input: String
     Output: List of tokens
     """
-    def apply(self, question, is_answer=False,tokent_int = True):
+    def apply(self, question, is_answer=False,tokent_int = True,use_dict_ques=False):
 
         tokens = []
         if is_answer:
@@ -51,7 +60,11 @@ class GWTokenizer:
                 if token not in self.word2i:
                     token = '<unk>'
                 if tokent_int:
-                    tokens.append(self.word2i[token][0])
+                    if use_dict_ques:
+                        tokens.append(self.ques_word2i[token])
+                    else:
+                        tokens.append(self.word2i[token][0])
+
                 else:tokens.append(token)
 
         return tokens

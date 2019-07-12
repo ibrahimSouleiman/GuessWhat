@@ -41,12 +41,16 @@ if __name__ == '__main__':
     parser.add_argument("-dict_file_question", type=str, default="dict.json", help="Dictionary file name")# default dict_pos_tag
     parser.add_argument("-dict_file_description", type=str, default="dict_Description.json", help="Dictionary file name")
     parser.add_argument("-all_dictfile", type=str, default="data/list_allquestion1.npy", help="Dictionary file name")
+    
     parser.add_argument("-img_dir", type=str, help='Directory with images')
     parser.add_argument("-crop_dir", type=str, help='Directory with images')
+
     parser.add_argument("-load_checkpoint", type=str, help="Load model parameters from specified checkpoint")
     parser.add_argument("-continue_exp", type=lambda x: bool(strtobool(x)), default="False", help="Continue previously started experiment?")
     parser.add_argument("-gpu_ratio", type=float, default=0.50, help="How many GPU ram is required? (ratio)")
     parser.add_argument("-no_thread", type=int, default=4, help="No thread to load batch")
+
+
 
     parser.add_argument("-inference_mode", type=bool, default=False, help="inference mode True if you want to execute only test_dataset")
 
@@ -85,6 +89,7 @@ if __name__ == '__main__':
     use_resnet = False
     logger.info("Loading ")
     t1 = time.time()
+
     if config['inputs'].get('image', False):
         logger.info('Loading images..')
         image_builder = get_img_builder(config['model']['image'], args.img_dir)
@@ -112,6 +117,7 @@ if __name__ == '__main__':
     trainset =  OracleDataset.load(args.data_dir, "train",image_builder = image_builder, crop_builder = crop_builder,all_img_bbox  = all_img_bbox,all_img_describtion=all_img_describtion)
     validset =  OracleDataset.load(args.data_dir, "valid", image_builder= image_builder, crop_builder = crop_builder,all_img_bbox = all_img_bbox,all_img_describtion=all_img_describtion)
     testset  =  OracleDataset.load(args.data_dir, "test",image_builder= image_builder, crop_builder = crop_builder,all_img_bbox = all_img_bbox,all_img_describtion=all_img_describtion)
+
     
     t2 = time.time()
 
@@ -134,13 +140,9 @@ if __name__ == '__main__':
     else:
         logger.info("all_question exist")                
     
-
-
     # Load dictionary
-
     logger.info('Loading dictionary Question..')
-    tokenizer = GWTokenizer(os.path.join(args.data_dir, args.dict_file_question))
-
+    tokenizer = GWTokenizer(os.path.join(args.data_dir, args.dict_file_question),dic_all_question="data/dict_word_indice.pickle")
 
     # Load dictionary
     tokenizer_description = None
@@ -148,23 +150,16 @@ if __name__ == '__main__':
         logger.info('Loading dictionary Description......')
         tokenizer_description = GWTokenizer(os.path.join(args.data_dir,args.dict_file_description),question=False)
 
-
-
     # Build Network
     logger.info('Building network..')
-    
     if tokenizer_description != None:
         network = OracleNetwork(config, num_words_question=tokenizer.no_words,num_words_description=tokenizer_description.no_words)
     else: 
         network = OracleNetwork(config, num_words_question=tokenizer.no_words,num_words_description=None)
 
-
-
     # Build Optimizer
     logger.info('Building optimizer..')
     optimizer, outputs = create_optimizer(network, config, finetune=finetune)
-
-
     best_param = network.get_predict()
     ##############################
     #  START  TRAINING           

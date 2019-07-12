@@ -17,11 +17,11 @@ from gensim.scripts.glove2word2vec import glove2word2vec
 from pathlib import Path
 from generic.utils.file_handlers import pickle_loader
 from gensim.models import Word2Vec,FastText,KeyedVectors
-
+from pathlib import Path
 #from guesswhat.data_provider.lemmatize import lemmatize
 import os
 import numpy as np
-
+import path
 
 
 
@@ -107,49 +107,49 @@ class Embeddings(object):
         self.emb_window = emb_window
         self.embedding_name = embedding_name
 
-
         self.train = train
         self.valid = valid
         self.test = test
 
+        name_file = "saved_model_{}_doc_ques".format(embedding_name)
+        model_saved = Path(name_file)
 
-        self.input_text = self.get_data(self.file_name)
-        self.get_list_data = self.get_list_data(self.input_text)
-        self.model = self.get_model_embedding(self.get_list_data)
-
-
-
-      
+        if model_saved.is_file():
+            self.model =  FastText.load(name_file)
+            print("file already exist ...")
         
-            
+        else:
+            self.input_text = self.get_data(self.file_name)
+            self.get_list_data = self.get_list_data(self.input_text)
+            self.model = self.get_model_embedding(self.get_list_data)
+            self.model.save('saved_model_fasttext_doc_ques')
+            print("file not exist ...")
+
+
+        
+
+
+
+    
     
     def get_data(self,name_files):
         
         urllib.request.urlretrieve("https://wit3.fbk.eu/get.php?path=XML_releases/xml/ted_en-20160408.zip&filename=ted_en-20160408.zip", filename="ted_en-20160408.zip")
 
         input_text = ""
-
         for name_file in name_files:
             extension_file = name_file.split(".")[-1]
-
             print("name_file = {}".format(name_file))
-
             if extension_file == "zip":
                 with zipfile.ZipFile(name_file, 'r') as z:
                     doc = lxml.etree.parse(z.open('ted_en-20160408.xml', 'r'))
                 input_text += '\n'.join(doc.xpath('//content/text()'))
-
-
-
 
             elif extension_file == "txt":
                 with open(name_file,'r') as f:
                     input_text += f.read()
 
             
-                
-
- 
         return input_text
 
     def get_list_data(self,data):
@@ -175,6 +175,7 @@ class Embeddings(object):
         self.model = None
         if self.embedding_name == "fasttext":
             self.model = FastText(sentences, size=self.emb_dim, window=5, min_count=5, workers=4,sg=1)
+            
         elif self.embedding_name == "glove":
             self.model = Word2Vec(sentences=sentences, size=self.emb_dim, window=5, min_count=5, workers=4, sg=0)
     
@@ -183,16 +184,23 @@ class Embeddings(object):
 
     def get_embedding(self,words):
 
-
+        assert isinstance(words, list),"get_embedding have param list only"
 
         vector_zeros = np.zeros(self.emb_dim)
         self.all_embedding = []
         
-        for word in words:
-            try:
-                self.all_embedding.append( self.model[word])
-            except Exception:
-                self.all_embedding.append( vector_zeros ) 
+        try:
+            # print("embedding  = {} ".format(self.model[words]))
+            # print("words = {} ".format(words))
+            self.all_embedding = self.model[words]
+        except Exception:
+            print("EXCEPTION **** ")
+            for word in words:
+                try:
+                    # self.all_embedding.append( self.model[word])
+                    self.all_embedding.append(vector_zeros)
+                except Exception:
+                    self.all_embedding.append( vector_zeros ) 
 
         self.all_embedding = np.asarray(self.all_embedding)
 

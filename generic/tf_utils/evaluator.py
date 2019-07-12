@@ -80,7 +80,7 @@ class Evaluator(object):
                 # crops_id = batch["crop_id"]
 
                 for key,values in batch.items():
-                    if key!="question" and key!="question_word" and key!= "image_id":
+                    if  key!="question_word" and key!= "image_id":
                         pass
                     elif type(values) != bool :
                         batch_1[key] = [values[0]]
@@ -92,19 +92,16 @@ class Evaluator(object):
             
             if inference == False:
 
-                batch = {key:value for key,value in batch.items() if key!="question" and key!="question_word" and key!= "image_id"}
-
-
+                batch = {key:value for key,value in batch.items() if  key!="question_word" and key!= "image_id"}
                 results = self.execute(sess, outputs,batch,type_data )
 
-                
 
             if inference:
 
                 
 
                 old_batch = batch
-                batch = {key:value for key,value in batch.items() if key!="question" and key!="question_word" and key!= "image_id"}
+                batch = {key:value for key,value in batch.items() if  key!="question_word" and key!= "image_id"}
                 prediction = self.execute(sess,out_net,batch, type_data)
                 results = self.execute(sess, outputs,batch, type_data )
 
@@ -173,7 +170,11 @@ class Evaluator(object):
     def execute(self, sess, output, batch,type_data = "Train"):
         #print("+++++++++++++++++++++",batch.items())
         feed_dict = {self.scope +key + ":0": value for key, value in batch.items() if key in self.provided_sources}
+        # print("-- [{}]  question = {}--".format(type_data, feed_dict["oracle/question:0"]))
+        # print("shape = {} ".format(np.asarray(feed_dict["oracle/question:0"]).shape ))
+
         # print("-- [{}]  Feed_Dict = {}--".format(type_data, feed_dict.keys()))
+        # exit()
         # print("answer = {}".format(feed_dict["oracle/answer:0"]))
         
         # print("-- [{}]  image_values = {}--".format(type_data, feed_dict["oracle/image:0"]))

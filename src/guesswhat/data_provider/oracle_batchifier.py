@@ -76,14 +76,17 @@ class OracleBatchifier(AbstractBatchifier):
             image = game.image
             
             if 'question' in sources :
+                question = self.tokenizer_question.apply(game.questions[0],use_dict_ques=False)
 
-                question = self.tokenizer_question.apply(game.questions[0])
+                # print("question = {} ".format(question))
+                
                 batch['question'].append(question)
 
             if 'embedding_vector_ques' in sources:
                 assert  len(game.questions) == 1
                 # Add glove vectors (NB even <unk> may have a specific glove)
                 # print("oracle_batchifier | question = {}".format(game.questions[0]))
+
                 words = self.tokenizer_question.apply(game.questions[0],tokent_int=False)
                 
                 if "question_pos" in sources:
@@ -93,15 +96,20 @@ class OracleBatchifier(AbstractBatchifier):
                     batch['embedding_vector_ques'].append(embedding_vectors)
                     batch['embedding_vector_ques_pos'].append(embedding_pos)
                     batch['question_pos'].append(question)
-                    # print(batch['embedding_vector_pos'])
 
                 else:
                     embedding_vectors = self.embedding.get_embedding(words)
+
+                    # print("embedding = {}".format(np.asarray(embedding_vectors).shape  ))
+                    # exit()
+
+                    # if "embedding_vector_ques" not in batch:
+                    #     batch['embedding_vector_ques'] = np.zeros((batch_size,7,100))
                     batch['embedding_vector_ques'].append(embedding_vectors)
+                   
 
 
             if 'embedding_vector_ques_hist' in sources:
-                
                 assert  len(game.questions) == 1
                 words = []
 
@@ -162,16 +170,34 @@ class OracleBatchifier(AbstractBatchifier):
 
                 
                 if "answer" not in batch:
-                    batch["answer"] = np.zeros((batch_size,3))    
+                    batch["answer"] = np.zeros((batch_size,3))   
+
+
+                # print("game.amswer = {}".format(game.answers))
+
+                # exit()
                 assert len(game.answers) == 1
                 batch['answer'][i] = answer_dict[game.answers[0]]
                 #print(" Correct Answer = ",game.answers[0])
 
             if 'category' in sources:
+                use_embedding_cat = self.config["model"]["category"]["use_embedding"]
 
                 if "category" not in batch:
-                    batch['category'] = np.zeros((batch_size))
-                batch['category'][i] = game.object.category_id
+                    if use_embedding_cat:
+                        batch['category'] = np.zeros((batch_size,100))
+                    else:
+                        batch['category'] = np.zeros((batch_size))
+                
+                if use_embedding_cat:
+                    embc = np.asarray(self.embedding.get_embedding([game.object.category] ))
+                    category_input = np.reshape(embc,(100))
+                else:
+                    category_input = game.object.category_id
+
+                batch['category'][i] = category_input
+
+    
 
             if 'allcategory' in sources:
                 allcategory = []

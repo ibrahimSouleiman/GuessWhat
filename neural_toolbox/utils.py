@@ -6,14 +6,27 @@ import logging
 
 
 def get_embedding(lookup_indices, n_words, n_dim,
-                  scope="embedding", reuse=False):
+                  scope="embedding", reuse=False,all_embedding = None,dict_all_embedding=[]):
     with tf.variable_scope(scope, reuse=reuse):
         with tf.control_dependencies([tf.assert_non_negative(n_words - tf.reduce_max(lookup_indices))]):
-            embedding_matrix = tf.get_variable(
-                'W', [n_words, n_dim],
-                initializer=tf.random_uniform_initializer(-0.08, 0.08))
+            
+            if len(dict_all_embedding) > 0:
+                embedding_matrix = tf.constant(dict_all_embedding,shape=[len(dict_all_embedding),100],name='Ws',dtype=tf.float32)
+                # embedding_matrix_2 = tf.get_variable('W', [n_words, n_dim],initializer=tf.constant_initializer(0.08))
+                # print("embedding_matrix_1 = {} ".format(embedding_matrix_1))
+                # print("embedding_matrix_2 = {} ".format(embedding_matrix_2))
+                # exit()
+            else:
+                
+                embedding_matrix = tf.get_variable('W', [n_words, n_dim],initializer=tf.constant_initializer(0.08))
+
+
+            
+            print("embedding_matrix = {}".format(embedding_matrix))
             embedded = tf.nn.embedding_lookup(embedding_matrix, lookup_indices)
             print("Utils | embedding={}".format(embedded))
+
+
             return embedded
 
 
