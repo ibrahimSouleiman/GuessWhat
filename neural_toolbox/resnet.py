@@ -68,7 +68,7 @@ def create_resnet(image_input, is_training, scope="",scope_feature="", resnet_ou
     # exit()
 
     with slim.arg_scope(arg_sc):
-        net, end_points = current_resnet(image_input, 1000,scope=scope_feature+"resnet_v1_50")  # 1000 is the number of softmax class
+        net, end_points = current_resnet(image_input, 1000,scope="resnet_v1_50")  # 1000 is the number of softmax class
     
     print("net = {}, end_points = {}".format(net,end_points))
 
@@ -80,9 +80,9 @@ def create_resnet(image_input, is_training, scope="",scope_feature="", resnet_ou
 
  
 
-    out = end_points[scope + scope_feature + resnet_scope] # Tensor("oracle/resnet_v1_50/block4/unit_3/bottleneck_v1/Relu:0", shape=(32, 7, 7, 2048), dtype=float32) 
+    out = end_points[scope +  resnet_scope] # Tensor("oracle/resnet_v1_50/block4/unit_3/bottleneck_v1/Relu:0", shape=(32, 7, 7, 2048), dtype=float32) 
 
-
+  
     # print("------------------------- out Use: {},output = {}".format(resnet_scope,out))
     # out = tf.reshape(
     # out,

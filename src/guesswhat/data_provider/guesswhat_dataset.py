@@ -380,7 +380,7 @@ class Dataset(AbstractDataset):
                 if self.maxlength_question < question_length: self.maxlength_question = question_length
                 games.append(g)
 
-                if len(games) > 5000: break
+                if len(games) > 50: break
 
         logger.info(" Max Length of Question = {} , total_question = {}, nb_parties = {} | {}".format(self.maxlength_question,self.total,len(games),which_set))
 

@@ -5,7 +5,7 @@
     "allcategory":false,
     "category": true,
     "spatial": true,
-    "crop": false,
+    "crop": true,
     "image": false
   },
   "model": {
@@ -60,7 +60,7 @@
       },
 
       "cbn": {
-        "use_cbn": false,
+        "use_cbn": true,
         "cbn_embedding_size": 512,
         "excluded_scope_names": ["*"]
       }

@@ -218,6 +218,7 @@ def compute_all_attention(question_states,caption,history_states,image_feature,n
 def compute_attention(feature_maps, context, no_mlp_units, reuse=False):
 
 
+  
     with tf.variable_scope("attention"):
 
         if len(feature_maps.get_shape()) == 3:

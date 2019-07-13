@@ -362,6 +362,6 @@ if __name__ == '__main__':
 
         t_end = time.time()
 
-        logger.info("Time execution =".format(t2-t1))
+        logger.info("Time execution =".format(t_begin-t_end))
 
 

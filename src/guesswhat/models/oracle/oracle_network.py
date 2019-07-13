@@ -252,8 +252,6 @@ class OracleNetwork(ResnetModel):
                     #                               scope="cat_embedding",
                     #                               dict_all_embedding=dict_all_embedding
                     #                              )
-
-
                 else:
                     self._category = tf.placeholder(tf.int32, [self.batch_size], name='category')
                     cat_emb = utils.get_embedding(self._category,
@@ -339,12 +337,15 @@ class OracleNetwork(ResnetModel):
                 self._crop = tf.placeholder(tf.float32, [self.batch_size] + config['model']['crop']["dim"], name='crop')
                 
                 self.crop_out = get_image_features(
-                    image=self._crop, question=self.lstm_states,
+                    image=self._crop, question=self.lstm_states_question,
                     is_training=self._is_training,
                     scope_name=scope.name,
                     scope_feature="Crop/",
                     config=config["model"]['crop'])
                 
+
+                # print(".. crop = {}".format(self.crop_out))
+                # exit()
 
                 co_attention[3] = self.crop_out
 
