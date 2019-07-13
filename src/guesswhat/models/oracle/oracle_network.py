@@ -54,7 +54,7 @@ class OracleNetwork(ResnetModel):
                                                 n_words=num_words_question,
                                                 n_dim=int(config["model"]["word_embedding_dim"]),
                                                 scope="word_embedding",
-                                                dict_all_embedding=dict_all_embedding)
+                                                dict_all_embedding=[])
 
 
                     # print("word_emb ={}".format(word_emb))
@@ -242,15 +242,25 @@ class OracleNetwork(ResnetModel):
             if config['inputs']['category']:
                 print("****  Oracle_network |  input = category ")
                 
+
                 if config["model"]["category"]["use_embedding"]:
                     self._category = tf.placeholder(tf.float32, [self.batch_size,int(config["model"]["word_embedding_dim"])], name='category')
-                    cat_emb = self._category
+                    cat_emb = self._category                    
+                    # cat_emb = utils.get_embedding(self._category,
+                    #                               int(config['model']['category']["n_categories"]) + 1,
+                    #                               n_dim=int(config["model"]["word_embedding_dim"]),
+                    #                               scope="cat_embedding",
+                    #                               dict_all_embedding=dict_all_embedding
+                    #                              )
+
+
                 else:
                     self._category = tf.placeholder(tf.int32, [self.batch_size], name='category')
                     cat_emb = utils.get_embedding(self._category,
                                                 int(config['model']['category']["n_categories"]) + 1,  # we add the unkwon category
                                                 int(config["model"]["word_embedding_dim"]),
-                                                scope="cat_embedding")
+                                                scope="cat_embedding",
+                                                 )
 
 
 
@@ -298,11 +308,10 @@ class OracleNetwork(ResnetModel):
 
                 self._image_id = tf.placeholder(tf.float32, [self.batch_size], name='image_id')
                 self._image = tf.placeholder(tf.float32, [self.batch_size] + config['model']['image']["dim"], name='image')
-             
-
                 # self.image_out = tf.reshape(self._image,shpe=[224*224*3])
                 # print("question = {} ".format(self.lstm_states_question))
                 # exit()
+
                 self.image_out = get_image_features(
                     image=self._image, question=self.lstm_states_question,
                     is_training=self._is_training,
@@ -310,7 +319,6 @@ class OracleNetwork(ResnetModel):
                     scope_feature="Image/",
                     config=config['model']['image']
                 )
-
                 # embeddings.append(self.image_out)
                 print("Input: Image")
                 co_attention[3]  = self.image_out

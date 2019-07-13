@@ -31,7 +31,7 @@
     },
     "category": {
       "n_categories": 90,
-      "use_embedding" : false,
+      "use_embedding" : true,
       "glove": true,
       "embedding":"Word2Vec"
     },

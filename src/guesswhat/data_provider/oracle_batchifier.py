@@ -90,10 +90,7 @@ class OracleBatchifier(AbstractBatchifier):
             image = game.image
             
             if 'question' in sources :
-                question = self.tokenizer_question.apply(game.questions[0],use_dict_ques=False)
-
-                # print("question = {} ".format(question))
-                
+                question = self.tokenizer_question.apply(game.questions[0],use_dict_ques=False)                
                 batch['question'].append(question)
 
             if 'embedding_vector_ques' in sources:
@@ -204,11 +201,15 @@ class OracleBatchifier(AbstractBatchifier):
                         batch['category'] = np.zeros((batch_size))
                 
                 if use_embedding_cat:
-                    embc = np.asarray(self.embedding.get_embedding([game.object.category] ))
-                    category_input = np.reshape(embc,(100))
+                    embc = np.asarray(self.embedding.get_embedding([game.object.category]))
+                    # embc = self.tokenizer_question.apply(game.object.category,use_dict_ques=False)
+                    
+                    category_input = embc.reshape((100))
+    
                 else:
                     category_input = game.object.category_id
-
+                  
+                # print("category = {} ".format(category_input))
                 batch['category'][i] = category_input
 
     

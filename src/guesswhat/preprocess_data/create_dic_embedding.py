@@ -10,7 +10,6 @@ from generic.utils.config import load_json_config
 
 #############################
 config = load_json_config("config/oracle/config.json")
-
 tokenizer = TweetTokenizer(preserve_case=True)
 type_mebdding  = config["model"]["question"]["embedding_type"]
 
@@ -26,6 +25,18 @@ _allWords = {}
 dict_all_words = {}
 all_words = []
 #############################
+
+# with open("id_categories.json", "r") as f:
+#     categories = json.load(f)
+
+
+# print("categories = {} ".format(categories))
+
+# for value in categories.values():
+#     embedding_word = embedding.get_embedding([value])
+#     print(" word = {} | embedding ={}".format(value, embedding.model.wv.most_similar([value]) ))
+
+# exit()
 
 with open("all_question_game.txt","r") as f:
     all_question = f.read()
@@ -71,6 +82,8 @@ print("create pickle file ...")
 
 # with open("data/dict_word_indice.pickle","wb") as f:
 #     pickle.dump(dict_all_words,f,pickle.HIGHEST_PROTOCOL)
+
+
 
 with open("data/dict_word_embedding_{}_{}.pickle".format("fasttext",type_mebdding),"wb") as f:
     pickle.dump(dict_all_embedding,f,pickle.HIGHEST_PROTOCOL)
