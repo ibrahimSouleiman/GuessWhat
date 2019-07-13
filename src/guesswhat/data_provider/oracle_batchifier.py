@@ -32,8 +32,6 @@ class OracleBatchifier(AbstractBatchifier):
         self.config = config
         embedding_name = ""
 
-
-
         if config["model"]["fasttext"]:
             embedding_name = "fasttext"
 
@@ -42,9 +40,25 @@ class OracleBatchifier(AbstractBatchifier):
 
         #   ted_en-20160408.zip
         #   all_question_game.txt
-        if self.config["model"]["fasttext"] or  self.config["model"]["glove"]:
-            self.embedding = Embeddings(file_name=["ted_en-20160408.zip" ],embedding_name=embedding_name,emb_dim=100,total_words=tokenizer_question.no_words,train=trainset,valid=None,test=None,dictionary_file_question=os.path.join(args.data_dir, args.dict_file_question),dictionary_file_description=os.path.join(args.data_dir, args.dict_file_description),description=config["inputs"]["description"])
-            self.model_embedding = self.embedding.model
+
+        ##### Embedding_type #####################
+        # 0 : trained only question
+        # 1 : pretained with wikipedia data_set
+        # 2 : pretained + trained question 
+        #
+        ##########################################
+        
+        if config["model"]["question"]["embedding_type"] == 0:
+            self.embedding = Embeddings(file_name=["all_question_game.txt" ], embedding_type = config["model"]["question"]["embedding_type"] ,emb_dim=100)
+        
+        elif config["model"]["question"]["embedding_type"] == 1:
+            self.embedding = Embeddings(file_name=["ted_en-20160408.zip" ], embedding_type = config["model"]["question"]["embedding_type"] ,emb_dim=100)
+        
+        elif config["model"]["question"]["embedding_type"] == 2:
+            self.embedding = Embeddings(file_name=["ted_en-20160408.zip","all_question_game.txt" ], embedding_type = config["model"]["question"]["embedding_type"], emb_dim=100)
+
+
+        self.model_embedding = self.embedding.model
 
 
         # if self.config["model"]["fasttext"] : 

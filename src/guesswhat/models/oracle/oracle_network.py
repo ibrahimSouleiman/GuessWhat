@@ -13,7 +13,7 @@ class OracleNetwork(ResnetModel):
     def __init__(self, config, num_words_question ,num_words_description=None,  device='', reuse=False):
         ResnetModel.__init__(self, "oracle", device=device)
 
-        with open("data/dict_word_embedding.pickle","rb") as f:
+        with open("data/dict_word_embedding_{}_{}.pickle".format("fasttext",config["model"]["question"]["embedding_type"]),"rb") as f:
             dict_all_embedding = pickle.load(f)
 
 

@@ -4,13 +4,22 @@ from generic.data_provider.nlp_utils import Embeddings,get_embeddings
 import json
 import numpy  as np
 import pickle
+from generic.utils.config import load_json_config
 
 
 
 #############################
+config = load_json_config("config/oracle/config.json")
 
 tokenizer = TweetTokenizer(preserve_case=True)
-embedding = Embeddings(file_name=["ted_en-20160408.zip" ],embedding_name="fasttext",emb_dim=100)
+type_mebdding  = config["model"]["question"]["embedding_type"]
+
+if config["model"]["question"]["embedding_type"] == 0:
+    embedding = Embeddings(file_name=["all_question_game.txt" ],embedding_type = type_mebdding , embedding_name="fasttext",emb_dim=100)
+elif config["model"]["question"]["embedding_type"] == 1:
+    embedding = Embeddings(file_name=["ted_en-20160408.zip" ],embedding_type = type_mebdding,embedding_name="fasttext",emb_dim=100)
+elif config["model"]["question"]["embedding_type"] == 2:
+    embedding = Embeddings(file_name=["ted_en-20160408.zip","all_question_game.txt" ],embedding_type = type_mebdding, embedding_name="fasttext",emb_dim=100)
 
 #############################
 _allWords = {}
@@ -48,29 +57,29 @@ with open("data/dict.json", "r") as f:
 
 
 # last_id = 12130
-# dict_all_embedding = np.zeros((len(word2i.keys()),100))
+dict_all_embedding = np.zeros((len(word2i.keys()),100))
 
-# for i,word in enumerate(word2i.keys()):
-#     dict_all_embedding [word2i[word][0]] = embedding.get_embedding([word])
-#     if i == 12130:
-#         print("word = {}".format(word))
-#         embedding_1 = embedding.get_embedding([word])
-#         embedding_2 = dict_all_embedding [i]
-#         print(embedding_1 == embedding_2)
+for i,word in enumerate(word2i.keys()):
+    dict_all_embedding [word2i[word][0]] = embedding.get_embedding([word])
+    if i == 12130:
+        print("word = {}".format(word))
+        embedding_1 = embedding.get_embedding([word])
+        embedding_2 = dict_all_embedding [i]
+        print(embedding_1 == embedding_2)
        
 print("create pickle file ...")
 
 # with open("data/dict_word_indice.pickle","wb") as f:
 #     pickle.dump(dict_all_words,f,pickle.HIGHEST_PROTOCOL)
 
-# with open("data/dict_word_embedding.pickle","wb") as f:
-#     pickle.dump(dict_all_embedding,f,pickle.HIGHEST_PROTOCOL)
+with open("data/dict_word_embedding_{}_{}.pickle".format("fasttext",type_mebdding),"wb") as f:
+    pickle.dump(dict_all_embedding,f,pickle.HIGHEST_PROTOCOL)
 
 
 print("load pickle file ...")
 
 print(word2i)
-with open("data/dict_word_embedding.pickle","rb") as f:
+with open("data/dict_word_embedding_{}_{}.pickle".format("fasttext",type_mebdding),"rb") as f:
     dict_all_embedding = pickle.load(f)
     
 

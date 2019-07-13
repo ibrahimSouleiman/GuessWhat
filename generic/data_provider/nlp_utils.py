@@ -33,8 +33,6 @@ class GloveEmbeddings(object):
 
         if glove_dim == 300:
             input_file = 'glove.42B.300d.txt'
-        
-
 
         self.glove_dim = glove_dim
         self.glove_input_file = os.path.join("data",input_file)
@@ -43,8 +41,8 @@ class GloveEmbeddings(object):
         self.file_word2vec = Path(os.path.join("data",self.word2vec_output_file))
         self.filename = os.path.join("data",self.word2vec_output_file)
 
-        ## Extraction only_word used in guessWhat
 
+        ## Extraction only_word used in guessWhat
 
         self.glove_Wonly = Path(os.path.join("data","glove_onlyWord_GuessWhat_{}_{}.txt".format(glove_dim,"wikipedia")))
 
@@ -94,7 +92,7 @@ class GloveEmbeddings(object):
 
 class Embeddings(object):
 
-    def __init__(self, file_name,total_words=0,emb_dim=100,emb_window=3,embedding_name="fasttext",train=None,valid=None,test=None,dictionary_file_question="dict.json",dictionary_file_description="dict_Description.json",lemme=False,pos=False,description=False):
+    def __init__(self, file_name,embedding_type=1 ,total_words=0,emb_dim=100,emb_window=3,embedding_name="fasttext",train=None,valid=None,test=None,dictionary_file_question="dict.json",dictionary_file_description="dict_Description.json",lemme=False,pos=False,description=False):
 
         self.file_name = file_name
 
@@ -111,8 +109,10 @@ class Embeddings(object):
         self.valid = valid
         self.test = test
 
-        name_file = "saved_model_{}_doc_ques".format(embedding_name)
+        name_file = "saved_model_{}_{}".format(embedding_name,embedding_type)
         model_saved = Path(name_file)
+
+        print("... Embedding model_name = {}".format(name_file))
 
         if model_saved.is_file():
             self.model =  FastText.load(name_file)
@@ -122,7 +122,7 @@ class Embeddings(object):
             self.input_text = self.get_data(self.file_name)
             self.get_list_data = self.get_list_data(self.input_text)
             self.model = self.get_model_embedding(self.get_list_data)
-            self.model.save('saved_model_fasttext_doc_ques')
+            self.model.save(name_file)
             print("file not exist ...")
 
 

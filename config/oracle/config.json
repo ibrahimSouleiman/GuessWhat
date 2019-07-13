@@ -16,6 +16,7 @@
       "embedding_window":3,
       "pos":false,
       "lemme":false,
+      "embedding_type":2,
       "lstm" : true
     },
     "word_embedding_dim": 100,

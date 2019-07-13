@@ -17,7 +17,6 @@ def get_embedding(lookup_indices, n_words, n_dim,
                 # print("embedding_matrix_2 = {} ".format(embedding_matrix_2))
                 # exit()
             else:
-                
                 embedding_matrix = tf.get_variable('W', [n_words, n_dim],initializer=tf.constant_initializer(0.08))
 
 

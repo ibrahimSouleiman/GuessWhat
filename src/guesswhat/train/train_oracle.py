@@ -88,7 +88,7 @@ if __name__ == '__main__':
     image_builder, crop_builder = None, None
     use_resnet = False
     logger.info("Loading ")
-    t1 = time.time()
+    t_begin = time.time()
 
     if config['inputs'].get('image', False):
         logger.info('Loading images..')
@@ -101,8 +101,6 @@ if __name__ == '__main__':
         use_resnet = crop_builder.is_raw_image()
 
     
-
-    t2 = time.time()
 
 
     # Load data
@@ -361,3 +359,9 @@ if __name__ == '__main__':
             logger.info("Testing error: {}".format(1-test_accuracy))
         except Exception:
             logger.info("Erreur accuracy")
+
+        t_end = time.time()
+
+        logger.info("Time execution =".format(t2-t1))
+
+
