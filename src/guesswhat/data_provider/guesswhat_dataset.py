@@ -21,6 +21,7 @@ from nltk import WordNetLemmatizer
 from generic.data_provider.dataset import AbstractDataset
 from draw.Generate_Category import get_category
 from generic.data_provider.nlp_utils import Embeddings,get_embeddings
+from generic.data_provider.image_preprocessors import resize_image, scaled_crop_and_pad
 
 # TODO find a cleaner way!
 
@@ -276,11 +277,13 @@ class Object:
         # logger.info("get_mask_shape A= {} ".format(self.get_mask().shape ))
         # get_mask_or = self.get_mask()
         # get_mask = np.reshape(get_mask_or,(360,640))
+
         # logger.info("get_mask_shape B= {} ".format(get_mask.shape))
 
         # img_path = os.path.join("data/img/raw", "{}.jpg".format(image.id))
         # img = PIL_Image.open(img_path).convert('RGB')
-        # # img = resize_image(img, self.width , self.height)
+
+        # img = resize_image(img, self.width , self.height)
         
         # # logger.info("/*/*/*/*/******* Image ********/*/*/*/*/*/*/*/ {}".format(self.img_path))
         
@@ -292,16 +295,20 @@ class Object:
         # plt.imshow(img_segment)
         # # plt.imshow(get_mask)
         # plt.show()
-    
+        
 
         if crop_builder is not None:
             filename = "{}.jpg".format(image.id)
             # logger.info("id = {} ,filemane = {} ,which_set = {},bbox = {}".format(id,filename,which_set,bbox))
-            
-
-
+    
             self.crop_loader = crop_builder.build(id, filename=filename, which_set=which_set, bbox=bbox)            # logger.info("Image_id=",image.id)
-            # logger.info("crop_loader = {} ".format(self.crop_loader))
+            # logger.info("crop_loader = {} ".format(np.asarray(self.crop_loader.get_image()).shape  ))
+            # img_segment =np.asarray(img_segment)
+            # print("img_segment shape = {}".format(img_segment.shape))
+            # img_segment = np.asarray(img_segment).reshape ((self.crop_loader.width , self.crop_loader.height,3))
+            # print("img_show = {}".format(np.asarray(img_segment).shape ))
+
+
             # exit()
 
 
@@ -460,10 +467,6 @@ class OracleDataset(AbstractDataset):
 
         for i, q, a in zip(game.question_ids, game.questions, game.answers):
             
-            
-
-
-
             # wpt = TweetTokenizer(preserve_case=False)
 
             new_game = copy.copy(game)
@@ -480,8 +483,11 @@ class OracleDataset(AbstractDataset):
             # for all_category
             # for category in game.all_category:
             #     self.all_category.append(category)
-            # last_question =  self.add_question(game.all_last_question,q,a)
-            # new_game.all_last_question = last_question
+            last_question =  self.add_question(game.all_last_question,q,a)
+            new_game.all_last_question = last_question
+
+            # print("last_question = {} ".format(last_question))
+            # exit()
 
 
             games.append(new_game)

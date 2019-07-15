@@ -57,9 +57,9 @@ def variable_length_LSTM(inp, num_hidden, seq_length,
                             sequence_length=seq_length[i],
                             )
                         
-                        # print("rnn = {} , {} ".format(rnn_states,rnn_last_states.h)) # shape=(?, ?, 1024),
+                        # print("rnn h_last= {} , h_all = {} ".format(rnn_states,rnn_last_states)) # shape=(?, ?, 1024),
                         # print("type = {} ".format(type(rnn_states)))
-
+    
 
                         states.append(rnn_states)
                         last_states.append(rnn_last_states.h)                        
@@ -98,8 +98,7 @@ def variable_length_LSTM(inp, num_hidden, seq_length,
 
         if dim_4:
             print("BEFORE states  ,last_states = {} ".format(last_states))
-
-        last_states = tf.concat(last_states, axis=1)
+        else: last_states = tf.concat(last_states, axis=1)
 
         if dim_4:
             print("** LSTM OUTPUT =",last_states)

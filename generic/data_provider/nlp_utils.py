@@ -8,7 +8,6 @@ import lxml.etree
 import urllib.request
 
 # from pyfasttext import FastText
-
 #import glove
 
 
@@ -471,6 +470,8 @@ def padder(list_of_tokens, seq_length=None, padding_symbol=0, max_seq_length=0):
 
     padded_tokens = np.full(shape=(batch_size, max_seq_length), fill_value=padding_symbol)
 
+
+
     for i, seq in enumerate(list_of_tokens):
         seq = seq[:max_seq_length]
         padded_tokens[i, :len(seq)] = seq
@@ -478,20 +479,36 @@ def padder(list_of_tokens, seq_length=None, padding_symbol=0, max_seq_length=0):
     return padded_tokens, seq_length
     
 
-def padder_3d(list_of_tokens, max_seq_length=0):
+def padder_3d(list_of_tokens, max_seq_length=0,specified=False):
     seq_length = np.array([len(q) for q in list_of_tokens], dtype=np.int32)
 
     if max_seq_length == 0:
         max_seq_length = seq_length.max()
     
     batch_size = len(list_of_tokens)
-    feature_size = list_of_tokens[0][0].shape[0]
 
-    padded_tokens = np.zeros(shape=(batch_size, max_seq_length, feature_size))
+    
+    print("specified = {}".format(specified))
+        
+
+    if specified:
+        size = np.asarray(list_of_tokens[0]).shape[0]
+        padded_tokens = np.zeros(shape=(batch_size,size, max_seq_length))
+
+    else:
+        feature_size = list_of_tokens[0][0].shape[0]
+        padded_tokens = np.zeros(shape=(batch_size, max_seq_length, feature_size))
+
 
     for i, seq in enumerate(list_of_tokens):
         seq = seq[:max_seq_length]
-        padded_tokens[i, :len(seq), :] = seq
+        if specified:
+            print("seq = {} ".format(seq))
+
+            print("padded_tokens = {}".format(padded_tokens.shape))
+            padded_tokens[i, :len(seq)] = seq
+        else:
+            padded_tokens[i, :len(seq), :] = seq
 
     # max_seq_length
     return padded_tokens, seq_length
@@ -500,6 +517,7 @@ def padder_3d(list_of_tokens, max_seq_length=0):
 def padder_4d(list_of_tokens,max_seq_length=0):
     seq_length = np.array([[len(s) for s in q] for q in list_of_tokens], dtype=np.int32)
     
+   
     memory_length = np.array([len(q) for q in list_of_tokens], dtype=np.int32)
     memory_length = memory_length.max()
 
@@ -508,11 +526,14 @@ def padder_4d(list_of_tokens,max_seq_length=0):
         max_seq_length = seq_length.max()
 
     batch_size = len(list_of_tokens)
-    # print("Batch = ",batch_size)
 
-    feature_size = list_of_tokens[0][0][0].shape[0]
+    # print("list_of_tokens = {} ".format(list_of_tokens))
+    # print("list_of_tokens_shape = {} ".format(np.asarray(list_of_tokens).shape) )
+    # exit()
+    # print("Batch = ",batch_size)
+    # feature_size = list_of_tokens[0][0][0].shape[0]
     
-    padded_tokens = np.zeros(shape=(batch_size,memory_length, max_seq_length, feature_size))
+    padded_tokens = np.zeros(shape=(batch_size,memory_length, max_seq_length))
     
     for i, hist in enumerate(list_of_tokens):
         for j,h in enumerate(hist):
@@ -522,7 +543,10 @@ def padder_4d(list_of_tokens,max_seq_length=0):
             # print("Seq = {}".format(np.asarray(seq).shape ))
             # if j == 5:
             #    exit()
-            padded_tokens[i,j, :len(seq), :] = seq
+            padded_tokens[i,j, :len(seq)] = seq
+            # print("padded_tokens = {} ".format(padded_tokens))
+            # print("padded_tokens_shape = {} ".format(np.asarray(padded_tokens).shape  ))
+
 
     # max_seq_length
 

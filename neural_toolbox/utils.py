@@ -151,6 +151,10 @@ def fully_connected(inp, n_out, activation=None, scope="fully_connected",
                 all_ouput = [out,out_1,out_2] # Tensor("oracle/coattention/concat_1:0", shape=(2501, 256), dtype=float32)
                 # print("------ all_ouput = {} ".format(all_ouput))
 
+                # print("********* out = {} ".format(out))
+                # print("********* out_1 = {} ".format(out_1))
+                # print("********* out_2 = {} ".format(out_2))
+
                 sum_ouput = tf.add_n(all_ouput)
                 # print("------ sum_ouput = {} ".format(sum_ouput))
             
@@ -166,9 +170,12 @@ def fully_connected(inp, n_out, activation=None, scope="fully_connected",
 
                 all_ouput = [out,out_1] # Tensor("oracle/coattention/concat_1:0", shape=(2501, 256), dtype=float32)
                 # print("------ all_ouput = {} ".format(all_ouput))
+                # print("********* out = {} ".format(out))
+                # print("********* out_1 = {} ".format(out_1))
+                
 
                 sum_ouput = tf.add_n(all_ouput)
-                # print("------ sum_ouput = {} ".format(sum_ouput))
+                # print("------ sum_ouput_None = {} ".format(sum_ouput))
             
                 out_tanh = tf.tanh(sum_ouput)
                 # print("------ out_tanh = {} ".format(out_tanh))
