@@ -8,6 +8,7 @@ import tensorflow as tf
 import numpy as np
 
 # TODO check if optimizers are always ops? Maybe there is a better check
+
 def is_optimizer(x):
     return hasattr(x, 'op_def')
 
@@ -173,7 +174,9 @@ class Evaluator(object):
         # print("-- [{}]  question = {}--".format(type_data, feed_dict["oracle/question:0"]))
         # print("shape = {} ".format(np.asarray(feed_dict["oracle/question:0"]).shape ))
 
-        # print("-- [{}]  Feed_Dict = {}--".format(type_data, feed_dict.keys()))
+        # for key,value in feed_dict.items():
+        #     print("-- [{}]  Feed_Dict = {} : {}-- ".format(type_data,key,np.asarray(value).shape )) 
+        
         # exit()
         # print("answer = {}".format(feed_dict["oracle/answer:0"]))
         
@@ -192,7 +195,7 @@ class Evaluator(object):
             # print("ouput = {}".format(sess.run(output[1], feed_dict=feed_dict)))
             # exit()
             pass
-        # print("result_prediction = {}".format(sess.run(tf.get_variable("oracle/mlp/Softmax_1:0"), feed_dict=feed_dict)))
+        # print("resultat_softmax = {}".format(sess.run(tf.get_variable("oracle/mlp/Softmax_1:0"), feed_dict=feed_dict)))
         
         
         # exit()

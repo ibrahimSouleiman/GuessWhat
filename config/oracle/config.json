@@ -2,6 +2,7 @@
   "inputs": {
     "question": true,
     "description":true,
+    "history_question":true,
     "allcategory":false,
     "category": true,
     "spatial": true,

@@ -470,6 +470,8 @@ def padder(list_of_tokens, seq_length=None, padding_symbol=0, max_seq_length=0):
 
     padded_tokens = np.full(shape=(batch_size, max_seq_length), fill_value=padding_symbol)
 
+  
+
 
 
     for i, seq in enumerate(list_of_tokens):
@@ -549,7 +551,6 @@ def padder_4d(list_of_tokens,max_seq_length=0):
 
 
     # max_seq_length
-
     return padded_tokens, seq_length,max_seq_length
 
 

@@ -31,21 +31,14 @@ class OracleNetwork(ResnetModel):
                 self._question = tf.placeholder(tf.int32, [self.batch_size, 14], name='question')
                 self.seq_length_question = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question')
 
-
                 if config["model"]["glove"] == True or config["model"]["fasttext"] == True:
-                    # self._embWord = tf.placeholder(tf.float32, [self.batch_size, max_seq_length, int(config["model"]["word_embedding_dim"])], name="embedding_vector_ques")
-                    # word_emb = self._embWord
+            
                     print("****** WITH EMBEDDING ******")
                     word_emb = utils.get_embedding(self._question,
                                                 n_words=num_words_question,
                                                 n_dim=int(config["model"]["word_embedding_dim"]),
                                                 scope="word_embedding",
                                                 dict_all_embedding=dict_all_embedding)
-
-                    # print("word_emb ={}".format(word_emb))
-                    # exit()
-
-                    # word_emb = tf.concat([ word_emb,self._embWord], axis=2)
                 else:
                     print("****** NOT EMBEDDING ******")
 
@@ -58,36 +51,31 @@ class OracleNetwork(ResnetModel):
 
                     print(".... word_emb 1 = {} ".format(word_emb))                            
 
-
-                    # print("word_emb ={}".format(word_emb))
-                    # exit()
-                #     if config['glove']:
-                # self._glove = tf.placeholder(tf.float32, [None, None, int(config['model']['question']["embedding_dim"])], name="glove")
-                # word_emb = tf.concat([word_emb, self._glove], axis=2)
-                print("word_emb = {} ".format(word_emb))
                 self.out_question = None
+
                 if config['model']['question']['lstm']:
                     self.lstm_states_question, self.lstm_all_state_ques = rnn.variable_length_LSTM(word_emb,
                                                         num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
                                                         seq_length=self.seq_length_question)
 
-                
                     self.out_question =  self.lstm_all_state_ques
+
+                    # print("out_queston = {} ".format(self.lstm_states_question))
+                    # exit()
+                    # self.out_question = tf.reshape(self.out_question,[-1, self.out_question.get_shape()[1] * self.out_question.get_shape()[2] ])
+
+
                 else:
                     self.out_question = word_emb
+
                 if config["model"]["attention"]["co-attention"]:
-                    co_attention[0] = self.out_question     # embeddings.append(self.lstm_all_state_ques)
+                    co_attention[0] = self.out_question     # Tensor("oracle/lstm/lstmcell0/concat:0", shape=(?, 14, 1024), dtype=float32)
+                    embeddings.append(self.lstm_states_question)
+                    # print("question_lstm = {} ".format(self.out_question ))
+
+                    # exit()
                 else:
                     embeddings.append(self.lstm_states_question)
-
-
-                # print("*+*+*+*+* **+*+*+**Length=",self.seq_length_question)
-                # print("word_emb = {}".format(word_emb))
-                # print("question = {}".format(self._question))
-                # print("lstm_all_state_ques = {} ".format(self.lstm_all_state_ques))
-                # exit()
-
-
 
                 # QUESTION-Pos
                 if config['model']['question'] ['pos']:
@@ -119,113 +107,76 @@ class OracleNetwork(ResnetModel):
 
             # DESCRIPTION
             if config['inputs']['description']:
-                print("****  Oracle_network |  inpurt = Description ")
+                print("****  Oracle_network |  input = Description ")
 
-                # self._description = tf.placeholder(tf.int32, [self.batch_size, None], name='description')
-                # self.seq_length_description = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_description')
+                self._description = tf.placeholder(tf.int32, [self.batch_size, None], name='description')
+                self.seq_length_description = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_description')
 
-                # word_emb = utils.get_embedding(self._description,
-                #                             n_words=num_words_description,
-                #                             n_dim=300,
-                #                             scope="word_embedding_description")
-                
-
-                # if config["model"]["glove"] == True or config["model"]["fasttext"] == True:
-                #     self._glove = tf.placeholder(tf.float32, [None, None,int(config["model"]["word_embedding_dim"])], name="embedding_vector_des")
-                #     word_emb =  self._glove
-
-                #     # print("Word_emb",word_emb)
-                #     # exit()
-                # else:
-                #     print("None ****************")
-
-                
-
-                # print(" SeqDescription = ",self.seq_length_description)
-
-
-                # if config['model']['question']['lstm']:
-
-                # lstm_states_description, _ = rnn.variable_length_LSTM(word_emb,
-                #                         num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
-                #                         seq_length=self.seq_length_description,scope="lstm3")
-                # self.out_description = lstm_states_description
-
-                # else:
-                #     self.out_description = word_emb
-                
-                # print("config = ",config["model"]["attention"]["co-attention"])
-                # exit()
-                if config["model"]["attention"]["co-attention"]:
-                    history = []
-                    
-                    # history.append(self.out_description)
-                    # self._question_history = tf.placeholder(tf.int32, [self.batch_size, None , None,None], name='question_history')
-
-                    # if config["model"]["glove"] == True or config["model"]["fasttext"] == True:
-                    placeholders_lstmQuestion = []
-                    placeholders_lstmLength = []
-
-                    self._embWord = tf.placeholder(tf.float32, [None,None,None], name="embedding_vector_ques_hist")
-                    # self.seq_length_question_history = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question_history')
-
-                    for i in range(6):
-                        # self._embWord = tf.placeholder(tf.float32, [None,None, int(config["model"]["word_embedding_dim"])], name="embedding_vector_ques_hist_H{}".format(i))
-                        self._embWord = tf.placeholder(tf.int32, [self.batch_size, 14], name="ques_hist_H{}".format(i))
-
-                        self.seq_length_question_history = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question_history_H{}'.format(i))
-                        
-                        self.word_emb = utils.get_embedding(self._embWord,
+                word_emb = utils.get_embedding(self._description,
                                             n_words=num_words_question,
                                             n_dim=100,
                                             reuse=True,
                                             scope="word_embedding")
 
-                        placeholders_lstmQuestion.append(self.word_emb)
-                        placeholders_lstmLength.append(self.seq_length_question_history)
-                    
-                    # shape = [batch_size,history_length,max_length_sentences,dim_embedding]
-                    word_emb = self._embWord   
+                # print("word_emb = {} ".format(word_emb))
 
-                    #### end_if                 
-                   
-                    print("*+*+*+*+*+*+*+**Length=",self.seq_length_question_history,word_emb)
-                    print("Batch_size = ",self.batch_size)
-                    
-                    self.lstm_states, self.lstm_all_state_ques_hist = rnn.variable_length_LSTM(placeholders_lstmQuestion,
-                                                    num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
-                                                    seq_length=placeholders_lstmLength,scope="lstm4",dim_4=True)
+                if config['model']['question']['lstm']:
+                    self.lstm_states_des, self.lstm_all_state_des = rnn.variable_length_LSTM(word_emb,
+                                                        num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
+                                                        seq_length=self.seq_length_description,scope="lstm3")
 
 
 
-                    # print("lstm_all_state_ques_hist_shape = {} , lstm_all_state_ques_hist_shpae = {} ".format(self.lstm_states,self.lstm_all_state_ques_hist))
 
-                    # exit()
+                    self.out_question =  self.lstm_states_des
+
+                    # print("self.out_question_emb = {} ".format(self.out_question))  
+
+                    # self.out_question = tf.reshape(self.out_question,[-1, self.out_question.get_shape()[1] * self.out_question.get_shape()[2] ])
+                else:
+                    self.out_question = word_emb
+                    # print("self.out_question = {} ".format(self.out_question)) 
+
 
                 if config["model"]["attention"]["co-attention"]:
-                    history.append(self.lstm_states)
-                    # print("History = {}".format(history))
-
-                    # exit()
-
-
-                    # print("-**** lstm_states_description = ",self.out_description)
-                    # lstm_states_description = tf.expand_dims(lstm_states_description,1)
-                    # print(lstm_states_description)
-                    # exit()
-
-                    # co_attention[1] = self.out_description
-                    co_attention[2] = history
-
-
-                    # embeddings.append(lstm_states_description)
-                    # embeddings.append(self.lstm_states)
+                    # co_attention[1] = self.out_question     # embeddings.append(self.lstm_all_state_ques)
+                    embeddings.append(self.lstm_states_des)
 
                 else:
-                    embeddings.append(self.out_description)
+                    embeddings.append(self.lstm_states_des)
+                
+            if config['inputs']['history_question']:
+                
+                placeholders_lstmQuestion = []
+                placeholders_lstmLength = []
+
+               
+                for i in range(6):
+                    self._embWord = tf.placeholder(tf.int32, [self.batch_size, 14], name="ques_hist_H{}".format(i))
+
+                    self.seq_length_question_history = tf.placeholder(tf.int32, [self.batch_size], name='seq_length_question_history_H{}'.format(i))
+
+                    self.word_emb = utils.get_embedding(self._embWord,
+                                        n_words=num_words_question,
+                                        n_dim=100,
+                                        reuse=True,
+                                        scope="word_embedding")
+
+                    placeholders_lstmQuestion.append(self.word_emb)
+                    placeholders_lstmLength.append(self.seq_length_question_history)
+
+            
+                self.lstm_states, self.lstm_all_state_ques_hist = rnn.variable_length_LSTM(placeholders_lstmQuestion,
+                                                num_hidden=int(config['model']['question']["no_LSTM_hiddens"]),
+                                                seq_length=placeholders_lstmLength,scope="lstm4",dim_4=True)
+
+
+                if config["model"]["attention"]["co-attention"]:
+                    co_attention[2] = self.lstm_states
+                else:
+                    embeddings.append(self.lstm_states)
 
                 
-                # embeddings.append(lstm_states_description )
 
 
              # Description-Pos
@@ -353,18 +304,28 @@ class OracleNetwork(ResnetModel):
 
                 self._crop = tf.placeholder(tf.float32, [self.batch_size] + config['model']['crop']["dim"], name='crop')
                 
-                self.crop_out = get_image_features(
+                
+                
+                if config["model"]["attention"]["co-attention"]:
+                    self.crop_out = get_image_features(
                     image=self._crop, question=self.lstm_states_question,
                     is_training=self._is_training,
                     scope_name=scope.name,
                     scope_feature="Crop/",
                     config=config["model"]['crop'])
-                
+                    co_attention[3] = self.crop_out
 
-                # print(".. crop = {}".format(self.crop_out))
-                # exit()
+                else:
+                    self.crop_out = get_image_features(
+                    image=self._crop, question=self.lstm_states_question,
+                    is_training=self._is_training,
+                    scope_name=scope.name,
+                    scope_feature="Crop/",
+                    co_attention=False,
+                    config=config["model"]['crop'])
 
-                co_attention[3] = self.crop_out
+                    embeddings.append(self.crop_out)
+
 
 
             if config["model"]["crop"]["segment_crop"]["use"]:
@@ -392,23 +353,22 @@ class OracleNetwork(ResnetModel):
                 # print("-- crop = {},image_features = {} ".format(self.crop_out, image_feature))
                 # exit()
 
-            question_feature,history_feature , image_feature = compute_all_attention(question_states=co_attention[0],
-                                                                            caption=co_attention[1],
-                                                                            history_states=co_attention[2],
-                                                                            image_feature=co_attention[3],
-                                                                            no_mlp_units=config['model']['attention']['no_attention_mlp'],
-                                                                            config = config
-                                                                            )
+            if config["model"]["attention"]["co-attention"]:
+                question_feature,history_feature , image_feature = compute_all_attention(question_states=co_attention[0],
+                                                                                caption=co_attention[1],
+                                                                                history_states=co_attention[2],
+                                                                                image_feature=co_attention[3],
+                                                                                no_mlp_units=config['model']['attention']['no_attention_mlp'],
+                                                                                config = config
+                                                                                )
 
-            
 
-            embeddings.append(history_feature)
-            embeddings.append(question_feature)
-            embeddings.append(image_feature)
+                embeddings.append(history_feature)
+                embeddings.append(question_feature)
+                embeddings.append(image_feature)
 
             # embeddings.append(question_feature)
             print("*** All Embedding = ",embeddings)
-            # exit()
             self.emb = tf.concat(embeddings, axis=1)
             
             print("*** self.emb = ",self.emb)

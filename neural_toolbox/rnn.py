@@ -33,41 +33,24 @@ def variable_length_LSTM(inp, num_hidden, seq_length,
 
                 if dim_4: 
 
-                    print("** lstm_input=",inp)
-                    size_history = tf.constant(6)    
-                    embedding_size = tf.constant(300) 
-                    const = tf.constant(-1)    
-   
-
-                    # rnn_states = tf.reshape(rnn_states,(const,size_history,seq_length*embedding_size))
-                    # list_hidden_size = 
-                    # embed = tf.foldl(lambda a, x: a + tf.nn.embedding_lookup(embeddings, x),
-                    #                     tf.reshape(x_inputs, (-1,)), 
-                    #                     initializer=[[0, 0, 0]]
-                    # )
-
-
                     for i in range(len(inp)):
                         # print("rnn ques = {} sequence_length = {}".format(inp[i],seq_length[i]))
-
                         rnn_states, rnn_last_states = tf.nn.dynamic_rnn(
                             cell,
                             inp[i],
                             dtype=tf.float32,
                             sequence_length=seq_length[i],
                             )
-                        
+
                         # print("rnn h_last= {} , h_all = {} ".format(rnn_states,rnn_last_states)) # shape=(?, ?, 1024),
                         # print("type = {} ".format(type(rnn_states)))
-    
-
                         states.append(rnn_states)
-                        last_states.append(rnn_last_states.h)                        
-
-
-                    
+                        last_states.append(rnn_last_states.h)         
+                                                           
                 else:
 
+                    # print("****** inp =  {} , seq_length = {} ".format(inp,seq_length))
+                        
                     rnn_states, rnn_last_states = tf.nn.dynamic_rnn(
                         cell,
                         inp,
@@ -77,20 +60,21 @@ def variable_length_LSTM(inp, num_hidden, seq_length,
 
                     # print("All param inp = {} , num_hidden = {} , seq_length = {} ".format(inp,num_hidden,seq_length))
 
-
-
-
-                    # print("rnn_states = {} ,last_states = {} , .h= {} ".format(rnn_states,
+                    # print("** rnn_states = {} ,last_states = {} , .h= {} ".format(rnn_states,
                     #                                                     rnn_last_states,rnn_last_states.h))
+                    states.append(rnn_states)
+                    last_states.append(rnn_last_states.h)                    
+                    states = tf.concat(states, axis=0)
+                    
 
+                    # print("states = {} ".format(states))
+                    # print("last_states = {} ".format(last_states))
                     # exit()
 
 
-                    states.append(rnn_states)
-                    last_states.append(rnn_last_states.h)
+                 
 
-                    
-                    states = tf.concat(states, axis=2)
+
                     
                     # last_states = tf.concat(last_states, axis=1)
                     # print("AFTER Last_states = {} ".format(last_states))
@@ -98,12 +82,12 @@ def variable_length_LSTM(inp, num_hidden, seq_length,
 
         if dim_4:
             print("BEFORE states  ,last_states = {} ".format(last_states))
-        else: last_states = tf.concat(last_states, axis=1)
+
+        last_states = tf.concat(last_states, axis=1)
 
         if dim_4:
             print("** LSTM OUTPUT =",last_states)
             print("AFTER states  ,last_states = {} ".format(last_states))
-            # exit()
             
 
         return last_states, states

@@ -32,6 +32,7 @@ def get_embedding(lookup_indices, n_words, n_dim,
 def fully_connected(inp, n_out, activation=None, scope="fully_connected",
                     weight_initializer=UniformUnitScaling(),
                     init_bias=0.0, use_bias=True, reuse=False,co_attention=False,g1=None,g2=None,key_input=None):
+
     logger = logging.getLogger()
     with tf.variable_scope(scope, reuse=reuse):
         
@@ -45,7 +46,11 @@ def fully_connected(inp, n_out, activation=None, scope="fully_connected",
         "W", shape,
         initializer=weight_initializer)
 
+
+        print("-- INPUTS_SHAPE = {} , WEIGTH = {} ".format(inp,weight))
         out = tf.matmul(inp, weight)
+
+        
        
         if co_attention:
             # inp_size = inp.get_shape()[1:3]
@@ -57,13 +62,8 @@ def fully_connected(inp, n_out, activation=None, scope="fully_connected",
             # print(" Input = {}".format(inp))
             # print("input_size = {},weigth = {} ".format(inp_size,weight))
             
-
             out = tf.matmul(inp, weight)
-            
-
-            
-
-
+        
             if g1 != None and g2 != None:
                 inp_size = int(g1.get_shape()[1])
                 shape = [inp_size, n_out]

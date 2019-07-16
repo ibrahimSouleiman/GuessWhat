@@ -91,8 +91,17 @@ class OracleBatchifier(AbstractBatchifier):
             
             if 'question' in sources :
                 question = self.tokenizer_question.apply(game.questions[0],use_dict_ques=False) 
+                # print("+++++ words_question = {} ".format(question))
+   
+                sp_zeros = np.zeros((14))
+                sp_zeros [0:len(question)] = question
 
-                batch['question'].append(question)
+                batch["question"].append(sp_zeros)
+                batch["seq_length_question"].append(len(question))
+
+
+
+
 
             if 'embedding_vector_ques' in sources:
                 assert  len(game.questions) == 1
@@ -120,50 +129,44 @@ class OracleBatchifier(AbstractBatchifier):
                     batch['embedding_vector_ques'].append(embedding_vectors)
                    
 
+            if 'description' in sources:
 
-            if 'embedding_vector_ques_hist' in sources:
+                description = self.tokenizer_question.apply(game.image.description,use_dict_ques=False) 
+                # print("+++++ words_question = {} ".format(question))
+
+                batch["description"].append(description)
+
+
+            if 'ques_hist_H0' in sources:
                 assert  len(game.questions) == 1
-                words = []
-
-                for i in range(6):
-                    question_answer = game.all_last_question[i]
-                    if len(question_answer) > 1: 
-                        # print("QUESTION=",game.all_last_question[i])
-                        word = self.tokenizer_question.apply(game.all_last_question[i][1][0])
-
-                        words.append(word)
-                    else:
-                        word = self.tokenizer_question.apply(game.all_last_question[i][0])
-                        words.append(word)
                 
 
+                # description = self.tokenizer_description.apply(game.image.description)
 
-                if self.config["model"]["fasttext"] : 
-                    embedding_vectors = []
-                    for i in range(6):
-                        embedding_vector,_ = get_embeddings(words[i],pos=self.config["model"]["question"]["pos"],lemme=self.config["model"]["question"]["lemme"],model_wordd=self.model_wordd,model_worddl=self.model_worddl,model_word=self.model_word,model_wordl=self.model_wordl,model_posd=self.model_posd,model_pos=self.model_pos)
-                        embedding_vectors.append(embedding_vector)
+                # batch['description'].append(description)
+
+
+                for j in range(6):
+                    question_answer = game.all_last_question[0]
+                    words = []
+
+                    if len(question_answer) > 1: 
+                        word = self.tokenizer_question.apply(game.all_last_question[0][1][0])
+                        words = word
+                    else:
+                        word = self.tokenizer_question.apply(game.all_last_question[0][0])
+                        words = word
                     
-                elif self.config["model"]["glove"] : 
-                    #print("++++++----- ++++++++ Dans glove ")
-                    embedding_vectors = []
-                    for i in range(6):
-                        embedding_vector= self.glove.get_embeddings(words[i])
-                        embedding_vectors.append(embedding_vector)
+                    
 
+                    sp_zeros = np.zeros((14))
+                    # print("words = {} ".format(words))
+                    sp_zeros [0:len(words)] = words
+                    # print("sp_zeros = {} ".format(sp_zeros))    
 
-                    # embedding_vectors = self.glove.get_embeddings(words)
+                    batch['ques_hist_H{}'.format(j)].append(sp_zeros)
+                    batch['seq_length_question_history_H{}'.format(j)].append(len(words))
 
-                # embedding_vectors = []
-                # for i in range(6):
-                #     # embedding_vector= self.glove.get_embeddings(words[i])
-                #     print("word_i = {} ".format(words[i]))
-                #     exit()
-                #     embedding_vector = self.tokenizer_question.apply(game.questions[0],use_dict_ques=False) 
-                #     embedding_vectors.append(embedding_vector)
-
-
-                batch['embedding_vector_ques_hist'].append(words)
 
             # print('embedding_vector_des'in sources)
             if 'embedding_vector_des'in sources:
@@ -269,8 +272,8 @@ class OracleBatchifier(AbstractBatchifier):
         
         
         
-        if "question" in sources:
-            batch['question'] , batch['seq_length_question'] = padder(batch['question'],max_seq_length=14)
+        # if "question" in sources:
+        #     batch['question'] , batch['seq_length_question'] = padder(batch['question'],max_seq_length=14)
 
 
         if "question_pos" in sources:
@@ -279,10 +282,9 @@ class OracleBatchifier(AbstractBatchifier):
 
 
 
-        # if "description" in sources:
-        #     batch['description'], batch['seq_length_description'] = padder(batch['description'],
-        #                                                     padding_symbol=self.tokenizer_question.padding_token)
-
+        if "description" in sources:
+            batch['description'], batch['seq_length_description'] = padder(batch['description'] )
+            
 
         # batch['embedding_vector_pos'], _ = padder_3d(batch['embedding_vector_pos'])
 
